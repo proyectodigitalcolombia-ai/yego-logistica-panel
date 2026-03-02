@@ -1,51 +1,157 @@
-async function subirExcel() {
-    const file = document.getElementById('excelFile').files[0];
-    const formData = new FormData();
-    formData.append('archivo', file);
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YEGO LOGÍSTICA - Panel Oficial</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --yego-blue: #002d5a; --yego-green: #27ae60; --yego-gray: #f2f2f2; }
+        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+        .navbar { background: var(--yego-blue); color: white; padding: 15px; border-bottom: 4px solid var(--yego-green); }
+        .section-header { background: #d9d9d9; color: #333; font-weight: bold; text-align: center; padding: 6px; border: 1px solid #aaa; margin-top: 20px; text-transform: uppercase; font-size: 0.85rem; }
+        .card-panel { background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 25px; margin-top: 20px; }
+        .form-label { font-size: 0.7rem; font-weight: bold; color: #555; text-transform: uppercase; margin-bottom: 2px; }
+        .form-control { border-radius: 2px; border: 1px solid #ccc; font-size: 0.85rem; padding: 4px 8px; }
+        .btn-go { background: var(--yego-blue); color: white; border-radius: 30px; padding: 12px 60px; font-weight: bold; border: none; margin-top: 30px; transition: 0.3s; }
+        .btn-go:hover { background: #001a35; transform: scale(1.05); }
+    </style>
+</head>
+<body>
 
-    try {
-        const res = await fetch('/importar', { method: 'POST', body: formData });
-        const d = await res.json();
+<nav class="navbar shadow">
+    <div class="container d-flex justify-content-between align-items-center">
+        <span class="h4 mb-0"><b>YEGO</b> LOGÍSTICA</span>
+        <div>
+            <input type="file" id="excelFile" style="display:none" onchange="subirExcel()">
+            <button class="btn btn-success btn-sm px-4 shadow-sm" onclick="document.getElementById('excelFile').click()">
+                <i class="fas fa-file-excel"></i> IMPORTAR EXCEL
+            </button>
+        </div>
+    </div>
+</nav>
+
+<div class="container mb-5">
+    <div class="card-panel">
         
-        // I. VEHÍCULO
-        document.getElementById('placa').value = d.v.placa;
-        document.getElementById('marca').value = d.v.marca;
-        document.getElementById('color').value = d.v.color;
-        document.getElementById('clase').value = d.v.clase;
-        document.getElementById('modelo').value = d.v.modelo;
-        document.getElementById('repo').value = d.v.repo;
-        document.getElementById('linea').value = d.v.linea;
-        document.getElementById('motor').value = d.v.motor;
-        document.getElementById('chasis').value = d.v.chasis;
-        document.getElementById('gps_co').value = d.v.gps_co;
-        document.getElementById('gps_user').value = d.v.user;
-        document.getElementById('gps_pass').value = d.v.pass;
-        document.getElementById('trayler').value = d.v.trayler;
-        document.getElementById('carro').value = d.v.carro;
-        document.getElementById('m_trayler').value = d.v.m_trayler;
+        <div class="section-header">I. INFORMACIÓN DEL VEHÍCULO</div>
+        <div class="row g-2 mt-1">
+            <div class="col-md-4"><label class="form-label">Placa</label><input type="text" id="placa" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Marca</label><input type="text" id="marca" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Color</label><input type="text" id="color" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Clase de Vehículo</label><input type="text" id="clase" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Modelo</label><input type="text" id="modelo" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Repotenciado</label><input type="text" id="repo" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Línea</label><input type="text" id="linea" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Núm Motor</label><input type="text" id="motor" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Núm Chasis</label><input type="text" id="chasis" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">GPS - Compañía</label><input type="text" id="gps_co" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Usuario GPS</label><input type="text" id="gps_user" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Clave GPS</label><input type="text" id="gps_pass" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Trayler</label><input type="text" id="trayler" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Carrocería</label><input type="text" id="carro" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Marca Trayler</label><input type="text" id="m_trayler" class="form-control"></div>
+        </div>
 
-        // II. CONDUCTOR
-        document.getElementById('c_nom').value = d.c.nom;
-        document.getElementById('c_cc').value = d.c.cc;
-        document.getElementById('c_lic').value = d.c.lic;
-        document.getElementById('c_cat').value = d.c.cat;
-        document.getElementById('c_venc').value = d.c.venc;
-        document.getElementById('c_dir').value = d.c.dir;
-        document.getElementById('c_tel').value = d.c.tel;
-        document.getElementById('c_ciu1').value = d.c.ciu;
-        document.getElementById('c_cel').value = d.c.cel;
-        document.getElementById('c_arl').value = d.c.arl;
+        <div class="section-header">II. INFORMACIÓN DEL CONDUCTOR</div>
+        <div class="row g-2 mt-1">
+            <div class="col-md-4"><label class="form-label">Nombre</label><input type="text" id="c_nom" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">CC.</label><input type="text" id="c_cc" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Licencia</label><input type="text" id="c_lic" class="form-control"></div>
+            <div class="col-md-3"><label class="form-label">Categoría</label><input type="text" id="c_cat" class="form-control"></div>
+            <div class="col-md-3"><label class="form-label">Vencimiento</label><input type="text" id="c_venc" class="form-control"></div>
+            <div class="col-md-6"><label class="form-label">Dirección Vivienda</label><input type="text" id="c_dir" class="form-control"></div>
+            <div class="col-md-3"><label class="form-label">Teléfono</label><input type="text" id="c_tel" class="form-control"></div>
+            <div class="col-md-3"><label class="form-label">Ciudad</label><input type="text" id="c_ciu" class="form-control"></div>
+            <div class="col-md-3"><label class="form-label">Celular</label><input type="text" id="c_cel" class="form-control"></div>
+            <div class="col-md-3"><label class="form-label">ARL</label><input type="text" id="c_arl" class="form-control"></div>
+        </div>
 
-        // III. TENEDOR Y PROPIETARIO
-        document.getElementById('t_nom').value = d.t.nom;
-        document.getElementById('t_nit').value = d.t.nit;
-        document.getElementById('p_nom').value = d.p.nom;
-        document.getElementById('p_nit').value = d.p.nit;
+        <div class="section-header">III. TENEDOR - PROPIETARIO</div>
+        <div class="row g-2 mt-1">
+            <div class="col-md-4"><label class="form-label">Tenedor</label><input type="text" id="t_nom" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">NIT Tenedor</label><input type="text" id="t_nit" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Ciudad Tenedor</label><input type="text" id="t_ciu" class="form-control"></div>
+            <hr>
+            <div class="col-md-4"><label class="form-label">Propietario</label><input type="text" id="p_nom" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">NIT Propietario</label><input type="text" id="p_nit" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Ciudad Propietario</label><input type="text" id="p_ciu" class="form-control"></div>
+        </div>
 
-        // IV. REFERENCIAS
-        document.getElementById('r_e1').value = d.r.e1;
-        document.getElementById('r_per').value = d.r.per;
+        <div class="section-header">IV. REFERENCIAS</div>
+        <div class="row g-2 mt-1">
+            <div class="col-md-4"><label class="form-label">Empresa 1</label><input type="text" id="r_e1" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Empresa 2</label><input type="text" id="r_e2" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Ref Personal</label><input type="text" id="r_per" class="form-control"></div>
+        </div>
+    </div>
 
-        alert("✅ Toda la información ha sido cargada con éxito.");
-    } catch (e) { alert("❌ Error al procesar todos los datos."); }
-}
+    <div class="text-center">
+        <button class="btn-go shadow" onclick="alert('🚀 Conectando con Robot...')">
+            ACTIVAR SEGUIMIENTO (GO)
+        </button>
+    </div>
+</div>
+
+<script>
+    async function subirExcel() {
+        const file = document.getElementById('excelFile').files[0];
+        if(!file) return;
+        const formData = new FormData();
+        formData.append('archivo', file);
+
+        try {
+            const res = await fetch('/importar', { method: 'POST', body: formData });
+            const d = await res.json();
+            
+            // SECCIÓN I
+            document.getElementById('placa').value = d.v.placa;
+            document.getElementById('marca').value = d.v.marca;
+            document.getElementById('color').value = d.v.color;
+            document.getElementById('clase').value = d.v.clase;
+            document.getElementById('modelo').value = d.v.modelo;
+            document.getElementById('repo').value = d.v.repo;
+            document.getElementById('linea').value = d.v.linea;
+            document.getElementById('motor').value = d.v.motor;
+            document.getElementById('chasis').value = d.v.chasis;
+            document.getElementById('gps_co').value = d.v.gps_co;
+            document.getElementById('gps_user').value = d.v.user;
+            document.getElementById('gps_pass').value = d.v.pass;
+            document.getElementById('trayler').value = d.v.trayler;
+            document.getElementById('carro').value = d.v.carro;
+            document.getElementById('m_trayler').value = d.v.m_trayler;
+
+            // SECCIÓN II
+            document.getElementById('c_nom').value = d.c.nom;
+            document.getElementById('c_cc').value = d.c.cc;
+            document.getElementById('c_lic').value = d.c.lic;
+            document.getElementById('c_cat').value = d.c.cat;
+            document.getElementById('c_venc').value = d.c.venc;
+            document.getElementById('c_dir').value = d.c.dir;
+            document.getElementById('c_tel').value = d.c.tel;
+            document.getElementById('c_ciu').value = d.c.ciu;
+            document.getElementById('c_cel').value = d.c.cel;
+            document.getElementById('c_arl').value = d.c.arl;
+
+            // SECCIÓN III
+            document.getElementById('t_nom').value = d.t.nom;
+            document.getElementById('t_nit').value = d.t.nit;
+            document.getElementById('t_ciu').value = d.t.ciu;
+            document.getElementById('p_nom').value = d.p.nom;
+            document.getElementById('p_nit').value = d.p.nit;
+            document.getElementById('p_ciu').value = d.p.ciu;
+
+            // SECCIÓN IV
+            document.getElementById('r_e1').value = d.r.e1;
+            document.getElementById('r_e2').value = d.r.e2;
+            document.getElementById('r_per').value = d.r.per;
+
+            alert("✅ ¡Éxito! Base de datos importada al formulario.");
+        } catch (e) {
+            alert("❌ Error al procesar el Excel.");
+        }
+    }
+</script>
+</body>
+</html>
