@@ -3,18 +3,24 @@ const multer = require('multer');
 const xlsx = require('xlsx');
 const path = require('path');
 const fs = require('fs');
+const cors = require('cors');
+
 const app = express();
 const upload = multer({ dest: 'uploads/' });
 
+app.use(cors());
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/importar', upload.single('archivo'), (req, res) => {
     try {
+        if (!req.file) return res.status(400).json({ error: "No se subió archivo" });
+
         const workbook = xlsx.readFile(req.file.path);
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const data = xlsx.utils.sheet_to_json(sheet, { header: 1 });
 
-        // MAPEAMOS TODO SEGÚN TU IMAGEN DE EXCEL
+        // MAPEEO SEGÚN TU IMAGEN DE EXCEL (Coordenadas exactas)
         const info = {
             v: {
                 placa: data[2]?.[1] || '', marca: data[2]?.[4] || '', color: data[2]?.[7] || '',
@@ -45,10 +51,12 @@ app.post('/importar', upload.single('archivo'), (req, res) => {
             }
         };
 
-        fs.unlinkSync(req.file.path);
+        fs.unlinkSync(req.file.path); // Borrar temporal
         res.json(info);
-    } catch (e) { res.status(500).json({ error: e.message }); }
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor YEGO activo` || ''));
+app.listen(PORT, () => console.log(`🚀 Servidor YEGO en puerto ${PORT}`));
