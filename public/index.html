@@ -12,9 +12,9 @@
         .navbar { background: var(--yego-blue); color: white; padding: 1rem; }
         .card { border: none; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-top: -30px; }
         .nav-tabs { border: none; background: #eee; border-radius: 10px 10px 0 0; }
-        .nav-tabs .nav-link { border: none; color: #666; font-weight: 500; padding: 12px 20px; }
+        .nav-tabs .nav-link { border: none; color: #666; font-weight: 500; padding: 12px 20px; cursor: pointer; }
         .nav-tabs .nav-link.active { background: white; color: var(--yego-blue); border-radius: 10px 10px 0 0; border-bottom: 3px solid var(--yego-sky); }
-        .section-header { color: var(--yego-blue); font-weight: bold; border-left: 4px solid var(--yego-sky); padding-left: 10px; margin-bottom: 20px; }
+        .section-header { color: var(--yego-blue); font-weight: bold; border-left: 4px solid var(--yego-sky); padding-left: 10px; margin-bottom: 20px; margin-top: 10px; }
         .form-label { font-size: 0.85rem; font-weight: 600; color: #555; }
         .btn-upload { background: var(--yego-green); color: white; border-radius: 25px; transition: 0.3s; }
         .btn-go { background: var(--yego-blue); color: white; padding: 12px 40px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; }
@@ -40,19 +40,4 @@
     <div class="card">
         <div class="card-body p-0">
             <ul class="nav nav-tabs" id="fleetTab" role="tablist">
-                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-vehiculo">I. Vehículo</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-conductor">II. Conductor</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-terceros">III. Tenedor / Prop.</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-seguridad">IV. Seguridad & GPS</button></li>
-            </ul>
-
-            <div class="tab-content p-4">
-                <div class="tab-pane fade show active" id="tab-vehiculo">
-                    <h5 class="section-header">Información del Vehículo y Remolque</h5>
-                    <div class="row g-3">
-                        <div class="col-md-3"><label class="form-label">Placa</label><input type="text" id="placa" class="form-control" placeholder="ABC123"></div>
-                        <div class="col-md-3"><label class="form-label">Marca</label><input type="text" id="marca" class="form-control"></div>
-                        <div class="col-md-3"><label class="form-label">Línea</label><input type="text" id="linea" class="form-control"></div>
-                        <div class="col-md-3"><label class="form-label">Modelo</label><input type="number" id="modelo" class="form-control"></div>
-                        <div class="col-md-3"><label class="form-label">Color</label><input type="text" id="color" class="form-control"></div>
-                        <div class="col-md
+                <li class
