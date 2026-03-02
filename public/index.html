@@ -2,90 +2,67 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YEGO LOGÍSTICA</title>
+    <title>YEGO LOGÍSTICA - Panel de Control</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --yego-blue: #002d5a; --yego-green: #27ae60; }
-        body { background: #f4f7f6; }
-        .navbar { background: var(--yego-blue); color: white; padding: 1rem; }
-        .card-main { background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin-top: -30px; padding: 20px; min-height: 300px; }
-        .btn-import { background: var(--yego-green); color: white; border-radius: 20px; border: none; padding: 8px 20px; }
-        .nav-link { color: #666; font-weight: 500; cursor: pointer; }
-        .nav-link.active { color: var(--yego-blue) !important; font-weight: bold; border-bottom: 3px solid #00a8e8 !important; }
+        :root { --yego-blue: #002d5a; --yego-gray: #f2f2f2; --yego-green: #27ae60; }
+        body { background: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar { background: var(--yego-blue); color: white; padding: 1rem; border-bottom: 4px solid var(--yego-green); }
+        .section-header { background: #d9d9d9; color: #333; font-weight: bold; text-align: center; padding: 6px; border: 1px solid #aaa; margin-top: 20px; text-transform: uppercase; font-size: 0.9rem; }
+        .form-card { background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 30px; margin-top: 20px; }
+        .form-label { font-size: 0.7rem; font-weight: bold; color: #555; text-transform: uppercase; margin-bottom: 2px; }
+        .form-control { border-radius: 2px; border: 1px solid #ccc; font-size: 0.85rem; padding: 4px 8px; background-color: #fdfdfd; }
+        .btn-import { background: var(--yego-green); color: white; border-radius: 25px; font-weight: bold; border: none; padding: 8px 20px; transition: 0.3s; }
+        .btn-import:hover { background: #219150; transform: scale(1.05); }
+        .btn-go { background: var(--yego-blue); color: white; border-radius: 30px; padding: 12px 60px; font-weight: bold; font-size: 1.1rem; border: none; transition: 0.3s; }
+        .btn-go:hover { background: #001f3f; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
 
-<nav class="navbar">
+<nav class="navbar shadow">
     <div class="container d-flex justify-content-between align-items-center">
-        <h4 class="mb-0"><b>YEGO</b> LOGÍSTICA</h4>
+        <span class="h4 mb-0"><i class="fas fa-truck-loading"></i> <b>YEGO</b> LOGÍSTICA</span>
         <div>
             <input type="file" id="excelFile" style="display:none" onchange="subirExcel()">
-            <button class="btn-import" onclick="document.getElementById('excelFile').click()">📂 IMPORTAR EXCEL</button>
+            <button class="btn-import shadow-sm" onclick="document.getElementById('excelFile').click()">
+                <i class="fas fa-file-excel"></i> IMPORTAR EXCEL
+            </button>
         </div>
     </div>
 </nav>
 
-<div style="height: 80px; background: var(--yego-blue);"></div>
-
 <div class="container mb-5">
-    <div class="card-main">
-        <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
-            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#t1">I. Vehículo</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#t2">II. Conductor</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#t3">III. Tenedor</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#t4">IV. GPS</button></li>
-        </ul>
-
-        <div class="tab-content">
-            <div class="tab-pane fade show active" id="t1">
-                <div class="row g-3">
-                    <div class="col-md-3"><label class="form-label">Placa</label><input type="text" id="placa" class="form-control"></div>
-                    <div class="col-md-3"><label class="form-label">Marca</label><input type="text" id="marca" class="form-control"></div>
-                    <div class="col-md-3"><label class="form-label">Modelo</label><input type="text" id="modelo" class="form-control"></div>
-                    <div class="col-md-3"><label class="form-label">Color</label><input type="text" id="color" class="form-control"></div>
-                </div>
-            </div>
-            <div class="tab-pane fade" id="t2">
-                <div class="row g-3">
-                    <div class="col-md-6"><label class="form-label">Nombre</label><input type="text" id="cond_nom" class="form-control"></div>
-                    <div class="col-md-6"><label class="form-label">Cédula</label><input type="text" id="cond_cc" class="form-control"></div>
-                </div>
-            </div>
-            <div class="tab-pane fade" id="t3">
-                <p class="text-muted">Información de terceros disponible tras cargar Excel.</p>
-            </div>
-            <div class="tab-pane fade" id="t4">
-                <div class="row g-3">
-                    <div class="col-md-6"><label class="form-label">Usuario GPS</label><input type="text" id="gps_user" class="form-control"></div>
-                    <div class="col-md-6"><label class="form-label">Clave GPS</label><input type="password" id="gps_pass" class="form-control"></div>
-                </div>
-            </div>
+    <div class="form-card">
+        
+        <div class="section-header">I. INFORMACIÓN DEL VEHÍCULO</div>
+        <div class="row g-2 mt-1">
+            <div class="col-md-4"><label class="form-label">Placa</label><input type="text" id="placa" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Marca</label><input type="text" id="marca" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Color</label><input type="text" id="color" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Clase de Vehículo</label><input type="text" id="clase" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Modelo</label><input type="text" id="modelo" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Repotenciado</label><input type="text" id="repo" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Línea</label><input type="text" id="linea" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Núm Motor</label><input type="text" id="motor" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Núm Chasis</label><input type="text" id="chasis" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">GPS - Compañía</label><input type="text" id="gps_co" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Usuario</label><input type="text" id="gps_user" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Clave</label><input type="text" id="gps_pass" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Trayler</label><input type="text" id="trayler" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Carrocería</label><input type="text" id="carro" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Marca Trayler</label><input type="text" id="m_trayler" class="form-control"></div>
         </div>
-    </div>
-    
-    <div class="text-center mt-4">
-        <button class="btn btn-success btn-lg px-5 shadow" style="border-radius: 30px;" onclick="alert('Enviando al Robot...')">🚀 ACTIVAR SEGUIMIENTO (GO)</button>
-    </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    async function subirExcel() {
-        const file = document.getElementById('excelFile').files[0];
-        const formData = new FormData();
-        formData.append('archivo', file);
-        try {
-            const res = await fetch('/importar', { method: 'POST', body: formData });
-            const data = await res.json();
-            document.getElementById('placa').value = data.vehiculo.placa || '';
-            document.getElementById('marca').value = data.vehiculo.marca || '';
-            document.getElementById('gps_user').value = data.vehiculo.usuario_gps || '';
-            document.getElementById('gps_pass').value = data.vehiculo.clave_gps || '';
-            alert("✅ ¡Cargado!");
-        } catch (e) { alert("❌ Error"); }
-    }
-</script>
-</body>
-</html>
+        <div class="section-header">II. INFORMACIÓN DEL CONDUCTOR</div>
+        <div class="row g-2 mt-1">
+            <div class="col-md-4"><label class="form-label">Nombre</label><input type="text" id="c_nom" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">CC.</label><input type="text" id="c_cc" class="form-control"></div>
+            <div class="col-md-4"><label class="form-label">Licencia de Cond.</label><input type="text" id="c_lic" class="form-control"></div>
+            <div class="col-md-3"><label class="form-label">Categoría</label><input type="text" id="c_cat" class="form-control"></div>
+            <div class="col-md-3"><label class="form-label">Vencimiento</label><input type="text" id="c_venc" class="form-control"></div>
+            <div class="col-md-6"><label class="form-label">Dirección Vivienda</label><input type="text" id="c_dir" class="form-control"></div>
+            <div class="col-md-3"><label class="form-label">Teléfono</label><input type="text" id="c_tel" class="form-control"></div>
+            <div class="col-md-3"><label class="form-label">Ciudad</label><input type="text" id="c_ciu1" class="form-control"></div>
+            <div class="col-md-3
