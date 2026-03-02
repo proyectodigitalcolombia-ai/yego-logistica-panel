@@ -3,41 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YEGO LOGÍSTICA - Gestión de Flota</title>
+    <title>YEGO LOGÍSTICA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --yego-blue: #002d5a; --yego-sky: #00a8e8; --yego-green: #27ae60; }
-        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+        :root { --yego-blue: #002d5a; --yego-green: #27ae60; }
+        body { background: #f4f7f6; }
         .navbar { background: var(--yego-blue); color: white; padding: 1rem; }
-        .card { border: none; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-top: -30px; }
-        .nav-tabs { border: none; background: #eee; border-radius: 10px 10px 0 0; }
-        .nav-tabs .nav-link { border: none; color: #666; font-weight: 500; padding: 12px 20px; cursor: pointer; }
-        .nav-tabs .nav-link.active { background: white; color: var(--yego-blue); border-radius: 10px 10px 0 0; border-bottom: 3px solid var(--yego-sky); }
-        .section-header { color: var(--yego-blue); font-weight: bold; border-left: 4px solid var(--yego-sky); padding-left: 10px; margin-bottom: 20px; margin-top: 10px; }
-        .form-label { font-size: 0.85rem; font-weight: 600; color: #555; }
-        .btn-upload { background: var(--yego-green); color: white; border-radius: 25px; transition: 0.3s; }
-        .btn-go { background: var(--yego-blue); color: white; padding: 12px 40px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; }
+        .card-main { background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); margin-top: -30px; padding: 20px; min-height: 300px; }
+        .btn-import { background: var(--yego-green); color: white; border-radius: 20px; border: none; padding: 8px 20px; }
+        .nav-link { color: #666; font-weight: 500; cursor: pointer; }
+        .nav-link.active { color: var(--yego-blue) !important; font-weight: bold; border-bottom: 3px solid #00a8e8 !important; }
     </style>
 </head>
 <body>
 
 <nav class="navbar">
-    <div class="container d-flex justify-content-between">
-        <span class="navbar-brand text-white"><i class="fas fa-truck-moving"></i> <b>YEGO</b> LOGÍSTICA</span>
+    <div class="container d-flex justify-content-between align-items-center">
+        <h4 class="mb-0"><b>YEGO</b> LOGÍSTICA</h4>
         <div>
             <input type="file" id="excelFile" style="display:none" onchange="subirExcel()">
-            <button class="btn btn-upload shadow-sm" onclick="document.getElementById('excelFile').click()">
-                <i class="fas fa-file-excel"></i> IMPORTAR EXCEL
-            </button>
+            <button class="btn-import" onclick="document.getElementById('excelFile').click()">📂 IMPORTAR EXCEL</button>
         </div>
     </div>
 </nav>
 
-<div style="height: 100px; background: var(--yego-blue);"></div>
+<div style="height: 80px; background: var(--yego-blue);"></div>
 
 <div class="container mb-5">
-    <div class="card">
-        <div class="card-body p-0">
-            <ul class="nav nav-tabs" id="fleetTab" role="tablist">
-                <li class
+    <div class="card-main">
+        <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#t1">I. Vehículo</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#t2">II. Conductor</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#t3">III. Tenedor</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#t4">IV. GPS</button></li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="t1">
+                <div class="row g-3">
+                    <div class="col-md-3"><label class="form-label">Placa</label><input type="text" id="placa" class="form-control"></div>
+                    <div class="col-md-3"><label class="form-label">Marca</label><input type="text" id="marca" class="form-control"></div>
+                    <div class="col-md-3"><label class="form-label">Modelo</label><input type="text" id="modelo" class="form-control"></div>
+                    <div class="col-md-3"><label class="form-label">Color</label><input type="text" id="color" class="form-control"></div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="t2">
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label">Nombre</label><input type="text" id="cond_nom" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label">Cédula</label><input type="text" id="cond_cc" class="form-control"></div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="t3">
+                <p class="text-muted">Información de terceros disponible tras cargar Excel.</p>
+            </div>
+            <div class="tab-pane fade" id="t4">
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label">Usuario GPS</label><input type="text" id="gps_user" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label">Clave GPS</label><input type="password" id="gps_pass" class="form-control"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="text-center mt-4">
+        <button class="btn btn-success btn-lg px-5 shadow" style="border-radius: 30px;" onclick="alert('Enviando al Robot...')">🚀 ACTIVAR SEGUIMIENTO (GO)</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    async function subirExcel() {
+        const file = document.getElementById('excelFile').files[0];
+        const formData = new FormData();
+        formData.append('archivo', file);
+        try {
+            const res = await fetch('/importar', { method: 'POST', body: formData });
+            const data = await res.json();
+            document.getElementById('placa').value = data.vehiculo.placa || '';
+            document.getElementById('marca').value = data.vehiculo.marca || '';
+            document.getElementById('gps_user').value = data.vehiculo.usuario_gps || '';
+            document.getElementById('gps_pass').value = data.vehiculo.clave_gps || '';
+            alert("✅ ¡Cargado!");
+        } catch (e) { alert("❌ Error"); }
+    }
+</script>
+</body>
+</html>
