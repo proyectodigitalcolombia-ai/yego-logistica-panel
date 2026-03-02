@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YEGO - Panel Logístico Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --primary: #002d5a; --secondary: #00a8e8; }
+        body { background: #f0f2f5; font-family: 'Inter', sans-serif; }
+        .navbar { background: var(--primary); color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .nav-tabs .nav-link.active { border-bottom: 3px solid var(--secondary); color: var(--primary); font-weight: bold; }
+        .btn-go { background: #27ae60; color: white; font-weight: bold; border-radius: 20px; padding: 10px 30px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg mb-4">
+    <div class="container">
+        <span class="navbar-brand"><b>YEGO</b> LOGÍSTICA</span>
+        <div class="ms-auto">
+            <input type="file" id="excelFile" style="display:none" onchange="subirExcel()">
+            <button class="btn btn-outline-light btn-sm" onclick="document.getElementById('excelFile').click()">📂 Cargar Excel</button>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <ul class="nav nav-tabs mb-4" id="myTab">
+                        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab1">🚛 Vehículo</button></li>
+                        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab2">👤 Conductor</button></li>
+                        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab3">🛰️ Satelital</button></li>
+                    </ul>
+                    
+                    <div class="tab-content" id="formFlota">
+                        <div class="tab-pane fade show active" id="tab1">
+                            <div class="row g-3">
+                                <div class="col-md-4"><label>Placa</label><input type="text" id="placa" class="form-control"></div>
+                                <div class="col-md-4"><label>Marca</label><input type="text" id="marca" class="form-control"></div>
+                                <div class="col-md-4"><label>Modelo</label><input type="text" id="modelo" class="form-control"></div>
+                            </div>
+                        </div>
+                        </div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <button class="btn btn-go shadow" onclick="dispararRobot()">🚀 ACTIVAR SEGUIMIENTO (GO)</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function subirExcel() {
+        const file = document.getElementById('excelFile').files[0];
+        const formData = new FormData();
+        formData.append('archivo', file);
+
+        const res = await fetch('/importar', { method: 'POST', body: formData });
+        const data = await res.json();
+        
+        // Autocompletar el formulario
+        document.getElementById('placa').value = data.vehiculo.placa;
+        alert("¡Datos del Excel cargados correctamente!");
+    }
+
+    function dispararRobot() {
+        alert("Enviando orden al Robot en Render...");
+        // Aquí conectamos con axios.post a tu URL de Render del robot
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
