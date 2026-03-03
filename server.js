@@ -29,28 +29,18 @@ app.post('/importar', upload.single('archivo'), (req, res) => {
         const info = {
             v: { 
                 placa: data[2]?.[1] || '', marca: data[2]?.[4] || '', color: data[2]?.[7] || '', 
-                clase: data[3]?.[1] || '', modelo: data[3]?.[4] || '', repo: data[3]?.[7] || '',
-                linea: data[4]?.[1] || '', motor: data[4]?.[4] || '', chasis: data[4]?.[7] || '',
-                gps_co: data[5]?.[1] || '', user: data[5]?.[4] || '', pass: data[5]?.[7] || '',
-                soat: data[7]?.[1] || '', tecno: data[7]?.[4] || '' // NUEVOS CAMPOS
+                modelo: data[3]?.[4] || '', soat: data[7]?.[1] || '', tecno: data[7]?.[4] || '',
+                gps_co: data[5]?.[1] || '', user: data[5]?.[4] || '', pass: data[5]?.[7] || ''
             },
             c: { 
-                nom: data[9]?.[1] || '', cc: data[9]?.[4] || '', lic: data[9]?.[7] || '',
-                cat: data[10]?.[1] || '', venc: data[10]?.[4] || '', dir: data[10]?.[7] || '',
-                tel: data[11]?.[1] || '', ciu: data[11]?.[4] || '', cel: data[12]?.[1] || '',
-                arl: data[12]?.[4] || '', eps: data[12]?.[7] || '', mail: data[13]?.[1] || '' // MAIL CONDUCTOR
+                nom: data[9]?.[1] || '', cc: data[9]?.[4] || '', venc_cc: '', // Venc CC manual o nueva celda
+                mail: data[13]?.[1] || '', cel: data[12]?.[1] || '', 
+                eps: data[12]?.[7] || '', venc_eps: '', 
+                arl: data[12]?.[4] || '', venc_arl: '',
+                pension: '', venc_planilla: '' // Nuevos campos
             },
-            t: { 
-                nom: data[16]?.[1] || '', nit: data[16]?.[4] || '', dir: data[16]?.[7] || '', 
-                tel: data[17]?.[1] || '', cel: data[17]?.[4] || '', mail: data[18]?.[1] || '' // DATOS TENEDOR
-            },
-            p: { 
-                nom: data[19]?.[1] || '', nit: data[19]?.[4] || '', dir: data[19]?.[7] || '', 
-                tel: data[20]?.[1] || '', cel: data[20]?.[4] || '', mail: data[21]?.[1] || '' // DATOS PROPIETARIO
-            },
-            r: { 
-                e1: data[24]?.[1] || '', e2: data[24]?.[4] || '', per: data[24]?.[7] || ''
-            }
+            t: { nom: data[16]?.[1] || '', nit: data[16]?.[4] || '', mail: data[18]?.[1] || '', dir: data[16]?.[7] || '' },
+            p: { nom: data[19]?.[1] || '', nit: data[19]?.[4] || '', mail: data[21]?.[1] || '', dir: data[19]?.[7] || '' }
         };
         fs.unlinkSync(req.file.path);
         res.json(info);
@@ -63,7 +53,7 @@ app.post('/guardar', (req, res) => {
     const index = db.findIndex(i => i.v.placa.toUpperCase() === nuevo.v.placa.toUpperCase());
     if (index !== -1) db[index] = nuevo; else db.push(nuevo);
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-    res.json({ mensaje: "✅ Registro guardado/actualizado correctamente." });
+    res.json({ mensaje: "✅ Registro y Alertas actualizadas en disco." });
 });
 
 app.get('/consultar/:t', (req, res) => {
