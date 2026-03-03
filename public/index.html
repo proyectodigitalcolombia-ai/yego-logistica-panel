@@ -21,7 +21,10 @@
         .btn-yego { background-color: #ffc107; color: #000; font-weight: bold; border: none; }
         .box-sub { background: #f8f9fa; border: 1px solid #eee; padding: 10px; border-radius: 4px; height: 100%; }
         .alert-item { padding: 8px; border-radius: 5px; margin-bottom: 8px; border-left: 5px solid #ccc; background: #fff; font-size: 0.75rem; }
-        
+        .alert-danger { border-left-color: #dc3545; background: #fdf2f2; }
+        .alert-warning { border-left-color: #ffc107; background: #fffbeb; }
+        .alert-success { border-left-color: #28a745; background: #f4faf6; }
+        /* Ocultar elementos en el PDF */
         @media print { .no-pdf { display: none !important; } }
     </style>
 </head>
@@ -31,7 +34,7 @@
     <div class="container d-flex justify-content-between">
         <span>YEGO LOGÍSTICA - SEGURIDAD</span>
         <div>
-            <button id="btnPDF" class="btn btn-danger btn-sm fw-bold me-2" onclick="generarPDF()">📥 DESCARGAR PDF</button>
+            <button class="btn btn-danger btn-sm fw-bold me-2" onclick="generarPDF()">📥 DESCARGAR PDF</button>
             <button class="btn btn-warning btn-sm fw-bold me-2" onclick="generarPlantilla()">📥 EXCEL</button>
             <button class="btn btn-outline-light btn-sm me-2" onclick="limpiarForm()">🆕 NUEVO</button>
             <button class="btn btn-success btn-sm fw-bold" onclick="document.getElementById('f').click()">📤 IMPORTAR EXCEL</button>
@@ -77,15 +80,17 @@
                     <div class="col-md-4">
                         <label>DOCUMENTO IDENTIDAD</label>
                         <div class="input-group">
-                            <select id="c_tipo" class="form-select" style="max-width: 90px;"><option value="CC">CC</option><option value="CE">CE</option><option value="PPT">PPT</option></select>
-                            <input type="text" id="c_cc" class="form-control">
+                            <select id="c_tipo" class="form-select" style="max-width: 90px;">
+                                <option value="CC">CC</option><option value="CE">CE</option><option value="PPT">PPT</option><option value="PAS">PAS</option>
+                            </select>
+                            <input type="text" id="c_cc" class="form-control" placeholder="Número">
                         </div>
                     </div>
                     <div class="col-md-2"><label>LICENCIA</label><input type="text" id="c_lic" class="form-control"></div>
                     <div class="col-md-2"><label>VENC. LICENCIA</label><input type="date" id="c_venc_lic" class="form-control" onchange="alerta(this.id)"></div>
                     <div class="col-md-2"><label>CELULAR</label><input type="text" id="c_cel" class="form-control"></div>
-                    <div class="col-md-3"><label>DIRECCIÓN</label><input type="text" id="c_dir" class="form-control"></div>
-                    <div class="col-md-3"><label>CORREO</label><input type="text" id="c_mail" class="form-control"></div>
+                    <div class="col-md-3"><label>DIRECCIÓN CONDUCTOR</label><input type="text" id="c_dir" class="form-control"></div>
+                    <div class="col-md-3"><label>CORREO CONDUCTOR</label><input type="text" id="c_mail" class="form-control"></div>
                     <div class="col-md-4"><label class="text-danger">VENC. PLANILLA</label><input type="date" id="c_venc_planilla" class="form-control border-danger" onchange="alerta(this.id)"></div>
                     <div class="col-md-4"><label>EPS</label><input type="text" id="c_eps" class="form-control"></div>
                     <div class="col-md-4"><label>ARL</label><input type="text" id="c_arl" class="form-control"></div>
@@ -94,23 +99,56 @@
 
                 <div class="section-header">III. TENEDOR Y PROPIETARIO</div>
                 <div class="card-body row g-3">
-                    <div class="col-md-6"><div class="box-sub"><label class="text-primary fw-bold">TENEDOR</label><input type="text" id="t_nom" class="form-control mb-1" placeholder="Nombre"><input type="text" id="t_nit" class="form-control" placeholder="NIT/CC"><input type="text" id="t_dir" class="form-control mt-1" placeholder="Dirección"></div></div>
-                    <div class="col-md-6"><div class="box-sub"><label class="text-primary fw-bold">PROPIETARIO</label><input type="text" id="p_nom" class="form-control mb-1" placeholder="Nombre"><input type="text" id="p_nit" class="form-control" placeholder="NIT/CC"><input type="text" id="p_dir" class="form-control mt-1" placeholder="Dirección"></div></div>
+                    <div class="col-md-6">
+                        <div class="box-sub">
+                            <label class="text-primary fw-bold">DATOS DEL TENEDOR</label>
+                            <input type="text" id="t_nom" class="form-control mb-1" placeholder="Nombre/Razón Social">
+                            <div class="input-group mb-1">
+                                <select id="t_tipo" class="form-select" style="max-width: 90px;">
+                                    <option value="NIT">NIT</option><option value="CC">CC</option><option value="PPT">PPT</option><option value="PAS">PAS</option>
+                                </select>
+                                <input type="text" id="t_nit" class="form-control" placeholder="Número">
+                            </div>
+                            <input type="text" id="t_dir" class="form-control mb-1" placeholder="Dirección">
+                            <input type="text" id="t_tel" class="form-control mb-1" placeholder="Teléfono">
+                            <input type="text" id="t_mail" class="form-control" placeholder="Correo">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="box-sub">
+                            <label class="text-primary fw-bold">DATOS DEL PROPIETARIO</label>
+                            <input type="text" id="p_nom" class="form-control mb-1" placeholder="Nombre/Razón Social">
+                            <div class="input-group mb-1">
+                                <select id="p_tipo" class="form-select" style="max-width: 90px;">
+                                    <option value="CC">CC</option><option value="NIT">NIT</option><option value="PPT">PPT</option><option value="PAS">PAS</option>
+                                </select>
+                                <input type="text" id="p_nit" class="form-control" placeholder="Número">
+                            </div>
+                            <input type="text" id="p_dir" class="form-control mb-1" placeholder="Dirección">
+                            <input type="text" id="p_tel" class="form-control mb-1" placeholder="Teléfono">
+                            <input type="text" id="p_mail" class="form-control" placeholder="Correo">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="section-header">IV. REFERENCIAS</div>
                 <div class="card-body row g-2">
-                    <div class="col-md-4"><label>EMPRESA 1</label><input type="text" id="r_e1" class="form-control mb-1"><input type="text" id="r_t1" class="form-control" placeholder="Tel"></div>
-                    <div class="col-md-4"><label>EMPRESA 2</label><input type="text" id="r_e2" class="form-control mb-1"><input type="text" id="r_t2" class="form-control" placeholder="Tel"></div>
-                    <div class="col-md-4"><label>PERSONAL</label><input type="text" id="r_per" class="form-control mb-1"><input type="text" id="r_tp" class="form-control" placeholder="Tel"></div>
+                    <div class="col-md-4"><label>EMPRESA 1</label><input type="text" id="r_e1" class="form-control mb-1"><input type="text" id="r_t1" class="form-control"></div>
+                    <div class="col-md-4"><label>EMPRESA 2</label><input type="text" id="r_e2" class="form-control mb-1"><input type="text" id="r_t2" class="form-control"></div>
+                    <div class="col-md-4"><label>PERSONAL</label><input type="text" id="r_per" class="form-control mb-1"><input type="text" id="r_tp" class="form-control"></div>
                 </div>
             </form>
         </div>
 
         <div class="col-lg-3 no-pdf">
             <div class="sticky-top" style="top: 20px;">
-                <div class="card bg-dark text-white p-3 mb-2 shadow"><h6 class="mb-0 text-warning">⚠️ ALERTAS</h6><small id="placa-activa">-</small></div>
-                <div id="panel-vencimientos" class="p-3 border rounded bg-white shadow-sm"></div>
+                <div class="card bg-dark text-white p-3 mb-2 shadow">
+                    <h6 class="mb-0 text-warning">⚠️ PANEL DE ALERTAS</h6>
+                    <small id="placa-activa">Placa: -</small>
+                </div>
+                <div id="panel-vencimientos" class="p-3 border rounded bg-white shadow-sm" style="min-height: 200px;">
+                    <p class="text-muted text-center mt-4">Consulta una placa...</p>
+                </div>
             </div>
         </div>
     </div>
@@ -118,7 +156,9 @@
     <div class="section-header mt-4 no-pdf">V. LISTADO DE REGISTROS</div>
     <div class="card-body p-0 border shadow-sm mt-2 no-pdf">
         <table class="table table-hover mb-0">
-            <thead class="table-dark"><tr><th>PLACA</th><th>CONDUCTOR</th><th>SOAT</th><th>TECNO</th><th>ACCIONES</th></tr></thead>
+            <thead class="table-dark">
+                <tr><th>PLACA</th><th>CONDUCTOR</th><th>SOAT</th><th>TECNO</th><th>ACCIONES</th></tr>
+            </thead>
             <tbody id="listaTabla"></tbody>
         </table>
     </div>
@@ -128,12 +168,12 @@
     const val = (id) => document.getElementById(id).value;
     const set = (id, v) => { if(document.getElementById(id)) document.getElementById(id).value = v || ''; };
 
-    // --- LISTADO CON BOTÓN DE ELIMINAR RESTAURADO ---
     async function listarTodo() {
         try {
             const res = await fetch('/listar');
             const db = await res.json();
-            document.getElementById('listaTabla').innerHTML = db.map(i => `
+            const tabla = document.getElementById('listaTabla');
+            tabla.innerHTML = db.map(i => `
                 <tr>
                     <td class="fw-bold ps-3">${i.v.placa}</td>
                     <td>${i.c.nom}</td>
@@ -148,30 +188,34 @@
         } catch(e) {}
     }
 
-    async function eliminar(placa) {
-        if(!confirm(`¿Seguro que desea eliminar el registro ${placa}?`)) return;
-        const res = await fetch(`/eliminar/${placa}`, { method: 'DELETE' });
-        if(res.ok) { alert("Eliminado"); listarTodo(); limpiarForm(); }
+    async function eliminar(p) {
+        const pass = prompt(`Para eliminar la placa ${p}, ingresa la clave de administrador:`);
+        if(!pass) return;
+        const res = await fetch(`/eliminar/${p}`, { method: 'DELETE', headers: { 'admin-password': pass } });
+        if(res.ok) { alert("Eliminado."); listarTodo(); } else { alert("Error al eliminar."); }
     }
 
     async function consultar() {
         const res = await fetch(`/consultar/${val('q')}`);
-        if(res.ok) { const data = await res.json(); llenar(data); actualizarDashboard(data); }
-        else alert("No encontrado");
+        if(res.ok) {
+            const data = await res.json();
+            llenar(data);
+            actualizarDashboard(data);
+        } else alert("No encontrado");
     }
 
     function actualizarDashboard(d) {
         document.getElementById('placa-activa').innerText = `Placa: ${d.v.placa}`;
         const panel = document.getElementById('panel-vencimientos');
-        panel.innerHTML = '<h6 class="fw-bold mb-3 border-bottom pb-1">Vencimientos</h6>';
+        panel.innerHTML = '<h6 class="fw-bold mb-3 border-bottom pb-1">Estado de Vencimientos</h6>';
         const fechas = [{n:'SOAT',f:d.v.soat},{n:'TECNO',f:d.v.tecno},{n:'LICENCIA',f:d.c.venc_lic},{n:'PLANILLA',f:d.c.venc_planilla}];
         fechas.forEach(f => {
             if(!f.f) return;
             const diff = Math.ceil((new Date(f.f) - new Date()) / 86400000);
-            let c = 'text-success', i = '✅';
-            if(diff < 0) { c = 'text-danger'; i = '❌'; }
-            else if(diff <= 10) { c = 'text-warning'; i = '⚠️'; }
-            panel.innerHTML += `<div class="mb-2 ${c}"><strong>${f.n}:</strong> ${i} (${f.f})</div>`;
+            let c = 'alert-success', i = '✅', m = `Faltan ${diff} días`;
+            if(diff < 0) { c = 'alert-danger'; i = '❌'; m = 'VENCIDO'; }
+            else if(diff <= 10) { c = 'alert-warning'; i = '⚠️'; if(diff <= 6) m = `¡URGENTE! ${diff} días`; }
+            panel.innerHTML += `<div class="alert-item ${c}"><strong>${f.n}:</strong> ${i} <br> <small>${m} (${f.f})</small></div>`;
         });
     }
 
@@ -180,8 +224,8 @@
         const d = {
             v: { placa: val('v_placa').toUpperCase(), marca: val('v_marca'), color: val('v_color'), clase: val('v_clase'), modelo: val('v_modelo'), repo: val('v_repo'), linea: val('v_linea'), motor: val('v_motor'), chasis: val('v_chasis'), carro: val('v_carro'), trayler: val('v_trayler'), m_trailer: val('v_m_trailer'), soat: val('v_soat'), tecno: val('v_tecno'), gps_co: val('v_gps_co'), user: val('v_gps_user'), pass: val('v_gps_pass') },
             c: { tipo: val('c_tipo'), nom: val('c_nom'), cc: val('c_cc'), cel: val('c_cel'), lic: val('c_lic'), venc_lic: val('c_venc_lic'), eps: val('c_eps'), arl: val('c_arl'), pension: val('c_pension'), venc_planilla: val('c_venc_planilla'), mail: val('c_mail'), dir: val('c_dir') },
-            t: { nom: val('t_nom'), nit: val('t_nit'), dir: val('t_dir') },
-            p: { nom: val('p_nom'), nit: val('p_nit'), dir: val('p_dir') },
+            t: { tipo: val('t_tipo'), nom: val('t_nom'), nit: val('t_nit'), tel: val('t_tel'), mail: val('t_mail'), dir: val('t_dir') },
+            p: { tipo: val('p_tipo'), nom: val('p_nom'), nit: val('p_nit'), tel: val('p_tel'), mail: val('p_mail'), dir: val('p_dir') },
             r: { e1: val('r_e1'), t1: val('r_t1'), e2: val('r_e2'), t2: val('r_t2'), per: val('r_per'), tp: val('r_tp') }
         };
         const res = await fetch('/guardar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(d) });
@@ -191,12 +235,16 @@
     }
 
     function llenar(d) {
-        if(d.v) Object.keys(d.v).forEach(k => set(k === 'user' ? 'v_gps_user' : k === 'pass' ? 'v_gps_pass' : 'v_'+k, d.v[k]));
+        if(d.v) Object.keys(d.v).forEach(k => {
+            if(k === 'user') set('v_gps_user', d.v[k]);
+            else if(k === 'pass') set('v_gps_pass', d.v[k]);
+            else set('v_'+k, d.v[k]);
+        });
         if(d.c) Object.keys(d.c).forEach(k => set('c_'+k, d.c[k]));
         if(d.t) Object.keys(d.t).forEach(k => set('t_'+k, d.t[k]));
         if(d.p) Object.keys(d.p).forEach(k => set('p_'+k, d.p[k]));
         if(d.r) Object.keys(d.r).forEach(k => set('r_'+k, d.r[k]));
-        ['v_soat', 'v_tecno', 'c_venc_lic', 'c_venc_planilla'].forEach(alerta);
+        setTimeout(() => { ['v_soat', 'v_tecno', 'c_venc_lic', 'c_venc_planilla'].forEach(alerta); }, 500);
     }
 
     function alerta(id) {
@@ -206,43 +254,66 @@
         if(diff < 0) el.classList.add('vencido'); else if(diff <= 10) el.classList.add('por-vencer');
     }
 
-    function limpiarForm() { document.getElementById("formYego").reset(); }
-    function cargar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
-
-    // --- PDF REPARADO PARA RENDER (FORZANDO IMPRESIÓN LIMPIA) ---
-    async function generarPDF() {
-        const btn = document.getElementById('btnPDF');
-        const placa = val('v_placa') || "FICHA";
-        
-        try {
-            btn.disabled = true;
-            btn.innerText = "⌛ GENERANDO...";
-            
-            const element = document.getElementById('area-pdf');
-            const opt = {
-                margin: 10,
-                filename: `Ficha_${placa}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, logging: false },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            await html2pdf().set(opt).from(element).save();
-            
-        } catch (e) {
-            console.error("Error PDF:", e);
-            alert("Error al procesar el PDF. Asegúrese de que el formulario tenga datos.");
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "📥 DESCARGAR PDF";
-        }
+    function limpiarForm() { 
+        document.getElementById("formYego").reset(); 
+        document.querySelectorAll('.form-control').forEach(e => e.classList.remove('vencido', 'por-vencer'));
     }
 
+    function cargar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
+    
+    async function importar() {
+        if(!document.getElementById('f').files[0]) return;
+        const formData = new FormData();
+        formData.append('archivo', document.getElementById('f').files[0]);
+        const res = await fetch('/importar', { method: 'POST', body: formData });
+        const data = await res.json();
+        llenar(data);
+        alert("Ficha cargada.");
+    }
+
+    // --- CORRECCIÓN PDF ---
+    function generarPDF() {
+        const elemento = document.getElementById('area-pdf');
+        const placa = document.getElementById('v_placa').value || "FICHA";
+        
+        const opciones = {
+            margin:       [10, 10, 10, 10],
+            filename:     `Ficha_YEGO_${placa}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { 
+                scale: 2, 
+                useCORS: true,
+                logging: false,
+                letterRendering: true
+            },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Verificamos si la librería está lista
+        if (typeof html2pdf === 'undefined') {
+            alert("La librería PDF aún no ha cargado. Por favor espere un segundo.");
+            return;
+        }
+
+        html2pdf().from(elemento).set(opciones).save();
+    }
+
+    // --- CORRECCIÓN EXCEL ---
     function generarPlantilla() {
-        const ws = XLSX.utils.json_to_sheet([{ PLACA: val('v_placa'), CONDUCTOR: val('c_nom') }]);
+        let pArr = Array.from({ length: 40 }, () => Array(15).fill(""));
+        
+        pArr[0][0] = "SISTEMA YEGO LOGÍSTICA - REGISTRO TÉCNICO";
+        
+        // Mapeo simple de datos para que no falle por índices
+        pArr[2] = ["PLACA", val('v_placa'), "MARCA", val('v_marca'), "MODELO", val('v_modelo')];
+        pArr[3] = ["COLOR", val('v_color'), "CLASE", val('v_clase'), "LÍNEA", val('v_linea')];
+        pArr[5] = ["CONDUCTOR", val('c_nom'), "ID", val('c_cc'), "CELULAR", val('c_cel')];
+        pArr[6] = ["VENC. SOAT", val('v_soat'), "VENC. TECNO", val('v_tecno'), "VENC. LIC", val('c_venc_lic')];
+
+        const ws = XLSX.utils.aoa_to_sheet(pArr);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Ficha");
-        XLSX.writeFile(wb, `Ficha_${val('v_placa')}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, "Datos");
+        XLSX.writeFile(wb, `Ficha_${val('v_placa') || 'General'}.xlsx`);
     }
 </script>
 </body>
