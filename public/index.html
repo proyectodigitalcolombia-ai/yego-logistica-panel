@@ -59,11 +59,11 @@
             <div class="col-md-2"><label>CELULAR</label><input type="text" id="c_cel" class="form-control border-primary"></div>
             <div class="col-md-4"><label>DIRECCIÓN CONDUCTOR</label><input type="text" id="c_dir" class="form-control"></div>
             <div class="col-md-2"><label>LICENCIA</label><input type="text" id="c_lic" class="form-control"></div>
-            <div class="col-md-2"><label>VENC. LICENCIA</label><input type="date" id="c_venc_lic" class="form-control border-danger"></div>
+            <div class="col-md-2"><label>VENC. LICENCIA</label><input type="date" id="c_venc_lic" class="form-control"></div>
             <div class="col-md-2"><label>EPS</label><input type="text" id="c_eps" class="form-control"></div>
             <div class="col-md-2"><label>ARL</label><input type="text" id="c_arl" class="form-control"></div>
             <div class="col-md-2"><label>FONDO PENSIÓN</label><input type="text" id="c_pension" class="form-control"></div>
-            <div class="col-md-2"><label class="text-danger">VENC. PLANILLA</label><input type="date" id="c_venc_planilla" class="form-control border-danger"></div>
+            <div class="col-md-2"><label class="text-danger">VENC. PLANILLA</label><input type="date" id="c_venc_planilla" class="form-control"></div>
             <div class="col-md-12"><label>CORREO CONDUCTOR</label><input type="text" id="c_mail" class="form-control"></div>
         </div>
 
@@ -131,7 +131,7 @@
     }
 
     async function eliminar(p) {
-        if(confirm(`¿Deseas eliminar permanentemente la placa ${p}?`)) {
+        if(confirm(`¿Borrar placa ${p}?`)) {
             await fetch(`/eliminar/${p}`, { method: 'DELETE' });
             listarTodo();
         }
