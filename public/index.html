@@ -7,7 +7,20 @@
     <style>
         :root { --yego-blue: #002d5a; --yego-green: #27ae60; }
         body { background: #f4f6f9; font-family: 'Segoe UI', sans-serif; font-size: 0.82rem; }
-        .section-header { background: var(--yego-blue); color: white; padding: 6px 12px; margin-top: 10px; font-weight: bold; border-left: 5px solid var(--yego-green); text-transform: uppercase; }
+        
+        /* AJUSTE SOLICITADO: Mayor visibilidad para los títulos de sección */
+        .section-header { 
+            background: var(--yego-blue); 
+            color: white; 
+            padding: 12px 15px; /* Más alto para que se vea bien */
+            margin-top: 15px; 
+            font-weight: bold; 
+            font-size: 0.9rem;
+            border-left: 7px solid var(--yego-green); 
+            text-transform: uppercase; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
         .card-body { background: white; border: 1px solid #ddd; padding: 12px; border-top: none; }
         label { font-weight: bold; font-size: 0.7rem; color: #444; display: block; margin-top: 5px; }
         .vencido { background-color: #ffdce0 !important; border: 1px solid #dc3545 !important; }
