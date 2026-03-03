@@ -43,7 +43,7 @@
             <div class="col-md-2"><label>MODELO</label><input type="text" id="v_modelo" class="form-control"></div>
             <div class="col-md-3"><label>MOTOR</label><input type="text" id="v_motor" class="form-control"></div>
             <div class="col-md-3"><label>CHASIS</label><input type="text" id="v_chasis" class="form-control"></div>
-            <div class="col-md-3"><label>PROVEEDOR GPS</label><input type="text" id="v_gps_co" class="form-control border-primary"></div>
+            <div class="col-md-3"><label>GPS PROVEEDOR</label><input type="text" id="v_gps_co" class="form-control border-primary"></div>
             <div class="col-md-3"><label>USUARIO GPS</label><input type="text" id="v_gps_user" class="form-control"></div>
             <div class="col-md-3"><label>CLAVE GPS</label><input type="text" id="v_gps_pass" class="form-control"></div>
             <div class="col-md-3"><label>VENC. SOAT</label><input type="date" id="v_soat" class="form-control"></div>
@@ -57,13 +57,14 @@
             <div class="col-md-4"><label>NOMBRE CONDUCTOR</label><input type="text" id="c_nom" class="form-control"></div>
             <div class="col-md-2"><label>CÉDULA</label><input type="text" id="c_cc" class="form-control"></div>
             <div class="col-md-2"><label>CELULAR</label><input type="text" id="c_cel" class="form-control border-primary"></div>
+            <div class="col-md-4"><label>DIRECCIÓN CONDUCTOR</label><input type="text" id="c_dir" class="form-control"></div>
             <div class="col-md-2"><label>LICENCIA</label><input type="text" id="c_lic" class="form-control"></div>
             <div class="col-md-2"><label>VENC. LICENCIA</label><input type="date" id="c_venc_lic" class="form-control border-danger"></div>
-            <div class="col-md-3"><label>EPS</label><input type="text" id="c_eps" class="form-control"></div>
-            <div class="col-md-3"><label>ARL</label><input type="text" id="c_arl" class="form-control"></div>
-            <div class="col-md-3"><label>FONDO PENSIÓN</label><input type="text" id="c_pension" class="form-control"></div>
-            <div class="col-md-3"><label class="text-danger">VENC. PLANILLA</label><input type="date" id="c_venc_planilla" class="form-control border-danger"></div>
-            <div class="col-md-12"><label>CORREO CONDUCTOR</label><input type="text" id="c_mail" class="form-control" placeholder="Email del Conductor"></div>
+            <div class="col-md-2"><label>EPS</label><input type="text" id="c_eps" class="form-control"></div>
+            <div class="col-md-2"><label>ARL</label><input type="text" id="c_arl" class="form-control"></div>
+            <div class="col-md-2"><label>FONDO PENSIÓN</label><input type="text" id="c_pension" class="form-control"></div>
+            <div class="col-md-2"><label class="text-danger">VENC. PLANILLA</label><input type="date" id="c_venc_planilla" class="form-control border-danger"></div>
+            <div class="col-md-12"><label>CORREO CONDUCTOR</label><input type="text" id="c_mail" class="form-control"></div>
         </div>
 
         <div class="section-header">III. TENEDOR Y PROPIETARIO</div>
@@ -73,16 +74,16 @@
                 <input type="text" id="t_nom" class="form-control mb-1" placeholder="Nombre">
                 <input type="text" id="t_nit" class="form-control mb-1" placeholder="NIT">
                 <input type="text" id="t_tel" class="form-control mb-1" placeholder="Tel">
-                <input type="text" id="t_mail" class="form-control mb-1" placeholder="Email Tenedor">
-                <input type="text" id="t_dir" class="form-control" placeholder="Dirección">
+                <input type="text" id="t_mail" class="form-control mb-1" placeholder="Correo Tenedor">
+                <input type="text" id="t_dir" class="form-control" placeholder="Dirección Tenedor">
             </div>
             <div class="col-md-6">
                 <label class="text-primary fw-bold">DATOS PROPIETARIO</label>
                 <input type="text" id="p_nom" class="form-control mb-1" placeholder="Nombre">
                 <input type="text" id="p_nit" class="form-control mb-1" placeholder="NIT">
                 <input type="text" id="p_tel" class="form-control mb-1" placeholder="Tel">
-                <input type="text" id="p_mail" class="form-control mb-1" placeholder="Email Propietario">
-                <input type="text" id="p_dir" class="form-control" placeholder="Dirección">
+                <input type="text" id="p_mail" class="form-control mb-1" placeholder="Correo Propietario">
+                <input type="text" id="p_dir" class="form-control" placeholder="Dirección Propietario">
             </div>
         </div>
 
@@ -94,7 +95,7 @@
         </div>
     </form>
 
-    <div class="section-header mt-5">V. INVENTARIO DE FLOTA</div>
+    <div class="section-header mt-5">V. INVENTARIO DE REGISTROS</div>
     <div class="card-body p-0 shadow-sm border">
         <table class="table table-hover mb-0">
             <thead class="table-dark">
@@ -130,7 +131,7 @@
     }
 
     async function eliminar(p) {
-        if(confirm(`¿Borrar placa ${p}?`)) {
+        if(confirm(`¿Deseas eliminar permanentemente la placa ${p}?`)) {
             await fetch(`/eliminar/${p}`, { method: 'DELETE' });
             listarTodo();
         }
@@ -145,7 +146,7 @@
         if(!val('v_placa')) return alert("Falta Placa");
         const d = {
             v: { placa: val('v_placa').toUpperCase(), marca: val('v_marca'), modelo: val('v_modelo'), motor: val('v_motor'), chasis: val('v_chasis'), trayler: val('v_trayler'), repo: val('v_repo'), soat: val('v_soat'), tecno: val('v_tecno'), gps_co: val('v_gps_co'), user: val('v_gps_user'), pass: val('v_gps_pass') },
-            c: { nom: val('c_nom'), cc: val('c_cc'), cel: val('c_cel'), lic: val('c_lic'), venc_lic: val('c_venc_lic'), eps: val('c_eps'), arl: val('c_arl'), pension: val('c_pension'), venc_planilla: val('c_venc_planilla'), mail: val('c_mail') },
+            c: { nom: val('c_nom'), cc: val('c_cc'), cel: val('c_cel'), lic: val('c_lic'), venc_lic: val('c_venc_lic'), eps: val('c_eps'), arl: val('c_arl'), pension: val('c_pension'), venc_planilla: val('c_venc_planilla'), mail: val('c_mail'), dir: val('c_dir') },
             t: { nom: val('t_nom'), nit: val('t_nit'), tel: val('t_tel'), mail: val('t_mail'), dir: val('t_dir') },
             p: { nom: val('p_nom'), nit: val('p_nit'), tel: val('p_tel'), mail: val('p_mail'), dir: val('p_dir') },
             r: { e1: val('r_e1'), t1: val('r_t1'), e2: val('r_e2'), t2: val('r_t2'), per: val('r_per'), tp: val('r_tp') }
