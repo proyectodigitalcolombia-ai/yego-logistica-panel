@@ -33,14 +33,16 @@ app.post('/importar', upload.single('archivo'), (req, res) => {
                 gps_co: data[5]?.[1] || '', user: data[5]?.[4] || '', pass: data[5]?.[7] || ''
             },
             c: { 
-                nom: data[9]?.[1] || '', cc: data[9]?.[4] || '', venc_cc: '', // Venc CC manual o nueva celda
-                mail: data[13]?.[1] || '', cel: data[12]?.[1] || '', 
-                eps: data[12]?.[7] || '', venc_eps: '', 
-                arl: data[12]?.[4] || '', venc_arl: '',
-                pension: '', venc_planilla: '' // Nuevos campos
+                nom: data[9]?.[1] || '', cc: data[9]?.[4] || '', mail: data[13]?.[1] || '', 
+                cel: data[12]?.[1] || '', eps: data[12]?.[7] || '', arl: data[12]?.[4] || '',
+                pension: '', venc_cc: '', venc_eps: '', venc_arl: '', venc_planilla: ''
             },
-            t: { nom: data[16]?.[1] || '', nit: data[16]?.[4] || '', mail: data[18]?.[1] || '', dir: data[16]?.[7] || '' },
-            p: { nom: data[19]?.[1] || '', nit: data[19]?.[4] || '', mail: data[21]?.[1] || '', dir: data[19]?.[7] || '' }
+            t: { nom: data[16]?.[1] || '', nit: data[16]?.[4] || '', mail: data[18]?.[1] || '', dir: data[16]?.[7] || '', tel: data[17]?.[1] || '' },
+            p: { nom: data[19]?.[1] || '', nit: data[19]?.[4] || '', mail: data[21]?.[1] || '', dir: data[19]?.[7] || '', tel: data[20]?.[1] || '' },
+            r: { 
+                e1: data[24]?.[1] || '', e2: data[24]?.[4] || '', per: data[24]?.[7] || '',
+                t1: data[25]?.[1] || '', t2: data[25]?.[4] || '', tp: data[25]?.[7] || ''
+            }
         };
         fs.unlinkSync(req.file.path);
         res.json(info);
@@ -53,7 +55,7 @@ app.post('/guardar', (req, res) => {
     const index = db.findIndex(i => i.v.placa.toUpperCase() === nuevo.v.placa.toUpperCase());
     if (index !== -1) db[index] = nuevo; else db.push(nuevo);
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-    res.json({ mensaje: "✅ Registro y Alertas actualizadas en disco." });
+    res.json({ mensaje: "✅ Registro YEGO guardado con éxito." });
 });
 
 app.get('/consultar/:t', (req, res) => {
