@@ -39,10 +39,10 @@ app.post('/importar', upload.single('archivo'), (req, res) => {
                 nom: data[9]?.[1] || '', cc: data[9]?.[4] || '', lic: data[9]?.[7] || '',
                 venc_lic: data[10]?.[4] || '', cel: data[12]?.[1] || '',
                 arl: data[12]?.[4] || '', eps: data[12]?.[7] || '', pension: data[13]?.[4] || '', 
-                mail: data[13]?.[1] || '' // Correo Conductor
+                mail: data[13]?.[1] || '', dir: data[11]?.[1] || '' // Correo y Dirección Conductor
             },
-            t: { nom: data[16]?.[1] || '', nit: data[16]?.[4] || '', dir: data[16]?.[7] || '', tel: data[17]?.[1] || '', mail: data[18]?.[1] || '' }, // Correo Tenedor
-            p: { nom: data[19]?.[1] || '', nit: data[19]?.[4] || '', dir: data[19]?.[7] || '', tel: data[20]?.[1] || '', mail: data[21]?.[1] || '' }, // Correo Propietario
+            t: { nom: data[16]?.[1] || '', nit: data[16]?.[4] || '', dir: data[16]?.[7] || '', tel: data[17]?.[1] || '', mail: data[18]?.[1] || '' },
+            p: { nom: data[19]?.[1] || '', nit: data[19]?.[4] || '', dir: data[19]?.[7] || '', tel: data[20]?.[1] || '', mail: data[21]?.[1] || '' },
             r: { 
                 e1: data[24]?.[1] || '', t1: data[25]?.[1] || '', 
                 e2: data[24]?.[4] || '', t2: data[25]?.[4] || '', 
@@ -72,10 +72,9 @@ app.get('/consultar/:t', (req, res) => {
 
 app.delete('/eliminar/:placa', (req, res) => {
     let db = leerDB();
-    const placa = req.params.placa.toUpperCase();
-    const nuevaDB = db.filter(i => i.v.placa.toUpperCase() !== placa);
+    const nuevaDB = db.filter(i => i.v.placa.toUpperCase() !== req.params.placa.toUpperCase());
     fs.writeFileSync(DB_PATH, JSON.stringify(nuevaDB, null, 2));
-    res.json({ mensaje: "Registro eliminado." });
+    res.json({ mensaje: "Eliminado" });
 });
 
 const PORT = process.env.PORT || 3000;
