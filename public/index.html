@@ -144,24 +144,26 @@
                     <small id="placa-activa">Placa: -</small>
                 </div>
                 <div id="panel-vencimientos" class="p-3 border rounded bg-white shadow-sm" style="min-height: 200px;">
-                    <p class="text-muted text-center mt-4 small">Consulte una placa para ver sus alertas...</p>
+                    <p class="text-muted text-center mt-4 small">Consulte una placa...</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="section-header mt-4 no-pdf">V. LISTADO DE REGISTROS Y DESCARGAS</div>
-    <div class="card-body p-0 border shadow-sm mt-2 no-pdf">
+    <div class="section-header mt-4 no-pdf">V. LISTADO DE REGISTROS</div>
+    <div class="card-body p-0 border shadow-sm mt-2 no-pdf" style="min-height: 100px;">
         <table class="table table-hover mb-0">
             <thead class="table-dark">
                 <tr>
                     <th class="ps-3">PLACA</th>
                     <th>CONDUCTOR</th>
-                    <th>SOAT / TECNO</th>
-                    <th class="text-center">ACCIONES Y DESCARGAS</th>
+                    <th>VENCIMIENTOS</th>
+                    <th class="text-center">GESTIÓN / DESCARGAS</th>
                 </tr>
             </thead>
-            <tbody id="listaTabla"></tbody>
+            <tbody id="listaTabla">
+                <tr><td colspan="4" class="text-center p-4">Cargando registros de la base de datos...</td></tr>
+            </tbody>
         </table>
     </div>
 </div>
@@ -170,58 +172,67 @@
     const val = (id) => document.getElementById(id).value;
     const set = (id, v) => { if(document.getElementById(id)) document.getElementById(id).value = v || ''; };
 
+    // --- REVISIÓN DE LISTADO ---
     async function listarTodo() {
+        const tabla = document.getElementById('listaTabla');
         try {
             const res = await fetch('/listar');
+            if (!res.ok) throw new Error("No se pudo conectar al servidor");
             const db = await res.json();
-            const tabla = document.getElementById('listaTabla');
+            
+            if (!db || db.length === 0) {
+                tabla.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-muted">No hay registros guardados en la base de datos.</td></tr>';
+                return;
+            }
+
             tabla.innerHTML = db.map(i => `
                 <tr>
                     <td class="fw-bold ps-3 align-middle">${i.v.placa}</td>
-                    <td class="align-middle">${i.c.nom}</td>
-                    <td class="align-middle small">${i.v.soat || '-'} / ${i.v.tecno || '-'}</td>
+                    <td class="align-middle">${i.c.nom || 'S/N'}</td>
+                    <td class="align-middle small">
+                        SOAT: ${i.v.soat || '-'}<br>TEC: ${i.v.tecno || '-'}
+                    </td>
                     <td class="text-center">
-                        <button class="btn btn-primary btn-sm fw-bold" onclick="cargar('${i.v.placa}')">VER</button>
-                        <button class="btn btn-danger btn-sm fw-bold" onclick="descargarDesdeDB('${i.v.placa}', 'pdf')">📄 PDF</button>
-                        <button class="btn btn-warning btn-sm fw-bold" onclick="descargarDesdeDB('${i.v.placa}', 'xlsx')">📊 EXCEL</button>
-                        <button class="btn btn-secondary btn-sm" onclick="eliminar('${i.v.placa}')">🗑️</button>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-primary fw-bold" onclick="cargar('${i.v.placa}')">VER</button>
+                            <button class="btn btn-danger fw-bold" onclick="descargarDesdeDB('${i.v.placa}', 'pdf')">📄 PDF</button>
+                            <button class="btn btn-warning fw-bold" onclick="descargarDesdeDB('${i.v.placa}', 'xlsx')">📊 EXCEL</button>
+                            <button class="btn btn-dark" onclick="eliminar('${i.v.placa}')">🗑️</button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
-        } catch(e) { console.error("Error al listar registros", e); }
+        } catch(e) { 
+            console.error(e);
+            tabla.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-danger">Error al cargar datos: ${e.message}</td></tr>`;
+        }
     }
 
-    // CORRECCIÓN PARA PDF: SE AGREGA TIMEOUT DE RENDERIZADO
     async function descargarDesdeDB(placa, tipo) {
         try {
             const res = await fetch(`/consultar/${placa}`);
             if(!res.ok) return alert("Error al conectar con la base de datos.");
             const data = await res.json();
-            
-            // 1. Llenamos el formulario con los datos de la DB
             llenar(data);
             
             if(tipo === 'pdf') {
-                // 2. Esperamos 500ms para asegurar que el DOM tenga los valores puestos
                 setTimeout(() => {
                     const elemento = document.getElementById('area-pdf');
                     const opciones = {
-                        margin: 10,
-                        filename: `Ficha_YEGO_${placa}.pdf`,
+                        margin: 10, filename: `Ficha_YEGO_${placa}.pdf`,
                         image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2, useCORS: true, logging: false },
+                        html2canvas: { scale: 2, useCORS: true },
                         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                     };
                     html2pdf().from(elemento).set(opciones).save();
-                }, 500); 
+                }, 600); 
             } else {
                 let pArr = [
                     ["SISTEMA YEGO LOGÍSTICA - FICHA TÉCNICA"],
                     ["DATOS DEL VEHÍCULO"],
                     ["PLACA", data.v.placa, "MARCA", data.v.marca, "MODELO", data.v.modelo],
                     ["SOAT", data.v.soat, "TECNO", data.v.tecno],
-                    [""],
-                    ["DATOS DEL CONDUCTOR"],
+                    [""], ["DATOS DEL CONDUCTOR"],
                     ["NOMBRE", data.c.nom, "ID", data.c.cc, "CEL", data.c.cel]
                 ];
                 const ws = XLSX.utils.aoa_to_sheet(pArr);
@@ -229,23 +240,25 @@
                 XLSX.utils.book_append_sheet(wb, ws, "Ficha");
                 XLSX.writeFile(wb, `Ficha_YEGO_${placa}.xlsx`);
             }
-        } catch(e) { alert("Error procesando la descarga."); }
+        } catch(e) { alert("Error en la descarga."); }
     }
 
     async function eliminar(p) {
-        const pass = prompt(`Para eliminar la placa ${p}, ingresa la clave:`);
+        const pass = prompt(`Ingresa la clave para eliminar ${p}:`);
         if(!pass) return;
         const res = await fetch(`/eliminar/${p}`, { method: 'DELETE', headers: { 'admin-password': pass } });
         if(res.ok) { alert("Eliminado."); listarTodo(); } else { alert("Error de clave."); }
     }
 
     async function consultar() {
-        const res = await fetch(`/consultar/${val('q')}`);
+        const query = val('q');
+        if(!query) return alert("Ingresa un dato para buscar.");
+        const res = await fetch(`/consultar/${query}`);
         if(res.ok) {
             const data = await res.json();
             llenar(data);
             actualizarDashboard(data);
-        } else alert("Registro no encontrado.");
+        } else alert("No encontrado.");
     }
 
     function actualizarDashboard(d) {
@@ -298,4 +311,17 @@
         document.querySelectorAll('.form-control').forEach(e => e.classList.remove('vencido', 'por-vencer'));
     }
 
-    function cargar(p) { document.getElementById('q').value = p;
+    function cargar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
+    
+    async function importar() {
+        if(!document.getElementById('f').files[0]) return;
+        const formData = new FormData();
+        formData.append('archivo', document.getElementById('f').files[0]);
+        const res = await fetch('/importar', { method: 'POST', body: formData });
+        const data = await res.json();
+        llenar(data);
+        alert("Importación finalizada.");
+    }
+</script>
+</body>
+</html>
