@@ -24,7 +24,6 @@
         .alert-danger { border-left-color: #dc3545; background: #fdf2f2; }
         .alert-warning { border-left-color: #ffc107; background: #fffbeb; }
         .alert-success { border-left-color: #28a745; background: #f4faf6; }
-        /* Ocultar elementos en el PDF */
         @media print { .no-pdf { display: none !important; } }
     </style>
 </head>
@@ -34,7 +33,7 @@
     <div class="container d-flex justify-content-between">
         <span>YEGO LOGÍSTICA - SEGURIDAD</span>
         <div>
-            <button class="btn btn-danger btn-sm fw-bold me-2" onclick="generarPDF()">📥 DESCARGAR PDF</button>
+            <button id="btnPDF" class="btn btn-danger btn-sm fw-bold me-2" onclick="generarPDF()">📥 DESCARGAR PDF</button>
             <button class="btn btn-warning btn-sm fw-bold me-2" onclick="generarPlantilla()">📥 EXCEL</button>
             <button class="btn btn-outline-light btn-sm me-2" onclick="limpiarForm()">🆕 NUEVO</button>
             <button class="btn btn-success btn-sm fw-bold" onclick="document.getElementById('f').click()">📤 IMPORTAR EXCEL</button>
@@ -192,7 +191,7 @@
         const pass = prompt(`Para eliminar la placa ${p}, ingresa la clave de administrador:`);
         if(!pass) return;
         const res = await fetch(`/eliminar/${p}`, { method: 'DELETE', headers: { 'admin-password': pass } });
-        if(res.ok) { alert("Eliminado."); listarTodo(); } else { alert("Error al eliminar."); }
+        if(res.ok) { alert("Eliminado."); listarTodo(); limpiarForm(); } else { alert("Error al eliminar."); }
     }
 
     async function consultar() {
@@ -271,13 +270,17 @@
         alert("Ficha cargada.");
     }
 
-    // --- CORRECCIÓN PDF ---
-    function generarPDF() {
+    // --- FUNCIÓN PDF CORREGIDA Y REFORZADA ---
+    async function generarPDF() {
+        const btn = document.getElementById('btnPDF');
         const elemento = document.getElementById('area-pdf');
         const placa = document.getElementById('v_placa').value || "FICHA";
         
+        btn.innerText = "⏳ GENERANDO...";
+        btn.disabled = true;
+
         const opciones = {
-            margin:       [10, 10, 10, 10],
+            margin:       10,
             filename:     `Ficha_YEGO_${placa}.pdf`,
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { 
@@ -289,27 +292,25 @@
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // Verificamos si la librería está lista
-        if (typeof html2pdf === 'undefined') {
-            alert("La librería PDF aún no ha cargado. Por favor espere un segundo.");
-            return;
+        try {
+            // Usamos el método asíncrono para asegurar que el navegador dispare la descarga
+            await html2pdf().from(elemento).set(opciones).save();
+        } catch (error) {
+            console.error("Error al generar PDF:", error);
+            alert("No se pudo descargar el PDF. Intente de nuevo.");
+        } finally {
+            btn.innerText = "📥 DESCARGAR PDF";
+            btn.disabled = false;
         }
-
-        html2pdf().from(elemento).set(opciones).save();
     }
 
-    // --- CORRECCIÓN EXCEL ---
     function generarPlantilla() {
         let pArr = Array.from({ length: 40 }, () => Array(15).fill(""));
-        
         pArr[0][0] = "SISTEMA YEGO LOGÍSTICA - REGISTRO TÉCNICO";
-        
-        // Mapeo simple de datos para que no falle por índices
         pArr[2] = ["PLACA", val('v_placa'), "MARCA", val('v_marca'), "MODELO", val('v_modelo')];
         pArr[3] = ["COLOR", val('v_color'), "CLASE", val('v_clase'), "LÍNEA", val('v_linea')];
         pArr[5] = ["CONDUCTOR", val('c_nom'), "ID", val('c_cc'), "CELULAR", val('c_cel')];
         pArr[6] = ["VENC. SOAT", val('v_soat'), "VENC. TECNO", val('v_tecno'), "VENC. LIC", val('c_venc_lic')];
-
         const ws = XLSX.utils.aoa_to_sheet(pArr);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Datos");
