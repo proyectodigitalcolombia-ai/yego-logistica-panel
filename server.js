@@ -72,4 +72,5 @@ app.delete('/eliminar/:placa', (req, res) => {
     res.json({ mensaje: "Eliminado" });
 });
 
-app.listen(3000, () => console.log("🚀 Server YEGO en Puerto 3000"));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 YEGO Server Activo (NODE_VERSION 20)`));
