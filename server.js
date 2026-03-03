@@ -37,9 +37,8 @@ app.post('/importar', upload.single('archivo'), (req, res) => {
             },
             c: { 
                 nom: data[9]?.[1] || '', cc: data[9]?.[4] || '', lic: data[9]?.[7] || '',
-                cat: data[10]?.[1] || '', venc_lic: data[10]?.[4] || '', dir: data[10]?.[7] || '',
-                tel: data[11]?.[1] || '', ciu: data[11]?.[4] || '', cel: data[12]?.[1] || '',
-                arl: data[12]?.[4] || '', eps: data[12]?.[7] || '', mail: data[13]?.[1] || ''
+                venc_lic: data[10]?.[4] || '', cel: data[12]?.[1] || '',
+                arl: data[12]?.[4] || '', eps: data[12]?.[7] || '', pension: data[13]?.[4] || '', mail: data[13]?.[1] || ''
             },
             t: { nom: data[16]?.[1] || '', nit: data[16]?.[4] || '', dir: data[16]?.[7] || '', tel: data[17]?.[1] || '', mail: data[18]?.[1] || '' },
             p: { nom: data[19]?.[1] || '', nit: data[19]?.[4] || '', dir: data[19]?.[7] || '', tel: data[20]?.[1] || '', mail: data[21]?.[1] || '' },
@@ -60,7 +59,7 @@ app.post('/guardar', (req, res) => {
     const index = db.findIndex(i => i.v.placa.toUpperCase() === nuevo.v.placa.toUpperCase());
     if (index !== -1) db[index] = nuevo; else db.push(nuevo);
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-    res.json({ mensaje: "✅ Registro YEGO procesado exitosamente." });
+    res.json({ mensaje: "✅ Registro YEGO actualizado correctamente." });
 });
 
 app.get('/consultar/:t', (req, res) => {
@@ -71,4 +70,4 @@ app.get('/consultar/:t', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 YEGO Online`));
+app.listen(PORT, () => console.log(`🚀 YEGO Online (Node v20)`));
