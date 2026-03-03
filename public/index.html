@@ -3,427 +3,353 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YEGO LOGÍSTICA - PANEL DE SEGURIDAD VIAL</title>
+    <title>SISTEMA YEGO - GESTIÓN DE SEGURIDAD VIAL</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <style>
-        /* CONFIGURACIÓN DE IDENTIDAD CORPORATIVA */
-        :root { 
-            --yego-blue: #002d5a; 
-            --yego-green: #27ae60; 
-            --yego-yellow: #ffc107; 
-            --yego-dark: #121212;
-            --yego-danger: #e74c3c;
+        :root {
+            --yego-blue: #002d5a;
+            --yego-green: #27ae60;
+            --yego-danger: #d32f2f;
+            --yego-yellow: #fbc02d;
+            --yego-light: #f8f9fa;
         }
 
-        body { 
-            background: #f0f2f5; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            font-size: 0.85rem; 
-            color: #333;
-            line-height: 1.6;
+        body {
+            background-color: #f1f3f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 0.82rem;
+            color: #2c3e50;
         }
 
-        /* DISEÑO DE CABECERAS DE SECCIÓN */
-        .section-header { 
-            background: var(--yego-blue); 
-            color: white; 
-            padding: 15px 25px; 
-            margin-top: 30px; 
-            font-weight: 800; 
-            font-size: 1rem; 
-            border-left: 10px solid var(--yego-green); 
-            text-transform: uppercase; 
-            border-radius: 4px 4px 0 0;
+        /* DISEÑO DE CABECERAS */
+        .main-header {
+            background: var(--yego-blue);
+            color: white;
+            padding: 20px;
+            border-bottom: 5px solid var(--yego-green);
+            margin-bottom: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .section-header {
+            background: white;
+            color: var(--yego-blue);
+            padding: 12px 20px;
+            margin-top: 25px;
+            font-weight: 800;
+            text-transform: uppercase;
+            border-left: 8px solid var(--yego-green);
+            border-bottom: 1px solid #ddd;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
-        .card-body { 
-            background: white; 
-            border: 1px solid #dee2e6; 
-            padding: 30px; 
-            margin-bottom: 15px; 
-            border-top: none; 
-            border-radius: 0 0 4px 4px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        .content-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            padding: 25px;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            margin-bottom: 15px;
         }
 
-        /* ESTILOS DE FORMULARIO */
-        label { 
-            font-weight: bold; 
-            font-size: 0.75rem; 
-            color: #495057; 
-            display: block; 
-            margin-top: 12px; 
+        /* FORMULARIOS */
+        label {
+            font-weight: 700;
+            color: #546e7a;
             margin-bottom: 5px;
+            display: block;
+            font-size: 0.72rem;
             text-transform: uppercase;
         }
 
-        .form-control { 
-            font-size: 0.85rem; 
-            border-radius: 4px; 
-            border: 1px solid #ced4da; 
+        .form-control {
+            border-radius: 4px;
+            border: 1px solid #cfd8dc;
             padding: 10px;
-            background-color: #fafafa;
+            background-color: #ffffff;
+            font-weight: 600;
         }
 
-        .form-control:focus { 
-            border-color: var(--yego-green); 
-            box-shadow: 0 0 0 0.2rem rgba(39, 174, 96, 0.25); 
-            background-color: white;
+        .form-control:focus {
+            border-color: var(--yego-green);
+            box-shadow: 0 0 0 0.2rem rgba(39, 174, 96, 0.1);
         }
 
-        /* SISTEMA DE ALERTAS (SEMAFORIZACIÓN) */
-        .vencido { 
-            background-color: #f8d7da !important; 
-            border: 2px solid var(--yego-danger) !important; 
-            color: #721c24;
-            font-weight: bold;
+        /* SEMAFORIZACIÓN */
+        .vencido {
+            background-color: #ffebee !important;
+            border: 2px solid var(--yego-danger) !important;
+            color: var(--yego-danger) !important;
         }
 
-        .por-vencer { 
-            background-color: #fff3cd !important; 
-            border: 2px solid var(--yego-yellow) !important; 
-            font-weight: bold;
+        .por-vencer {
+            background-color: #fffde7 !important;
+            border: 2px solid var(--yego-yellow) !important;
+            color: #827717 !important;
         }
 
-        /* BOTONES PERSONALIZADOS */
-        .btn-yego-primary {
+        /* BOTONES */
+        .btn-save {
             background-color: var(--yego-green);
             color: white;
             font-weight: bold;
-            padding: 12px 25px;
+            padding: 15px 40px;
             border: none;
+            border-radius: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             transition: 0.3s;
         }
 
-        .btn-yego-primary:hover {
-            background-color: #219150;
+        .btn-save:hover {
+            background-color: #1e8449;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             transform: translateY(-2px);
         }
 
-        /* PANEL DE LISTADO LATERAL */
-        #sidebar-container {
-            position: sticky;
-            top: 20px;
+        /* TABLA LATERAL */
+        .sidebar-list {
+            max-height: 800px;
+            overflow-y: auto;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
 
-        .list-group-item {
-            border-left: 5px solid transparent;
+        .list-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
             transition: 0.2s;
+            cursor: pointer;
         }
 
-        .list-group-item:hover {
-            border-left: 5px solid var(--yego-green);
-            background-color: #f8f9fa;
-        }
-
-        .badge-status {
-            font-size: 0.65rem;
-            padding: 4px 8px;
-            border-radius: 10px;
+        .list-item:hover {
+            background-color: #f1f8e9;
         }
 
         @media print { .no-print { display: none !important; } }
     </style>
 </head>
-<body onload="inicializarSistema()">
+<body>
 
-<nav class="navbar navbar-dark mb-4 no-print shadow-sm" style="background: var(--yego-blue);">
-    <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" href="#">
-            <span class="fw-bold">YEGO LOGÍSTICA | PANEL CONTROL POZ987</span>
-        </a>
-        <div class="d-flex text-white small">
-            <div class="me-3">ESTADO SERVIDOR: <span class="text-success fw-bold">ONLINE</span></div>
-            <div>VERSIÓN NODE: <span class="text-warning">20.x</span></div>
+<header class="main-header no-print">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="m-0 fw-bold">YEGO LOGÍSTICA</h2>
+            <p class="m-0 opacity-75">Panel Central de Control Operativo - Render Cloud</p>
+        </div>
+        <div class="text-end">
+            <span class="badge bg-success">SERVIDOR NODE 20 ACTIVO</span><br>
+            <small id="current-time"></small>
         </div>
     </div>
-</nav>
+</header>
 
-<div class="container-fluid px-5">
+<div class="container-fluid px-4">
     <div class="row">
         
         <div class="col-lg-9">
             
-            <div class="card card-body mb-4 shadow-sm no-print border-0" style="background: #e9ecef;">
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-6">
-                        <label class="mt-0">Consulte Vehículo por Placa</label>
-                        <input type="text" id="busqueda" class="form-control form-control-lg" placeholder="Ej: POZ987">
-                    </div>
-                    <div class="col-md-3">
-                        <button class="btn btn-primary btn-lg w-100 fw-bold" onclick="ejecutarConsulta()">BUSCAR</button>
-                    </div>
-                    <div class="col-md-3">
-                        <button class="btn btn-yego-primary btn-lg w-100" onclick="procesarGuardado()">GUARDAR DATOS</button>
-                    </div>
+            <div class="d-flex justify-content-between align-items-center mb-4 no-print bg-white p-3 rounded shadow-sm">
+                <div class="w-50">
+                    <input type="text" id="search-placa" class="form-control form-control-lg" placeholder="BUSCAR PLACA (Ej: POZ987)">
+                </div>
+                <div>
+                    <button class="btn btn-primary px-4 fw-bold" onclick="consultarServidor()">CONSULTAR</button>
+                    <button class="btn btn-save ms-2" onclick="guardarEnNube()">SINCRONIZAR DATOS</button>
                 </div>
             </div>
 
-            <form id="formularioPrincipal">
-                
+            <form id="yegoForm">
                 <div class="section-header">
-                    <span>I. FICHA TÉCNICA DEL VEHÍCULO</span>
-                    <span class="badge bg-success">ACTIVO</span>
+                    <span>I. INFORMACIÓN TÉCNICA - UNIDAD DE TRACCIÓN</span>
+                    <span class="text-muted small">Datos KENWORTH POZ987</span>
                 </div>
-                <div class="card-body">
+                <div class="content-card">
                     <div class="row g-3">
-                        <div class="col-md-3">
-                            <label>Placa Principal</label>
-                            <input type="text" id="v_placa" class="form-control fw-bold" value="POZ987">
+                        <div class="col-md-2">
+                            <label>Placa</label>
+                            <input type="text" id="v_placa" class="form-control" value="POZ987">
                         </div>
                         <div class="col-md-3">
-                            <label>Marca Fabricante</label>
+                            <label>Marca</label>
                             <input type="text" id="v_marca" class="form-control" value="KENWORTH">
                         </div>
                         <div class="col-md-3">
-                            <label>Línea / Referencia</label>
+                            <label>Línea</label>
                             <input type="text" id="v_linea" class="form-control" value="T88067-77">
                         </div>
-                        <div class="col-md-3">
-                            <label>Modelo (Año)</label>
+                        <div class="col-md-2">
+                            <label>Modelo</label>
                             <input type="text" id="v_modelo" class="form-control" value="2026">
                         </div>
-                        
-                        <div class="col-md-3">
-                            <label>Color Registrado</label>
+                        <div class="col-md-2">
+                            <label>Color</label>
                             <input type="text" id="v_color" class="form-control" value="AZUL BLANCO">
                         </div>
-                        <div class="col-md-3">
+
+                        <div class="col-md-4">
                             <label>Número de Motor</label>
                             <input type="text" id="v_motor" class="form-control" value="80726806">
                         </div>
-                        <div class="col-md-6">
-                            <label>Número de Chasis (VIN)</label>
+                        <div class="col-md-4">
+                            <label>Número de Chasis</label>
                             <input type="text" id="v_chasis" class="form-control" value="3WKZD40X0TF45100">
+                        </div>
+                        <div class="col-md-4">
+                            <label>Carrocería</label>
+                            <input type="text" id="v_carro" class="form-control" value="3S3">
                         </div>
 
                         <div class="col-md-3">
-                            <label>Clase de Vehículo</label>
-                            <input type="text" id="v_clase" class="form-control" value="TRACTOCAMION">
+                            <label>Vencimiento SOAT</label>
+                            <input type="date" id="v_soat" class="form-control" value="2026-07-03" onchange="checkSemaforo(this.id)">
                         </div>
                         <div class="col-md-3">
-                            <label>Tipo Carrocería</label>
-                            <input type="text" id="v_carro" class="form-control" value="3S3">
-                        </div>
-                        <div class="col-md-3">
-                            <label>Combustible</label>
-                            <input type="text" id="v_fuel" class="form-control" value="DIESEL">
-                        </div>
-                        <div class="col-md-3">
-                            <label>Capacidad (kg)</label>
-                            <input type="text" id="v_cap" class="form-control" value="52000">
+                            <label>Vencimiento Técnico</label>
+                            <input type="date" id="v_tecno" class="form-control" value="2026-07-04" onchange="checkSemaforo(this.id)">
                         </div>
                     </div>
                 </div>
 
-                <div class="section-header">
-                    <span>II. INFORMACIÓN DEL SEMIREMOLQUE (TRÁILER)</span>
-                    <span class="badge bg-warning text-dark">ACOPLADO</span>
-                </div>
-                <div class="card-body">
+                <div class="section-header">II. EQUIPO ACOPLADO (TRÁILER / REMOLQUE)</div>
+                <div class="content-card">
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label>Placa del Tráiler</label>
+                            <label>Placa Tráiler</label>
                             <input type="text" id="v_trailer_placa" class="form-control" value="S87681">
                         </div>
                         <div class="col-md-4">
-                            <label>Marca del Tráiler</label>
-                            <input type="text" id="v_trailer_marca" class="form-control" placeholder="Indicar marca">
+                            <label>Modelo Tráiler</label>
+                            <input type="text" id="v_trailer_modelo" class="form-control" value="2024">
                         </div>
                         <div class="col-md-4">
-                            <label>Modelo del Tráiler</label>
-                            <input type="text" id="v_trailer_modelo" class="form-control" value="2024">
+                            <label>Configuración</label>
+                            <input type="text" id="v_config" class="form-control" value="T3-S3">
                         </div>
                     </div>
                 </div>
 
-                <div class="section-header">
-                    <span>III. ACCESO A PLATAFORMA GPS</span>
-                    <span class="badge bg-info">SATRACK</span>
-                </div>
-                <div class="card-body">
+                <div class="section-header">III. SISTEMA DE MONITOREO SATELITAL</div>
+                <div class="content-card">
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label>Enlace de Plataforma</label>
+                            <label>Proveedor / URL</label>
                             <input type="text" id="v_gps_url" class="form-control" value="https://login.satrack.com">
                         </div>
                         <div class="col-md-4">
-                            <label>Usuario de Acceso</label>
+                            <label>Usuario GPS</label>
                             <input type="text" id="v_gps_user" class="form-control" value="POZ987J">
                         </div>
                         <div class="col-md-4">
-                            <label>Clave de Seguridad</label>
+                            <label>Clave GPS</label>
                             <input type="text" id="v_gps_pass" class="form-control" value="Colombia987.">
                         </div>
                     </div>
                 </div>
 
-                <div class="section-header">
-                    <span>IV. VENCIMIENTOS LEGALES</span>
-                    <span class="badge bg-danger">OBLIGATORIO</span>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3 text-center">
+                <div class="section-header">IV. INFORMACIÓN DEL CONDUCTOR</div>
+                <div class="content-card">
+                    <div class="row g-3">
                         <div class="col-md-6">
-                            <label>Vencimiento SOAT</label>
-                            <input type="date" id="v_soat" class="form-control form-control-lg text-center" value="2026-07-03" onchange="validarFecha(this.id)">
-                            <div class="mt-2 small text-muted">Aseguradora: Seguros del Estado</div>
+                            <label>Nombre Completo</label>
+                            <input type="text" id="c_nom" class="form-control">
                         </div>
-                        <div class="col-md-6">
-                            <label>Vencimiento Técnico-Mecánica</label>
-                            <input type="date" id="v_tecno" class="form-control form-control-lg text-center" value="2026-07-04" onchange="validarFecha(this.id)">
-                            <div class="mt-2 small text-muted">CDA: Autorizado Nacional</div>
+                        <div class="col-md-3">
+                            <label>Cédula</label>
+                            <input type="text" id="c_cc" class="form-control">
                         </div>
-                    </div>
-                </div>
-
-                <div class="section-header">V. DATOS OPERATIVOS DEL CONDUCTOR</div>
-                <div class="card-body row g-3">
-                    <div class="col-md-6">
-                        <label>Nombres y Apellidos</label>
-                        <input type="text" id="c_nombre" class="form-control">
-                    </div>
-                    <div class="col-md-3">
-                        <label>Documento Identidad</label>
-                        <input type="text" id="c_cc" class="form-control">
-                    </div>
-                    <div class="col-md-3">
-                        <label>Teléfono Celular</label>
-                        <input type="text" id="c_cel" class="form-control">
-                    </div>
-                    <div class="col-md-4">
-                        <label>Licencia de Conducción</label>
-                        <input type="text" id="c_lic" class="form-control">
-                    </div>
-                    <div class="col-md-4">
-                        <label>Categoría Licencia</label>
-                        <input type="text" id="c_cat" class="form-control" value="C3">
-                    </div>
-                    <div class="col-md-4">
-                        <label>Vencimiento Licencia</label>
-                        <input type="date" id="c_venc_lic" class="form-control" onchange="validarFecha(this.id)">
+                        <div class="col-md-3">
+                            <label>Celular</label>
+                            <input type="text" id="c_cel" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label>Vencimiento Licencia</label>
+                            <input type="date" id="c_venc_lic" class="form-control" onchange="checkSemaforo(this.id)">
+                        </div>
+                        <div class="col-md-4">
+                            <label>Seguridad Social (EPS/ARL)</label>
+                            <input type="text" id="c_ss" class="form-control">
+                        </div>
                     </div>
                 </div>
             </form>
         </div>
 
         <div class="col-lg-3 no-print">
-            <div id="sidebar-container">
-                <div class="bg-dark text-white p-3 rounded-top">
-                    <h6 class="m-0 fw-bold">REGISTROS EN NUBE</h6>
+            <div class="sidebar-list">
+                <div class="bg-dark text-white p-3 fw-bold rounded-top">
+                    HISTORIAL EN NUBE
                 </div>
-                <div id="listaRegistros" class="list-group list-group-flush shadow-sm bg-white" style="max-height: 600px; overflow-y: auto;">
-                    <div class="p-4 text-center text-muted">Esperando datos del servidor...</div>
-                </div>
-                <div class="mt-3 card card-body bg-light">
-                    <h6 class="fw-bold">ESTADÍSTICAS</h6>
-                    <div class="d-flex justify-content-between">
-                        <span>Total Flota:</span>
-                        <span id="stat-total" class="fw-bold">0</span>
+                <div id="lista-render" class="p-2">
                     </div>
-                    <hr>
-                    <button class="btn btn-sm btn-outline-dark w-100" onclick="location.reload()">Sincronizar ahora</button>
-                </div>
+            </div>
+            
+            <div class="mt-4 p-3 bg-white border rounded shadow-sm">
+                <h6 class="fw-bold border-bottom pb-2">RESUMEN DE ESTADO</h6>
+                <div id="stats-panel" class="small">
+                    </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="container mt-4 no-print">
-    <div class="alert alert-secondary small">
-        <strong>LOGS DEL SISTEMA:</strong> <span id="system-log">Iniciado correctamente en Render. Puerto 3000.</span>
-    </div>
-</div>
-
 <script>
     /**
-     * Lógica de Inicialización
+     * LÓGICA DEL CLIENTE - YEGO LOGÍSTICA
      */
-    function inicializarSistema() {
-        console.log("Sistema Yego Cargado");
-        listarRegistrosServidor();
+    
+    // 1. Inicialización
+    window.onload = () => {
+        updateClock();
+        setInterval(updateClock, 1000);
+        actualizarLista();
         
-        // Aplicar semaforización inicial
-        const checks = ['v_soat', 'v_tecno', 'c_venc_lic'];
-        checks.forEach(id => {
-            if(document.getElementById(id).value) validarFecha(id);
-        });
+        // Ejecutar semáforo inicial para los datos de POZ987
+        ['v_soat', 'v_tecno'].forEach(checkSemaforo);
+    };
+
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('current-time').innerText = now.toLocaleString();
     }
 
-    /**
-     * Gestión de Datos con el Servidor Render
-     */
-    async function listarRegistrosServidor() {
-        try {
-            const respuesta = await fetch('/listar');
-            const data = await respuesta.json();
-            
-            const contenedor = document.getElementById('listaRegistros');
-            document.getElementById('stat-total').innerText = data.length;
+    // 2. Funciones de Semaforización
+    function checkSemaforo(id) {
+        const el = document.getElementById(id);
+        if(!el.value) return;
 
-            if(data.length === 0) {
-                contenedor.innerHTML = '<div class="p-4 text-center">No hay registros guardados.</div>';
-                return;
-            }
+        const hoy = new Date();
+        const fechaDoc = new Date(el.value);
+        const diff = (fechaDoc - hoy) / (1000 * 60 * 60 * 24);
 
-            contenedor.innerHTML = data.map(item => `
-                <div class="list-group-item p-3">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <span class="fw-bold text-primary">${item.v.placa}</span><br>
-                            <small class="text-muted">${item.v.marca} ${item.v.modelo}</small>
-                        </div>
-                        <span class="badge bg-secondary">${item.v.carro || '3S3'}</span>
-                    </div>
-                    <div class="mt-2 d-grid gap-1">
-                        <button class="btn btn-sm btn-outline-primary" onclick="cargarParaEditar('${item.v.placa}')">Visualizar</button>
-                        <button class="btn btn-sm btn-danger" onclick="window.open('/descargar-pdf/${item.v.placa}')">Descargar PDF</button>
-                    </div>
-                </div>
-            `).join('');
+        el.classList.remove('vencido', 'por-vencer');
 
-        } catch (error) {
-            document.getElementById('system-log').innerText = "Error: No se pudo conectar con el servidor.";
+        if(diff < 0) {
+            el.classList.add('vencido');
+        } else if(diff <= 15) {
+            el.classList.add('por-vencer');
         }
     }
 
-    /**
-     * Proceso de Guardado
-     */
-    async function procesarGuardado() {
-        const placa = document.getElementById('v_placa').value.toUpperCase();
-        
-        if(!placa) {
-            alert("Error: La placa es un campo obligatorio.");
-            return;
-        }
-
-        const objetoData = {
+    // 3. Comunicación con el Servidor Render
+    async function guardarEnNube() {
+        const payload = {
             v: {
-                placa: placa,
+                placa: document.getElementById('v_placa').value.toUpperCase(),
                 marca: document.getElementById('v_marca').value,
-                linea: document.getElementById('v_linea').value,
                 modelo: document.getElementById('v_modelo').value,
-                color: document.getElementById('v_color').value,
-                motor: document.getElementById('v_motor').value,
-                chasis: document.getElementById('v_chasis').value,
-                carro: document.getElementById('v_carro').value,
-                trailer: document.getElementById('v_trailer_placa').value,
                 soat: document.getElementById('v_soat').value,
-                tecno: document.getElementById('v_tecno').value
+                tecno: document.getElementById('v_tecno').value,
+                gps_user: document.getElementById('v_gps_user').value
             },
             c: {
-                nombre: document.getElementById('c_nombre').value,
-                cc: document.getElementById('c_cc').value,
-                cel: document.getElementById('c_cel').value,
-                lic: document.getElementById('c_lic').value,
-                venc_lic: document.getElementById('c_venc_lic').value
+                nom: document.getElementById('c_nom').value,
+                cc: document.getElementById('c_cc').value
             }
         };
 
@@ -431,70 +357,67 @@
             const res = await fetch('/guardar', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(objetoData)
+                body: JSON.stringify(payload)
             });
-            
-            if(res.ok) {
-                alert("DATOS SINCRONIZADOS: El vehículo " + placa + " ha sido actualizado en la nube.");
-                listarRegistrosServidor();
-            }
+            const data = await res.json();
+            alert("✓ " + data.mensaje);
+            actualizarLista();
         } catch (e) {
-            alert("Error de red al intentar guardar.");
+            alert("Error conectando con Render.");
         }
     }
 
-    /**
-     * Consultas Específicas
-     */
-    async function ejecutarConsulta() {
-        const placa = document.getElementById('busqueda').value.toUpperCase();
+    async function actualizarLista() {
+        try {
+            const res = await fetch('/listar');
+            const data = await res.json();
+            const container = document.getElementById('lista-render');
+            
+            if(data.length === 0) {
+                container.innerHTML = '<p class="text-center p-4 text-muted">Sin registros.</p>';
+                return;
+            }
+
+            container.innerHTML = data.map(item => `
+                <div class="list-item" onclick="cargarRegistro('${item.v.placa}')">
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-bold text-primary">${item.v.placa}</span>
+                        <span class="badge bg-light text-dark border">${item.v.modelo}</span>
+                    </div>
+                    <div class="text-muted small">SOAT: ${item.v.soat}</div>
+                </div>
+            `).join('');
+            
+            document.getElementById('stats-panel').innerHTML = `
+                <div class="d-flex justify-content-between"><span>Registros:</span> <b>${data.length}</b></div>
+            `;
+
+        } catch (e) {
+            console.error("Error al listar registros.");
+        }
+    }
+
+    async function consultarServidor() {
+        const placa = document.getElementById('search-placa').value.toUpperCase();
         if(!placa) return;
 
         try {
             const res = await fetch(`/consultar/${placa}`);
             if(res.ok) {
                 const data = await res.json();
-                llenarFormulario(data);
-                document.getElementById('system-log').innerText = "Registro " + placa + " cargado con éxito.";
+                alert("Registro encontrado.");
+                // Aquí podrías llenar el formulario completo
             } else {
-                alert("Vehículo no encontrado en la base de datos.");
+                alert("Placa no encontrada.");
             }
-        } catch (err) {
-            console.error(err);
+        } catch (e) {
+            console.error(e);
         }
     }
 
-    /**
-     * Utilidades
-     */
-    function llenarFormulario(d) {
-        document.getElementById('v_placa').value = d.v.placa;
-        document.getElementById('v_soat').value = d.v.soat;
-        document.getElementById('v_tecno').value = d.v.tecno;
-        // ... (resto de campos)
-        inicializarSistema(); // Re-validar fechas
-    }
-
-    function cargarParaEditar(p) {
-        document.getElementById('busqueda').value = p;
-        ejecutarConsulta();
-    }
-
-    function validarFecha(id) {
-        const input = document.getElementById(id);
-        if(!input.value) return;
-
-        const hoy = new Date();
-        const fechaDoc = new Date(input.value);
-        const diferencia = (fechaDoc - hoy) / (1000 * 60 * 60 * 24);
-
-        input.classList.remove('vencido', 'por-vencer');
-
-        if(diferencia < 0) {
-            input.classList.add('vencido');
-        } else if(diferencia <= 15) {
-            input.classList.add('por-vencer');
-        }
+    function cargarRegistro(placa) {
+        document.getElementById('search-placa').value = placa;
+        consultarServidor();
     }
 </script>
 
