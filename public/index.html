@@ -2,143 +2,128 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>YEGO LOGÍSTICA - Sistema de Gestión</title>
+    <title>YEGO LOGÍSTICA - Base de Datos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root { --yego-blue: #002d5a; --yego-green: #27ae60; }
-        body { background: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
         .navbar { background: var(--yego-blue); color: white; border-bottom: 4px solid var(--yego-green); }
-        .search-box { background: #fff; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 20px; border-left: 5px solid var(--yego-blue); }
-        .section-header { background: #e9ecef; color: #333; font-weight: bold; text-align: center; padding: 8px; border: 1px solid #ddd; margin-top: 25px; text-transform: uppercase; font-size: 0.8rem; }
-        .card-panel { background: white; border-radius: 12px; padding: 30px; margin-top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-        .form-label { font-size: 0.7rem; font-weight: 700; color: #666; text-transform: uppercase; }
-        .form-control { border-radius: 4px; font-size: 0.9rem; border: 1px solid #ced4da; }
-        .btn-action { border-radius: 30px; font-weight: bold; padding: 10px 30px; transition: 0.3s; }
+        .search-area { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-top: -30px; position: relative; z-index: 10; }
+        .section-header { background: #eee; font-weight: bold; padding: 5px; border: 1px solid #ccc; margin-top: 20px; text-transform: uppercase; font-size: 0.8rem; }
+        .form-control { border-radius: 0; font-size: 0.85rem; }
+        .form-label { font-size: 0.7rem; font-weight: bold; margin-bottom: 0; color: #555; }
     </style>
 </head>
 <body>
 
-<nav class="navbar p-3 shadow-sm">
-    <div class="container d-flex justify-content-between align-items-center">
-        <span class="h4 mb-0"><i class="fas fa-shield-alt"></i> <b>YEGO</b> LOGÍSTICA</span>
-        <div class="d-flex gap-2">
-            <input type="file" id="excelFile" style="display:none" onchange="subirExcel()">
-            <button class="btn btn-light btn-sm fw-bold" onclick="document.getElementById('excelFile').click()">
-                <i class="fas fa-file-import text-success"></i> IMPORTAR EXCEL
-            </button>
-        </div>
+<nav class="navbar p-4 pb-5 text-center">
+    <div class="container">
+        <h3><i class="fas fa-database"></i> PANEL LOGÍSTICO YEGO</h3>
     </div>
 </nav>
 
-<div class="container">
-    <div class="search-box">
-        <div class="row align-items-center">
-            <div class="col-md-7">
-                <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-                    <input type="text" id="terminoBusqueda" class="form-control border-start-0" placeholder="Buscar por PLACA o CÉDULA...">
-                </div>
+<div class="container mb-5">
+    <div class="search-area mb-4">
+        <div class="row g-2">
+            <div class="col-md-6">
+                <input type="text" id="busqueda" class="form-control form-control-lg" placeholder="Ingrese PLACA o CÉDULA...">
             </div>
-            <div class="col-md-5 d-flex gap-2">
-                <button class="btn btn-primary flex-grow-1 fw-bold" onclick="consultarDB()">CONSULTAR</button>
-                <button class="btn btn-success flex-grow-1 fw-bold" onclick="guardarRegistro()">GUARDAR / ACTUALIZAR</button>
+            <div class="col-md-3">
+                <button class="btn btn-primary btn-lg w-100 fw-bold" onclick="consultar()">🔍 CONSULTAR</button>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-success btn-lg w-100 fw-bold" onclick="document.getElementById('fileIn').click()">📁 IMPORTAR EXCEL</button>
+                <input type="file" id="fileIn" style="display:none" onchange="importar()">
             </div>
         </div>
     </div>
 
-    <div class="card-panel mb-5">
-        <form id="formLogistica">
+    <div class="bg-white p-4 shadow-sm rounded">
+        <div id="status" class="alert alert-info py-1 small d-none"></div>
+        
+        <form id="formYego">
             <div class="section-header">I. INFORMACIÓN DEL VEHÍCULO</div>
-            <div class="row g-2 mt-2">
-                <div class="col-md-4"><label class="form-label">Placa</label><input type="text" id="placa" class="form-control"></div>
-                <div class="col-md-4"><label class="form-label">Marca</label><input type="text" id="marca" class="form-control"></div>
-                <div class="col-md-4"><label class="form-label">Color</label><input type="text" id="color" class="form-control"></div>
-                <div class="col-md-4"><label class="form-label">Modelo</label><input type="text" id="modelo" class="form-control"></div>
+            <div class="row g-2 mt-1">
+                <div class="col-md-3"><label class="form-label">Placa</label><input type="text" id="placa" class="form-control"></div>
+                <div class="col-md-3"><label class="form-label">Marca</label><input type="text" id="marca" class="form-control"></div>
+                <div class="col-md-3"><label class="form-label">Modelo</label><input type="text" id="modelo" class="form-control"></div>
+                <div class="col-md-3"><label class="form-label">Color</label><input type="text" id="color" class="form-control"></div>
                 <div class="col-md-4"><label class="form-label">GPS Compañía</label><input type="text" id="gps_co" class="form-control"></div>
-                <div class="col-md-4"><label class="form-label">Usuario GPS</label><input type="text" id="gps_user" class="form-control"></div>
-                <div class="col-md-4"><label class="form-label">Clave GPS</label><input type="text" id="gps_pass" class="form-control"></div>
+                <div class="col-md-4"><label class="form-label">Usuario GPS</label><input type="text" id="gps_user" class="form-control text-primary fw-bold"></div>
+                <div class="col-md-4"><label class="form-label">Clave GPS</label><input type="text" id="gps_pass" class="form-control text-primary fw-bold"></div>
             </div>
 
             <div class="section-header">II. INFORMACIÓN DEL CONDUCTOR</div>
-            <div class="row g-2 mt-2">
-                <div class="col-md-6"><label class="form-label">Nombre</label><input type="text" id="c_nom" class="form-control"></div>
-                <div class="col-md-3"><label class="form-label">CC Conductor</label><input type="text" id="c_cc" class="form-control"></div>
+            <div class="row g-2 mt-1">
+                <div class="col-md-6"><label class="form-label">Nombre Completo</label><input type="text" id="c_nom" class="form-control"></div>
+                <div class="col-md-3"><label class="form-label">Cédula</label><input type="text" id="c_cc" class="form-control"></div>
                 <div class="col-md-3"><label class="form-label">Celular</label><input type="text" id="c_cel" class="form-control"></div>
             </div>
             
-            </form>
+            <div class="section-header">III. TENEDOR / PROPIETARIO</div>
+            <div class="row g-2 mt-1">
+                <div class="col-md-6"><label class="form-label">Tenedor</label><input type="text" id="t_nom" class="form-control"></div>
+                <div class="col-md-6"><label class="form-label">Propietario</label><input type="text" id="p_nom" class="form-control"></div>
+            </div>
+        </form>
+
+        <div class="text-center mt-4">
+            <button class="btn btn-warning btn-lg px-5 fw-bold shadow" onclick="guardar()">💾 GUARDAR EN BASE DE DATOS</button>
+        </div>
     </div>
 </div>
 
 <script>
-    async function subirExcel() {
-        const file = document.getElementById('excelFile').files[0];
+    async function importar() {
         const formData = new FormData();
-        formData.append('archivo', file);
-        try {
-            const res = await fetch('/importar', { method: 'POST', body: formData });
-            const d = await res.json();
-            llenarCampos(d);
-            alert("📊 Excel importado. No olvides GUARDAR para registrarlo en la base de datos.");
-        } catch (e) { alert("Error al leer Excel"); }
+        formData.append('archivo', document.getElementById('fileIn').files[0]);
+        const res = await fetch('/importar', { method: 'POST', body: formData });
+        const d = await res.json();
+        llenar(d);
     }
 
-    async function guardarRegistro() {
-        const d = obtenerDatosForm();
-        if(!d.v.placa) return alert("La placa es obligatoria");
+    async function guardar() {
+        const d = {
+            v: { placa: id('placa'), marca: id('marca'), modelo: id('modelo'), color: id('color'), gps_co: id('gps_co'), user: id('gps_user'), pass: id('gps_pass') },
+            c: { nom: id('c_nom'), cc: id('c_cc'), cel: id('c_cel') },
+            t: { nom: id('t_nom') },
+            p: { nom: id('p_nom') }
+        };
         const res = await fetch('/guardar', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(d)
         });
         const r = await res.json();
-        alert(r.mensaje || r.error);
+        alert(r.mensaje);
     }
 
-    async function consultarDB() {
-        const t = document.getElementById('terminoBusqueda').value;
-        if(!t) return alert("Ingresa placa o cédula");
-        try {
-            const res = await fetch(`/consultar/${t}`);
-            if(!res.ok) throw new Error();
+    async function consultar() {
+        const t = id('busqueda');
+        const res = await fetch(`/consultar/${t}`);
+        if(res.ok) {
             const d = await res.json();
-            llenarCampos(d);
-            alert("✅ Registro encontrado");
-        } catch (e) { alert("❌ No se encontró información."); }
+            llenar(d);
+        } else alert("❌ No encontrado");
     }
 
-    function llenarCampos(d) {
+    function llenar(d) {
         document.getElementById('placa').value = d.v.placa;
         document.getElementById('marca').value = d.v.marca;
-        document.getElementById('color').value = d.v.color;
         document.getElementById('modelo').value = d.v.modelo;
+        document.getElementById('color').value = d.v.color;
         document.getElementById('gps_co').value = d.v.gps_co;
-        document.getElementById('gps_user').value = d.v.user;
-        document.getElementById('gps_pass').value = d.v.pass;
+        document.getElementById('gps_user').value = d.v.user || d.v.gps_user;
+        document.getElementById('gps_pass').value = d.v.pass || d.v.gps_pass;
         document.getElementById('c_nom').value = d.c.nom;
         document.getElementById('c_cc').value = d.c.cc;
         document.getElementById('c_cel').value = d.c.cel;
+        document.getElementById('t_nom').value = d.t.nom;
+        document.getElementById('p_nom').value = d.p.nom;
     }
 
-    function obtenerDatosForm() {
-        return {
-            v: {
-                placa: document.getElementById('placa').value,
-                marca: document.getElementById('marca').value,
-                color: document.getElementById('color').value,
-                modelo: document.getElementById('modelo').value,
-                gps_co: document.getElementById('gps_co').value,
-                user: document.getElementById('gps_user').value,
-                pass: document.getElementById('gps_pass').value
-            },
-            c: {
-                nom: document.getElementById('c_nom').value,
-                cc: document.getElementById('c_cc').value,
-                cel: document.getElementById('c_cel').value
-            }
-        };
-    }
+    function id(name) { return document.getElementById(name).value; }
 </script>
 </body>
 </html>
