@@ -170,7 +170,6 @@
     const val = (id) => document.getElementById(id).value;
     const set = (id, v) => { if(document.getElementById(id)) document.getElementById(id).value = v || ''; };
 
-    // Función para listar con botones de descarga individual desde DB
     async function listarTodo() {
         try {
             const res = await fetch('/listar');
@@ -183,8 +182,8 @@
                     <td class="align-middle small">${i.v.soat || '-'} / ${i.v.tecno || '-'}</td>
                     <td class="text-center">
                         <button class="btn btn-primary btn-sm fw-bold" onclick="cargar('${i.v.placa}')">VER</button>
-                        <button class="btn btn-danger btn-sm fw-bold" onclick="descargarDesdeDB('${i.v.placa}', 'pdf')">📥 PDF</button>
-                        <button class="btn btn-warning btn-sm fw-bold" onclick="descargarDesdeDB('${i.v.placa}', 'xlsx')">📥 EXCEL</button>
+                        <button class="btn btn-danger btn-sm fw-bold" onclick="descargarDesdeDB('${i.v.placa}', 'pdf')">📄 PDF</button>
+                        <button class="btn btn-warning btn-sm fw-bold" onclick="descargarDesdeDB('${i.v.placa}', 'xlsx')">📊 EXCEL</button>
                         <button class="btn btn-secondary btn-sm" onclick="eliminar('${i.v.placa}')">🗑️</button>
                     </td>
                 </tr>
@@ -192,26 +191,29 @@
         } catch(e) { console.error("Error al listar registros", e); }
     }
 
-    // DESCARGA DIRECTA DESDE LA BASE DE DATOS
+    // CORRECCIÓN PARA PDF: SE AGREGA TIMEOUT DE RENDERIZADO
     async function descargarDesdeDB(placa, tipo) {
         try {
             const res = await fetch(`/consultar/${placa}`);
             if(!res.ok) return alert("Error al conectar con la base de datos.");
             const data = await res.json();
             
-            // Llenamos el formulario con la data fresca de Render
+            // 1. Llenamos el formulario con los datos de la DB
             llenar(data);
             
             if(tipo === 'pdf') {
-                const elemento = document.getElementById('area-pdf');
-                const opciones = {
-                    margin: 10,
-                    filename: `Ficha_YEGO_${placa}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true, logging: false },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-                html2pdf().from(elemento).set(opciones).save();
+                // 2. Esperamos 500ms para asegurar que el DOM tenga los valores puestos
+                setTimeout(() => {
+                    const elemento = document.getElementById('area-pdf');
+                    const opciones = {
+                        margin: 10,
+                        filename: `Ficha_YEGO_${placa}.pdf`,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true, logging: false },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    };
+                    html2pdf().from(elemento).set(opciones).save();
+                }, 500); 
             } else {
                 let pArr = [
                     ["SISTEMA YEGO LOGÍSTICA - FICHA TÉCNICA"],
@@ -281,7 +283,7 @@
         if(d.t) Object.keys(d.t).forEach(k => set('t_'+k, d.t[k]));
         if(d.p) Object.keys(d.p).forEach(k => set('p_'+k, d.p[k]));
         if(d.r) Object.keys(d.r).forEach(k => set('r_'+k, d.r[k]));
-        setTimeout(() => { ['v_soat', 'v_tecno', 'c_venc_lic', 'c_venc_planilla'].forEach(alerta); }, 500);
+        setTimeout(() => { ['v_soat', 'v_tecno', 'c_venc_lic', 'c_venc_planilla'].forEach(alerta); }, 100);
     }
 
     function alerta(id) {
@@ -296,17 +298,4 @@
         document.querySelectorAll('.form-control').forEach(e => e.classList.remove('vencido', 'por-vencer'));
     }
 
-    function cargar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
-    
-    async function importar() {
-        if(!document.getElementById('f').files[0]) return;
-        const formData = new FormData();
-        formData.append('archivo', document.getElementById('f').files[0]);
-        const res = await fetch('/importar', { method: 'POST', body: formData });
-        const data = await res.json();
-        llenar(data);
-        alert("Importación finalizada.");
-    }
-</script>
-</body>
-</html>
+    function cargar(p) { document.getElementById('q').value = p;
