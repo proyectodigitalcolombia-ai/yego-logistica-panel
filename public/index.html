@@ -32,7 +32,7 @@
         .alert-success { border-left-color: #28a745; background: #f4faf6; }
 
         @media print { .no-pdf { display: none !important; } }
-        /* Optimizando persistencia para disco duro externo en Render */
+        /* Optimizando la captura de imagen para evitar bloqueos del navegador */
     </style>
 </head>
 <body onload="listarTodo()">
@@ -197,7 +197,7 @@
                     <td class="text-center">
                         <div class="btn-group btn-group-sm">
                             <button class="btn btn-primary fw-bold" onclick="cargar('${i.v.placa}')">VER</button>
-                            <button class="btn btn-danger fw-bold" onclick="descargarDesdeDB('${i.v.placa}', 'pdf')">📄 PDF</button>
+                            <button id="btn-pdf-${i.v.placa}" class="btn btn-danger fw-bold" onclick="descargarDesdeDB('${i.v.placa}', 'pdf')">📄 PDF</button>
                             <button class="btn btn-warning fw-bold" onclick="descargarDesdeDB('${i.v.placa}', 'xlsx')">📊 EXCEL</button>
                             <button class="btn btn-dark" onclick="eliminar('${i.v.placa}')">🗑️</button>
                         </div>
@@ -207,28 +207,32 @@
     }
 
     async function descargarDesdeDB(placa, tipo) {
+        const b = document.getElementById(`btn-pdf-${placa}`);
         try {
+            if(b) b.innerText = "⏳..."; 
             const res = await fetch(`/consultar/${placa}`);
             const data = await res.json();
             llenar(data);
             if(tipo === 'pdf') {
+                const elemento = document.getElementById('formYego');
                 const opt = { 
-                    margin: 10, filename: `Ficha_Yego_${placa}.pdf`, 
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                    margin: [10, 5], filename: `YEGO_${placa}.pdf`, 
+                    image: { type: 'jpeg', quality: 0.95 },
+                    html2canvas: { scale: 1.5, useCORS: true, scrollY: 0 },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
                 };
-                const elemento = document.getElementById('formYego');
-                setTimeout(() => {
-                    html2pdf().from(elemento).set(opt).save();
-                }, 800);
+                setTimeout(async () => {
+                    await html2pdf().set(opt).from(elemento).save();
+                    if(b) b.innerText = "📄 PDF";
+                }, 1000);
             } else {
                 const ws = XLSX.utils.json_to_sheet([data.v, data.c]);
                 const wb = XLSX.utils.book_new(); 
                 XLSX.utils.book_append_sheet(wb, ws, "Ficha");
                 XLSX.writeFile(wb, `Ficha_${placa}.xlsx`);
+                if(b) b.innerText = "📄 PDF";
             }
-        } catch(e) { alert("Error: " + e.message); }
+        } catch(e) { alert("Error: " + e.message); if(b) b.innerText = "📄 PDF"; }
     }
 
     async function eliminar(p) {
@@ -298,7 +302,7 @@
         const res = await fetch('/importar', { method: 'POST', body: formData });
         const data = await res.json(); llenar(data); alert("Importado.");
     }
-    // Sincronización final con el disco duro persistente de Render
+    // Sincronización final con el disco duro persistente de Render 2026
 </script>
 </body>
 </html>
