@@ -32,7 +32,7 @@
         .alert-success { border-left-color: #28a745; background: #f4faf6; }
 
         @media print { .no-pdf { display: none !important; } }
-        /* Conexión con persistencia de datos en disco duro Render */
+        /* Optimizando persistencia para disco duro externo en Render */
     </style>
 </head>
 <body onload="listarTodo()">
@@ -170,7 +170,7 @@
                 </tr>
             </thead>
             <tbody id="listaTabla">
-                <tr><td colspan="4" class="text-center p-4">Cargando registros...</td></tr>
+                <tr><td colspan="4" class="text-center p-4">Conectando con base de datos en Render...</td></tr>
             </tbody>
         </table>
     </div>
@@ -213,24 +213,22 @@
             llenar(data);
             if(tipo === 'pdf') {
                 const opt = { 
-                    margin: [10, 10], filename: `Ficha_${placa}.pdf`, 
+                    margin: 10, filename: `Ficha_Yego_${placa}.pdf`, 
                     image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true },
+                    html2canvas: { scale: 2, useCORS: true, letterRendering: true },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
                 };
                 const elemento = document.getElementById('formYego');
                 setTimeout(() => {
-                    html2pdf().set(opt).from(elemento).toPdf().get('pdf').then(function (pdf) {
-                        pdf.save();
-                    });
-                }, 500);
+                    html2pdf().from(elemento).set(opt).save();
+                }, 800);
             } else {
                 const ws = XLSX.utils.json_to_sheet([data.v, data.c]);
                 const wb = XLSX.utils.book_new(); 
                 XLSX.utils.book_append_sheet(wb, ws, "Ficha");
                 XLSX.writeFile(wb, `Ficha_${placa}.xlsx`);
             }
-        } catch(e) { alert("Error en descarga: " + e.message); }
+        } catch(e) { alert("Error: " + e.message); }
     }
 
     async function eliminar(p) {
@@ -274,7 +272,7 @@
             r: { e1: val('r_e1'), t1: val('r_t1'), e2: val('r_e2'), t2: val('r_t2'), per: val('r_per'), tp: val('r_tp') }
         };
         await fetch('/guardar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(d) });
-        alert("Guardado en disco duro Render."); listarTodo();
+        alert("Guardado exitoso."); listarTodo();
     }
 
     function llenar(d) {
@@ -300,7 +298,7 @@
         const res = await fetch('/importar', { method: 'POST', body: formData });
         const data = await res.json(); llenar(data); alert("Importado.");
     }
-    // Verificación final de integridad de guardado en /data
+    // Sincronización final con el disco duro persistente de Render
 </script>
 </body>
 </html>
