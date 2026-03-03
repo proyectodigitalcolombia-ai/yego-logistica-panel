@@ -18,10 +18,10 @@
         .vencido { background-color: #ffdce0 !important; border: 1px solid #dc3545 !important; }
         .por-vencer { background-color: #fff3cd !important; border: 1px solid #ffc107 !important; }
         .btn-yego { background-color: #ffc107; color: #000; font-weight: bold; border: none; }
+        .box-sub { background: #f8f9fa; border: 1px solid #eee; padding: 10px; border-radius: 4px; height: 100%; }
         
-        /* Estilos del Dashboard Lateral */
-        .dash-card { border-radius: 8px; border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: 0.3s; }
-        .alert-item { padding: 10px; border-radius: 5px; margin-bottom: 8px; border-left: 5px solid #ccc; background: #fff; }
+        /* Dashboard */
+        .alert-item { padding: 8px; border-radius: 5px; margin-bottom: 8px; border-left: 5px solid #ccc; background: #fff; font-size: 0.75rem; }
         .alert-danger { border-left-color: #dc3545; background: #fdf2f2; }
         .alert-warning { border-left-color: #ffc107; background: #fffbeb; }
         .alert-success { border-left-color: #28a745; background: #f4faf6; }
@@ -86,17 +86,48 @@
                     <div class="col-md-4"><label>ARL</label><input type="text" id="c_arl" class="form-control"></div>
                     <div class="col-md-4"><label>FONDO PENSIÓN</label><input type="text" id="c_pension" class="form-control"></div>
                 </div>
+
+                <div class="section-header">III. TENEDOR Y PROPIETARIO</div>
+                <div class="card-body row g-3">
+                    <div class="col-md-6">
+                        <div class="box-sub">
+                            <label class="text-primary fw-bold">DATOS DEL TENEDOR</label>
+                            <input type="text" id="t_nom" class="form-control mb-1" placeholder="Nombre">
+                            <input type="text" id="t_nit" class="form-control mb-1" placeholder="NIT">
+                            <input type="text" id="t_dir" class="form-control mb-1" placeholder="Dirección">
+                            <input type="text" id="t_tel" class="form-control mb-1" placeholder="Teléfono">
+                            <input type="text" id="t_mail" class="form-control" placeholder="Correo">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="box-sub">
+                            <label class="text-primary fw-bold">DATOS DEL PROPIETARIO</label>
+                            <input type="text" id="p_nom" class="form-control mb-1" placeholder="Nombre">
+                            <input type="text" id="p_nit" class="form-control mb-1" placeholder="NIT">
+                            <input type="text" id="p_dir" class="form-control mb-1" placeholder="Dirección">
+                            <input type="text" id="p_tel" class="form-control mb-1" placeholder="Teléfono">
+                            <input type="text" id="p_mail" class="form-control" placeholder="Correo">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-header">IV. REFERENCIAS</div>
+                <div class="card-body row g-2">
+                    <div class="col-md-4"><label>EMPRESA 1</label><input type="text" id="r_e1" class="form-control mb-1"><input type="text" id="r_t1" class="form-control"></div>
+                    <div class="col-md-4"><label>EMPRESA 2</label><input type="text" id="r_e2" class="form-control mb-1"><input type="text" id="r_t2" class="form-control"></div>
+                    <div class="col-md-4"><label>PERSONAL</label><input type="text" id="r_per" class="form-control mb-1"><input type="text" id="r_tp" class="form-control"></div>
+                </div>
             </form>
         </div>
 
         <div class="col-lg-3">
             <div class="sticky-top" style="top: 20px;">
-                <div class="card dash-card bg-dark text-white p-3 mb-3">
-                    <h6 class="mb-0 text-warning">⚠️ ESTADO CRÍTICO</h6>
-                    <small id="placa-activa">Placa: Ninguna seleccionada</small>
+                <div class="card bg-dark text-white p-3 mb-2 shadow">
+                    <h6 class="mb-0 text-warning">⚠️ PANEL DE ALERTAS</h6>
+                    <small id="placa-activa">Placa: -</small>
                 </div>
-                <div id="panel-vencimientos" class="p-2 border rounded bg-white shadow-sm" style="min-height: 300px;">
-                    <p class="text-muted text-center mt-5">Consulta una placa para ver sus alertas de 6 días.</p>
+                <div id="panel-vencimientos" class="p-3 border rounded bg-white shadow-sm" style="min-height: 200px;">
+                    <p class="text-muted text-center mt-4">Consulta una placa...</p>
                 </div>
             </div>
         </div>
@@ -147,45 +178,37 @@
         if(res.ok) {
             const data = await res.json();
             llenar(data);
-            actualizarDashboard(data); // <-- NUEVA FUNCIÓN
+            actualizarDashboard(data);
         } else alert("No encontrado");
     }
 
     function actualizarDashboard(d) {
         document.getElementById('placa-activa').innerText = `Placa: ${d.v.placa}`;
         const panel = document.getElementById('panel-vencimientos');
-        panel.innerHTML = '<h6 class="fw-bold mb-3 border-bottom pb-2">Semáforo de Trámites</h6>';
+        panel.innerHTML = '<h6 class="fw-bold mb-3 border-bottom pb-1">Estado de Vencimientos</h6>';
         
         const fechas = [
-            { nombre: 'SOAT', fecha: d.v.soat },
-            { nombre: 'TECNO', fecha: d.v.tecno },
-            { nombre: 'LICENCIA', fecha: d.c.venc_lic },
-            { nombre: 'PLANILLA', fecha: d.c.venc_planilla }
+            { n: 'SOAT', f: d.v.soat },
+            { n: 'TECNO', f: d.v.tecno },
+            { n: 'LICENCIA', f: d.c.venc_lic },
+            { n: 'PLANILLA', f: d.c.venc_planilla }
         ];
 
         fechas.forEach(f => {
-            if(!f.fecha) return;
-            const diff = Math.ceil((new Date(f.fecha) - new Date()) / 86400000);
-            let clase = 'alert-success';
-            let icon = '✅';
-            let msg = `Vence en ${diff} días`;
+            if(!f.f) return;
+            const diff = Math.ceil((new Date(f.f) - new Date()) / 86400000);
+            let c = 'alert-success', i = '✅', m = `Faltan ${diff} días`;
 
-            if(diff < 0) { 
-                clase = 'alert-danger'; icon = '❌'; msg = 'VENCIDO'; 
-            } else if(diff <= 10) { 
-                clase = 'alert-warning'; icon = '⚠️'; 
-                if(diff <= 6) msg = `¡URGENTE! Solo ${diff} días`;
+            if(diff < 0) { c = 'alert-danger'; i = '❌'; m = 'VENCIDO'; }
+            else if(diff <= 10) { 
+                c = 'alert-warning'; i = '⚠️'; 
+                if(diff <= 6) m = `¡URGENTE! ${diff} días`;
             }
 
             panel.innerHTML += `
-                <div class="alert-item ${clase}">
-                    <div class="d-flex justify-content-between">
-                        <strong>${f.nombre}</strong>
-                        <span>${icon}</span>
-                    </div>
-                    <small>${msg} (${f.fecha})</small>
-                </div>
-            `;
+                <div class="alert-item ${c}">
+                    <strong>${f.n}:</strong> ${i} <br> <small>${m} (${f.f})</small>
+                </div>`;
         });
     }
 
@@ -226,7 +249,7 @@
     function limpiarForm() { 
         document.getElementById("formYego").reset(); 
         document.querySelectorAll('.form-control').forEach(e => e.classList.remove('vencido', 'por-vencer'));
-        document.getElementById('panel-vencimientos').innerHTML = '<p class="text-muted text-center mt-5">Consulta una placa...</p>';
+        document.getElementById('panel-vencimientos').innerHTML = '<p class="text-muted text-center mt-4">Consulta una placa...</p>';
     }
 
     function cargar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
@@ -239,7 +262,7 @@
         const data = await res.json();
         llenar(data);
         actualizarDashboard(data);
-        alert("Ficha cargada. Revise el panel lateral.");
+        alert("Ficha cargada con éxito.");
     }
 
     function generarPlantilla() {
