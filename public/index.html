@@ -24,6 +24,7 @@
         .alert-danger { border-left-color: #dc3545; background: #fdf2f2; }
         .alert-warning { border-left-color: #ffc107; background: #fffbeb; }
         .alert-success { border-left-color: #28a745; background: #f4faf6; }
+        /* Ocultar elementos en el PDF */
         @media print { .no-pdf { display: none !important; } }
     </style>
 </head>
@@ -188,7 +189,7 @@
     }
 
     async function eliminar(p) {
-        const pass = prompt(`Para eliminar la placa ${p}, ingresa la clave:`);
+        const pass = prompt(`Para eliminar la placa ${p}, ingresa la clave de administrador:`);
         if(!pass) return;
         const res = await fetch(`/eliminar/${p}`, { method: 'DELETE', headers: { 'admin-password': pass } });
         if(res.ok) { alert("Eliminado."); listarTodo(); } else { alert("Error al eliminar."); }
@@ -273,44 +274,46 @@
     // --- CORRECCIÓN PDF ---
     function generarPDF() {
         const elemento = document.getElementById('area-pdf');
-        if (!elemento) return alert("No hay datos para exportar");
-
         const placa = document.getElementById('v_placa').value || "FICHA";
         
-        // Configuraciones para máxima compatibilidad
         const opciones = {
             margin:       [10, 10, 10, 10],
             filename:     `Ficha_YEGO_${placa}.pdf`,
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { 
                 scale: 2, 
-                useCORS: true, 
-                letterRendering: true,
-                scrollY: 0
+                useCORS: true,
+                logging: false,
+                letterRendering: true
             },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // Ejecutar proceso de descarga
-        html2pdf().from(elemento).set(opciones).save().then(() => {
-            console.log("PDF generado exitosamente");
-        }).catch(err => {
-            console.error("Error al generar PDF:", err);
-            alert("Error al generar PDF. Intente nuevamente.");
-        });
+        // Verificamos si la librería está lista
+        if (typeof html2pdf === 'undefined') {
+            alert("La librería PDF aún no ha cargado. Por favor espere un segundo.");
+            return;
+        }
+
+        html2pdf().from(elemento).set(opciones).save();
     }
 
+    // --- CORRECCIÓN EXCEL ---
     function generarPlantilla() {
-        let pArr = Array.from({ length: 30 }, () => Array(10).fill(""));
-        pArr[0] = ["SISTEMA YEGO LOGÍSTICA - FICHA TÉCNICA"];
-        pArr[2] = ["PLACA", val('v_placa'), "MARCA", val('v_marca'), "COLOR", val('v_color')];
-        pArr[3] = ["CLASE", val('v_clase'), "MODELO", val('v_modelo'), "VENC. SOAT", val('v_soat')];
-        pArr[5] = ["CONDUCTOR", val('c_nom'), "ID", val('c_cc'), "TEL", val('c_cel')];
+        let pArr = Array.from({ length: 40 }, () => Array(15).fill(""));
         
+        pArr[0][0] = "SISTEMA YEGO LOGÍSTICA - REGISTRO TÉCNICO";
+        
+        // Mapeo simple de datos para que no falle por índices
+        pArr[2] = ["PLACA", val('v_placa'), "MARCA", val('v_marca'), "MODELO", val('v_modelo')];
+        pArr[3] = ["COLOR", val('v_color'), "CLASE", val('v_clase'), "LÍNEA", val('v_linea')];
+        pArr[5] = ["CONDUCTOR", val('c_nom'), "ID", val('c_cc'), "CELULAR", val('c_cel')];
+        pArr[6] = ["VENC. SOAT", val('v_soat'), "VENC. TECNO", val('v_tecno'), "VENC. LIC", val('c_venc_lic')];
+
         const ws = XLSX.utils.aoa_to_sheet(pArr);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Ficha");
-        XLSX.writeFile(wb, `Excel_${val('v_placa') || 'Yego'}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, "Datos");
+        XLSX.writeFile(wb, `Ficha_${val('v_placa') || 'General'}.xlsx`);
     }
 </script>
 </body>
