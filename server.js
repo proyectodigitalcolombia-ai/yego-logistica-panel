@@ -9,13 +9,9 @@ const app = express();
 const upload = multer({ dest: 'uploads/' });
 const DB_PATH = '/data/vehiculos.json';
 
-// Asegurar existencia de carpeta y archivo
-if (!fs.existsSync('/data')) {
-    try { fs.mkdirSync('/data', { recursive: true }); } catch (e) {}
-}
-if (!fs.existsSync(DB_PATH)) {
-    try { fs.writeFileSync(DB_PATH, JSON.stringify([], null, 2)); } catch (e) {}
-}
+// Inicialización de persistencia
+if (!fs.existsSync('/data')) { try { fs.mkdirSync('/data', { recursive: true }); } catch (e) {} }
+if (!fs.existsSync(DB_PATH)) { try { fs.writeFileSync(DB_PATH, JSON.stringify([], null, 2)); } catch (e) {} }
 
 app.use(cors());
 app.use(express.json());
@@ -25,13 +21,14 @@ const leerDB = () => {
     try { return JSON.parse(fs.readFileSync(DB_PATH, 'utf-8')); } catch (e) { return []; }
 };
 
-// --- RUTAS ---
+// --- RUTAS API ---
+
+app.get('/listar', (req, res) => res.json(leerDB()));
 
 app.post('/importar', upload.single('archivo'), (req, res) => {
     try {
         const workbook = xlsx.readFile(req.file.path);
         const data = xlsx.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
-        
         const info = {
             v: { 
                 placa: data[2]?.[1] || '', marca: data[2]?.[4] || '', color: data[2]?.[7] || '', 
@@ -62,11 +59,8 @@ app.post('/importar', upload.single('archivo'), (req, res) => {
 app.post('/guardar', (req, res) => {
     let db = leerDB();
     const nuevo = req.body;
-    if (!nuevo.v.placa) return res.status(400).json({ error: "La placa es obligatoria" });
-    
     const index = db.findIndex(i => i.v.placa.toUpperCase() === nuevo.v.placa.toUpperCase());
     if (index !== -1) db[index] = nuevo; else db.push(nuevo);
-    
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
     res.json({ mensaje: "✅ Registro YEGO actualizado correctamente." });
 });
@@ -78,14 +72,12 @@ app.get('/consultar/:t', (req, res) => {
     if (r) res.json(r); else res.status(404).json({ error: "No encontrado" });
 });
 
-// NUEVA RUTA DE ELIMINACIÓN
 app.delete('/eliminar/:placa', (req, res) => {
     let db = leerDB();
     const placa = req.params.placa.toUpperCase();
     const nuevaDB = db.filter(i => i.v.placa.toUpperCase() !== placa);
-    if (db.length === nuevaDB.length) return res.status(404).json({ error: "No encontrado" });
     fs.writeFileSync(DB_PATH, JSON.stringify(nuevaDB, null, 2));
-    res.json({ mensaje: "🗑️ Registro eliminado correctamente." });
+    res.json({ mensaje: "Registro eliminado." });
 });
 
 const PORT = process.env.PORT || 3000;
