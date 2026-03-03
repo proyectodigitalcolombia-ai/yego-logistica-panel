@@ -37,17 +37,12 @@ app.post('/importar', upload.single('archivo'), (req, res) => {
             },
             c: { 
                 nom: data[9]?.[1] || '', cc: data[9]?.[4] || '', lic: data[9]?.[7] || '',
-                venc_lic: data[10]?.[4] || '', cel: data[12]?.[1] || '',
-                arl: data[12]?.[4] || '', eps: data[12]?.[7] || '', pension: data[13]?.[4] || '', 
-                mail: data[13]?.[1] || '', dir: data[11]?.[1] || '' // Correo y Dirección Conductor
+                venc_lic: data[10]?.[4] || '', dir: data[11]?.[1] || '', cel: data[12]?.[1] || '',
+                arl: data[12]?.[4] || '', eps: data[12]?.[7] || '', pension: data[13]?.[4] || '', mail: data[13]?.[1] || ''
             },
             t: { nom: data[16]?.[1] || '', nit: data[16]?.[4] || '', dir: data[16]?.[7] || '', tel: data[17]?.[1] || '', mail: data[18]?.[1] || '' },
             p: { nom: data[19]?.[1] || '', nit: data[19]?.[4] || '', dir: data[19]?.[7] || '', tel: data[20]?.[1] || '', mail: data[21]?.[1] || '' },
-            r: { 
-                e1: data[24]?.[1] || '', t1: data[25]?.[1] || '', 
-                e2: data[24]?.[4] || '', t2: data[25]?.[4] || '', 
-                per: data[24]?.[7] || '', tp: data[25]?.[7] || '' 
-            }
+            r: { e1: data[24]?.[1] || '', t1: data[25]?.[1] || '', e2: data[24]?.[4] || '', t2: data[25]?.[4] || '', per: data[24]?.[7] || '', tp: data[25]?.[7] || '' }
         };
         fs.unlinkSync(req.file.path);
         res.json(info);
@@ -60,7 +55,7 @@ app.post('/guardar', (req, res) => {
     const index = db.findIndex(i => i.v.placa.toUpperCase() === nuevo.v.placa.toUpperCase());
     if (index !== -1) db[index] = nuevo; else db.push(nuevo);
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-    res.json({ mensaje: "✅ Registro YEGO actualizado correctamente." });
+    res.json({ mensaje: "✅ Registro actualizado correctamente." });
 });
 
 app.get('/consultar/:t', (req, res) => {
@@ -78,4 +73,4 @@ app.delete('/eliminar/:placa', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 YEGO Online (Node v20)`));
+app.listen(PORT, () => console.log(`🚀 Servidor Node v20 activo`));
