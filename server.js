@@ -9,6 +9,10 @@ const app = express();
 const upload = multer({ dest: 'uploads/' });
 const DB_PATH = '/data/vehiculos.json';
 
+// Asegurar existencia de carpeta y archivo
+if (!fs.existsSync('/data')) {
+    try { fs.mkdirSync('/data', { recursive: true }); } catch (e) {}
+}
 if (!fs.existsSync(DB_PATH)) {
     try { fs.writeFileSync(DB_PATH, JSON.stringify([], null, 2)); } catch (e) {}
 }
@@ -20,6 +24,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 const leerDB = () => {
     try { return JSON.parse(fs.readFileSync(DB_PATH, 'utf-8')); } catch (e) { return []; }
 };
+
+// --- RUTAS ---
 
 app.post('/importar', upload.single('archivo'), (req, res) => {
     try {
@@ -56,8 +62,11 @@ app.post('/importar', upload.single('archivo'), (req, res) => {
 app.post('/guardar', (req, res) => {
     let db = leerDB();
     const nuevo = req.body;
+    if (!nuevo.v.placa) return res.status(400).json({ error: "La placa es obligatoria" });
+    
     const index = db.findIndex(i => i.v.placa.toUpperCase() === nuevo.v.placa.toUpperCase());
     if (index !== -1) db[index] = nuevo; else db.push(nuevo);
+    
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
     res.json({ mensaje: "✅ Registro YEGO actualizado correctamente." });
 });
@@ -67,6 +76,16 @@ app.get('/consultar/:t', (req, res) => {
     const t = req.params.t.toUpperCase();
     const r = db.find(i => i.v.placa.toUpperCase() === t || i.c.cc.toString() === t);
     if (r) res.json(r); else res.status(404).json({ error: "No encontrado" });
+});
+
+// NUEVA RUTA DE ELIMINACIÓN
+app.delete('/eliminar/:placa', (req, res) => {
+    let db = leerDB();
+    const placa = req.params.placa.toUpperCase();
+    const nuevaDB = db.filter(i => i.v.placa.toUpperCase() !== placa);
+    if (db.length === nuevaDB.length) return res.status(404).json({ error: "No encontrado" });
+    fs.writeFileSync(DB_PATH, JSON.stringify(nuevaDB, null, 2));
+    res.json({ mensaje: "🗑️ Registro eliminado correctamente." });
 });
 
 const PORT = process.env.PORT || 3000;
