@@ -9,6 +9,7 @@ const app = express();
 const upload = multer({ dest: 'uploads/' });
 const DB_PATH = '/data/vehiculos.json';
 
+// Asegurar que la carpeta de datos existe
 if (!fs.existsSync('/data')) { try { fs.mkdirSync('/data', { recursive: true }); } catch (e) {} }
 if (!fs.existsSync(DB_PATH)) { try { fs.writeFileSync(DB_PATH, JSON.stringify([], null, 2)); } catch (e) {} }
 
@@ -20,6 +21,7 @@ const leerDB = () => {
     try { return JSON.parse(fs.readFileSync(DB_PATH, 'utf-8')); } catch (e) { return []; }
 };
 
+// Rutas API
 app.get('/listar', (req, res) => res.json(leerDB()));
 
 app.post('/importar', upload.single('archivo'), (req, res) => {
@@ -55,7 +57,7 @@ app.post('/guardar', (req, res) => {
     const index = db.findIndex(i => i.v.placa.toUpperCase() === nuevo.v.placa.toUpperCase());
     if (index !== -1) db[index] = nuevo; else db.push(nuevo);
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-    res.json({ mensaje: "✅ Registro YEGO actualizado." });
+    res.json({ mensaje: "✅ Registro YEGO actualizado correctamente." });
 });
 
 app.get('/consultar/:t', (req, res) => {
@@ -73,4 +75,4 @@ app.delete('/eliminar/:placa', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 YEGO Server Activo (NODE_VERSION 20)`));
+app.listen(PORT, () => console.log(`🚀 YEGO Server Activo en Puerto ${PORT} (NODE 20)`));
