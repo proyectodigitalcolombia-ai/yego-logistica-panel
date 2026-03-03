@@ -24,10 +24,8 @@
         .alert-danger { border-left-color: #dc3545; background: #fdf2f2; }
         .alert-warning { border-left-color: #ffc107; background: #fffbeb; }
         .alert-success { border-left-color: #28a745; background: #f4faf6; }
-        
         /* Ocultar elementos en el PDF */
         @media print { .no-pdf { display: none !important; } }
-        .no-pdf-capture { display: none !important; }
     </style>
 </head>
 <body onload="listarTodo()">
@@ -273,12 +271,11 @@
         alert("Ficha cargada.");
     }
 
-    // --- FUNCIÓN PDF INTEGRADA Y CORREGIDA ---
-    function generarPDF() {
+    // --- CORRECCIÓN FINAL PDF ---
+    async function generarPDF() {
         const elemento = document.getElementById('area-pdf');
         const placa = document.getElementById('v_placa').value || "FICHA";
         
-        // Configuración para asegurar calidad y descarga
         const opciones = {
             margin:       [10, 10, 10, 10],
             filename:     `Ficha_YEGO_${placa}.pdf`,
@@ -294,20 +291,20 @@
         };
 
         if (typeof html2pdf === 'undefined') {
-            alert("Error: La librería PDF no cargó correctamente.");
+            alert("La librería PDF aún no ha cargado. Por favor espere un segundo.");
             return;
         }
 
-        // Ejecutar proceso de generación y descarga
-        html2pdf().set(opciones).from(elemento).save().then(() => {
-            console.log("Descarga completada");
-        }).catch(err => {
-            console.error(err);
-            alert("Error al generar el PDF");
-        });
+        // Usamos await para asegurar que el proceso termine antes de disparar la descarga
+        try {
+            await html2pdf().set(opciones).from(elemento).save();
+        } catch (error) {
+            console.error("Error al generar PDF:", error);
+            alert("No se pudo generar el PDF.");
+        }
     }
 
-    // --- FUNCIÓN EXCEL INTEGRADA ---
+    // --- CORRECCIÓN EXCEL ---
     function generarPlantilla() {
         let pArr = Array.from({ length: 40 }, () => Array(15).fill(""));
         pArr[0][0] = "SISTEMA YEGO LOGÍSTICA - REGISTRO TÉCNICO";
