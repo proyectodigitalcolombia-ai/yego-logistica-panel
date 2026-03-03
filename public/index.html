@@ -172,16 +172,13 @@
         try {
             const res = await fetch('/listar');
             const db = await res.json();
-            const tabla = document.getElementById('listaTabla');
-            tabla.innerHTML = db.map(i => `
+            document.getElementById('listaTabla').innerHTML = db.map(i => `
                 <tr>
                     <td class="fw-bold ps-3">${i.v.placa}</td>
                     <td>${i.c.nom}</td>
                     <td>${i.v.soat || '-'}</td>
                     <td>${i.v.tecno || '-'}</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm" onclick="cargar('${i.v.placa}')">VER</button>
-                    </td>
+                    <td><button class="btn btn-primary btn-sm" onclick="cargar('${i.v.placa}')">VER</button></td>
                 </tr>
             `).join('');
         } catch(e) {}
@@ -245,18 +242,19 @@
     function limpiarForm() { document.getElementById("formYego").reset(); }
     function cargar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
 
-    // --- FUNCIÓN PDF BLINDADA PARA RENDER ---
+    // --- FUNCIÓN PDF RECONSTRUIDA PARA RENDER ---
     async function generarPDF() {
         const btn = document.getElementById('btnPDF');
         const textDefault = btn.innerText;
         
         try {
-            btn.innerText = "⏳ GENERANDO...";
+            btn.innerText = "⏳ PROCESANDO...";
             btn.disabled = true;
 
             const element = document.getElementById('area-pdf');
-            const placa = val('v_placa') || "FICHA_YEGO";
-            
+            const placa = val('v_placa') || "FICHA";
+
+            // OPCIONES DE ALTA COMPATIBILIDAD
             const opt = {
                 margin:       10,
                 filename:     `Ficha_${placa}.pdf`,
@@ -264,21 +262,20 @@
                 html2canvas:  { 
                     scale: 2, 
                     useCORS: true, 
-                    logging: false,
-                    letterRendering: true,
-                    scrollY: 0
+                    scrollY: 0,
+                    allowTaint: true,
+                    letterRendering: true
                 },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // Ejecución paso a paso para evitar el cuelgue en Render
-            const worker = html2pdf().set(opt).from(element);
-            await worker.save();
+            // Ejecución con retardo para permitir renderizado de inputs
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await html2pdf().set(opt).from(element).save();
             
-            console.log("Descarga exitosa");
         } catch (err) {
-            console.error("Error capturado:", err);
-            alert("No se pudo descargar el PDF. Asegúrese de que la placa tenga datos.");
+            console.error("Error PDF:", err);
+            alert("No se pudo descargar el PDF. Intente nuevamente.");
         } finally {
             btn.innerText = textDefault;
             btn.disabled = false;
