@@ -31,14 +31,17 @@ app.post('/importar', upload.single('archivo'), (req, res) => {
                 placa: data[2]?.[1] || '', marca: data[2]?.[4] || '', color: data[2]?.[7] || '', 
                 clase: data[3]?.[1] || '', modelo: data[3]?.[4] || '', repo: data[3]?.[7] || '',
                 linea: data[4]?.[1] || '', motor: data[4]?.[4] || '', chasis: data[4]?.[7] || '',
-                gps_co: data[5]?.[1] || '', user: data[5]?.[4] || '', pass: data[5]?.[7] || '',
+                gps_co: data[5]?.[1] || '', 
+                user: data[5]?.[4] || '', // Usuario GPS
+                pass: data[5]?.[7] || '', // Clave GPS
                 trayler: data[6]?.[1] || '', carro: data[6]?.[4] || '', m_trailer: data[6]?.[7] || '',
                 soat: data[7]?.[1] || '', tecno: data[7]?.[4] || ''
             },
             c: { 
                 nom: data[9]?.[1] || '', cc: data[9]?.[4] || '', lic: data[9]?.[7] || '',
                 venc_lic: data[10]?.[4] || '', dir: data[11]?.[1] || '', cel: data[12]?.[1] || '',
-                arl: data[12]?.[4] || '', eps: data[12]?.[7] || '', pension: data[13]?.[4] || '', mail: data[13]?.[1] || ''
+                arl: data[12]?.[4] || '', eps: data[12]?.[7] || '', pension: data[13]?.[4] || '', 
+                mail: data[13]?.[1] || '', venc_planilla: data[14]?.[4] || ''
             },
             t: { nom: data[16]?.[1] || '', nit: data[16]?.[4] || '', dir: data[16]?.[7] || '', tel: data[17]?.[1] || '', mail: data[18]?.[1] || '' },
             p: { nom: data[19]?.[1] || '', nit: data[19]?.[4] || '', dir: data[19]?.[7] || '', tel: data[20]?.[1] || '', mail: data[21]?.[1] || '' },
