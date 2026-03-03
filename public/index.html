@@ -32,7 +32,7 @@
         .alert-success { border-left-color: #28a745; background: #f4faf6; }
 
         @media print { .no-pdf { display: none !important; } }
-
+        /* Estilos adicionales para espaciado estructural */
     </style>
 </head>
 <body onload="listarTodo()">
@@ -184,7 +184,6 @@
         const tabla = document.getElementById('listaTabla');
         try {
             const res = await fetch('/listar');
-            if (!res.ok) throw new Error("Error");
             const db = await res.json();
             if (!db || db.length === 0) {
                 tabla.innerHTML = '<tr><td colspan="4" class="text-center p-4">Sin datos.</td></tr>';
@@ -214,30 +213,28 @@
             llenar(data);
 
             if(tipo === 'pdf') {
+                const elemento = document.getElementById('formYego');
                 const opt = { 
-                    margin: 10, filename: `Ficha_${placa}.pdf`, 
-                    html2canvas: { scale: 2 }, 
+                    margin: 10, filename: `Ficha_Yego_${placa}.pdf`, 
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, letterRendering: true },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
                 };
+                
+                // Forzamos un pequeño retraso para asegurar que los campos tengan los valores
+                setTimeout(() => {
+                    html2pdf().set(opt).from(elemento).save()
+                    .then(() => console.log('Descarga completa'))
+                    .catch(err => alert('Error generando PDF: ' + err));
+                }, 500);
 
-                const clon = document.getElementById('formYego').cloneNode(true);
-                const originalInputs = document.getElementById('formYego').querySelectorAll('input, select');
-                const clonInputs = clon.querySelectorAll('input, select');
-
-                originalInputs.forEach((inp, i) => { clonInputs[i].value = inp.value; });
-
-                const box = document.createElement('div');
-                box.innerHTML = `<h3 style="color:#002d5a;text-align:center">FICHA TÉCNICA - ${placa}</h3><hr>`;
-                box.appendChild(clon);
-
-                html2pdf().set(opt).from(box).save();
             } else {
                 const ws = XLSX.utils.json_to_sheet([data.v, data.c]);
                 const wb = XLSX.utils.book_new(); 
                 XLSX.utils.book_append_sheet(wb, ws, "Ficha");
                 XLSX.writeFile(wb, `Ficha_${placa}.xlsx`);
             }
-        } catch(e) { alert("Error al descargar"); }
+        } catch(e) { alert("Error al procesar descarga: " + e.message); }
     }
 
     async function eliminar(p) {
@@ -307,6 +304,7 @@
         const res = await fetch('/importar', { method: 'POST', body: formData });
         const data = await res.json(); llenar(data); alert("Importado.");
     }
+    // Final del script de gestión
 </script>
 </body>
 </html>
