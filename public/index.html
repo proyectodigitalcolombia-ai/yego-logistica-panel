@@ -172,26 +172,21 @@
     const val = (id) => document.getElementById(id).value;
     const set = (id, v) => { if(document.getElementById(id)) document.getElementById(id).value = v || ''; };
 
-    // --- REVISIÓN DE LISTADO ---
     async function listarTodo() {
         const tabla = document.getElementById('listaTabla');
         try {
             const res = await fetch('/listar');
             if (!res.ok) throw new Error("No se pudo conectar al servidor");
             const db = await res.json();
-            
             if (!db || db.length === 0) {
-                tabla.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-muted">No hay registros guardados en la base de datos.</td></tr>';
+                tabla.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-muted">No hay registros guardados.</td></tr>';
                 return;
             }
-
             tabla.innerHTML = db.map(i => `
                 <tr>
                     <td class="fw-bold ps-3 align-middle">${i.v.placa}</td>
                     <td class="align-middle">${i.c.nom || 'S/N'}</td>
-                    <td class="align-middle small">
-                        SOAT: ${i.v.soat || '-'}<br>TEC: ${i.v.tecno || '-'}
-                    </td>
+                    <td class="align-middle small">SOAT: ${i.v.soat || '-'}<br>TEC: ${i.v.tecno || '-'}</td>
                     <td class="text-center">
                         <div class="btn-group btn-group-sm">
                             <button class="btn btn-primary fw-bold" onclick="cargar('${i.v.placa}')">VER</button>
@@ -200,32 +195,35 @@
                             <button class="btn btn-dark" onclick="eliminar('${i.v.placa}')">🗑️</button>
                         </div>
                     </td>
-                </tr>
-            `).join('');
-        } catch(e) { 
-            console.error(e);
-            tabla.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-danger">Error al cargar datos: ${e.message}</td></tr>`;
-        }
+                </tr>`).join('');
+        } catch(e) { tabla.innerHTML = `<tr><td colspan="4">Error al cargar datos.</td></tr>`; }
     }
 
     async function descargarDesdeDB(placa, tipo) {
         try {
             const res = await fetch(`/consultar/${placa}`);
-            if(!res.ok) return alert("Error al conectar con la base de datos.");
+            if(!res.ok) return alert("Error al consultar.");
             const data = await res.json();
             llenar(data);
             
             if(tipo === 'pdf') {
-                setTimeout(() => {
-                    const elemento = document.getElementById('area-pdf');
-                    const opciones = {
-                        margin: 10, filename: `Ficha_YEGO_${placa}.pdf`,
-                        image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2, useCORS: true },
-                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                    };
-                    html2pdf().from(elemento).set(opciones).save();
-                }, 600); 
+                const original = document.getElementById('formYego');
+                const clon = original.cloneNode(true);
+                const inputsOriginales = original.querySelectorAll('input, select');
+                const inputsClonados = clon.querySelectorAll('input, select');
+                inputsOriginales.forEach((inp, i) => { inputsClonados[i].value = inp.value; });
+
+                const contenedor = document.createElement('div');
+                contenedor.style.padding = "20px";
+                contenedor.innerHTML = `<h2 style="color:#002d5a; text-align:center;">YEGO LOGÍSTICA - FICHA TÉCNICA</h2><hr>`;
+                contenedor.appendChild(clon);
+
+                html2pdf().set({
+                    margin: 10, filename: `Ficha_YEGO_${placa}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                }).from(contenedor).save().then(() => contenedor.remove());
             } else {
                 let pArr = [
                     ["SISTEMA YEGO LOGÍSTICA - FICHA TÉCNICA"],
@@ -240,25 +238,25 @@
                 XLSX.utils.book_append_sheet(wb, ws, "Ficha");
                 XLSX.writeFile(wb, `Ficha_YEGO_${placa}.xlsx`);
             }
-        } catch(e) { alert("Error en la descarga."); }
+        } catch(e) { alert("Error en descarga."); }
     }
 
     async function eliminar(p) {
-        const pass = prompt(`Ingresa la clave para eliminar ${p}:`);
+        const pass = prompt(`Clave para eliminar ${p}:`);
         if(!pass) return;
         const res = await fetch(`/eliminar/${p}`, { method: 'DELETE', headers: { 'admin-password': pass } });
-        if(res.ok) { alert("Eliminado."); listarTodo(); } else { alert("Error de clave."); }
+        if(res.ok) { alert("Eliminado."); listarTodo(); }
     }
 
     async function consultar() {
         const query = val('q');
-        if(!query) return alert("Ingresa un dato para buscar.");
+        if(!query) return;
         const res = await fetch(`/consultar/${query}`);
         if(res.ok) {
             const data = await res.json();
             llenar(data);
             actualizarDashboard(data);
-        } else alert("No encontrado.");
+        }
     }
 
     function actualizarDashboard(d) {
