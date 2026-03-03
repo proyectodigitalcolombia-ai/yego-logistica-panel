@@ -9,7 +9,6 @@ const app = express();
 const upload = multer({ dest: 'uploads/' });
 const DB_PATH = '/data/vehiculos.json';
 
-// Inicialización de persistencia
 if (!fs.existsSync('/data')) { try { fs.mkdirSync('/data', { recursive: true }); } catch (e) {} }
 if (!fs.existsSync(DB_PATH)) { try { fs.writeFileSync(DB_PATH, JSON.stringify([], null, 2)); } catch (e) {} }
 
@@ -20,8 +19,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 const leerDB = () => {
     try { return JSON.parse(fs.readFileSync(DB_PATH, 'utf-8')); } catch (e) { return []; }
 };
-
-// --- RUTAS API ---
 
 app.get('/listar', (req, res) => res.json(leerDB()));
 
@@ -41,10 +38,11 @@ app.post('/importar', upload.single('archivo'), (req, res) => {
             c: { 
                 nom: data[9]?.[1] || '', cc: data[9]?.[4] || '', lic: data[9]?.[7] || '',
                 venc_lic: data[10]?.[4] || '', cel: data[12]?.[1] || '',
-                arl: data[12]?.[4] || '', eps: data[12]?.[7] || '', pension: data[13]?.[4] || '', mail: data[13]?.[1] || ''
+                arl: data[12]?.[4] || '', eps: data[12]?.[7] || '', pension: data[13]?.[4] || '', 
+                mail: data[13]?.[1] || '' // Correo Conductor
             },
-            t: { nom: data[16]?.[1] || '', nit: data[16]?.[4] || '', dir: data[16]?.[7] || '', tel: data[17]?.[1] || '', mail: data[18]?.[1] || '' },
-            p: { nom: data[19]?.[1] || '', nit: data[19]?.[4] || '', dir: data[19]?.[7] || '', tel: data[20]?.[1] || '', mail: data[21]?.[1] || '' },
+            t: { nom: data[16]?.[1] || '', nit: data[16]?.[4] || '', dir: data[16]?.[7] || '', tel: data[17]?.[1] || '', mail: data[18]?.[1] || '' }, // Correo Tenedor
+            p: { nom: data[19]?.[1] || '', nit: data[19]?.[4] || '', dir: data[19]?.[7] || '', tel: data[20]?.[1] || '', mail: data[21]?.[1] || '' }, // Correo Propietario
             r: { 
                 e1: data[24]?.[1] || '', t1: data[25]?.[1] || '', 
                 e2: data[24]?.[4] || '', t2: data[25]?.[4] || '', 
