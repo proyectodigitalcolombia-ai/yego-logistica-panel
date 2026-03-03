@@ -8,21 +8,11 @@
     <style>
         :root { --yego-blue: #002d5a; --yego-green: #27ae60; }
         body { background: #f4f6f9; font-family: 'Segoe UI', sans-serif; font-size: 0.82rem; }
-        
         .section-header { 
-            background: var(--yego-blue); 
-            color: #ffffff; 
-            padding: 10px 15px; 
-            margin-top: 25px; 
-            font-weight: 800; 
-            font-size: 0.95rem;
-            border-left: 8px solid var(--yego-green); 
-            text-transform: uppercase;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            display: block;
-            width: 100%;
+            background: var(--yego-blue); color: white; padding: 10px 15px; margin-top: 25px; 
+            font-weight: 800; font-size: 0.95rem; border-left: 8px solid var(--yego-green); 
+            text-transform: uppercase; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
-
         .card-body { background: white; border: 1px solid #ddd; padding: 12px; border-top: none; }
         label { font-weight: bold; font-size: 0.7rem; color: #444; display: block; margin-top: 5px; }
         .vencido { background-color: #ffdce0 !important; border: 1px solid #dc3545 !important; }
@@ -37,9 +27,9 @@
     <div class="container d-flex justify-content-between">
         <span>YEGO LOGÍSTICA - SEGURIDAD</span>
         <div>
-            <button class="btn btn-warning btn-sm fw-bold me-2" onclick="generarPlantilla()">📄 PLANTILLA</button>
+            <button class="btn btn-warning btn-sm fw-bold me-2" onclick="generarPlantilla()">📥 DESCARGAR FICHA</button>
             <button class="btn btn-outline-light btn-sm me-2" onclick="limpiarForm()">🆕 NUEVO</button>
-            <button class="btn btn-success btn-sm fw-bold" onclick="document.getElementById('f').click()">📥 EXCEL</button>
+            <button class="btn btn-success btn-sm fw-bold" onclick="document.getElementById('f').click()">📤 IMPORTAR EXCEL</button>
         </div>
         <input type="file" id="f" style="display:none" onchange="importar()">
     </div>
@@ -120,7 +110,7 @@
             <div class="col-md-4"><label>PERSONAL</label><input type="text" id="r_per" class="form-control mb-1"><input type="text" id="r_tp" class="form-control"></div>
         </div>
     </form>
-
+    
     <div class="section-header mt-4">V. LISTADO DE REGISTROS</div>
     <div class="card-body p-0 border shadow-sm">
         <table class="table table-hover mb-0">
@@ -198,43 +188,67 @@
 
     function limpiarForm() { document.getElementById("formYego").reset(); document.querySelectorAll('.form-control').forEach(e => e.classList.remove('vencido', 'por-vencer')); }
     function cargar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
+    
     async function importar() {
+        if(!document.getElementById('f').files[0]) return;
         const formData = new FormData();
         formData.append('archivo', document.getElementById('f').files[0]);
         const res = await fetch('/importar', { method: 'POST', body: formData });
         llenar(await res.json());
+        alert("Ficha cargada en el formulario. Haga clic en GUARDAR para confirmar.");
     }
 
-    // NUEVA FUNCIÓN PARA GENERAR PLANTILLA EXCEL
+    // --- FUNCIÓN MEJORADA: Generar Excel con "LÍNEAS" y Formato ---
     function generarPlantilla() {
         let plantilla = Array.from({ length: 30 }, () => Array(10).fill(""));
+
+        // Cabeceras y Datos
         plantilla[1] = ["", "PLACA", "", "", "MARCA", "", "", "COLOR"];
-        plantilla[2] = ["", "EJEMPLO: ABC123", "", "", "Marca", "", "", "Color"]; 
+        plantilla[2] = ["", val('v_placa'), "", "", val('v_marca'), "", "", val('v_color')];
         plantilla[3] = ["", "CLASE", "", "", "MODELO", "", "", "REPOTENCIADO"];
+        plantilla[3][1] = val('v_clase'); plantilla[3][4] = val('v_modelo'); plantilla[3][7] = val('v_repo');
         plantilla[4] = ["", "LÍNEA", "", "", "MOTOR", "", "", "CHASIS"];
+        plantilla[4][1] = val('v_linea'); plantilla[4][4] = val('v_motor'); plantilla[4][7] = val('v_chasis');
         plantilla[5] = ["", "PROVEEDOR GPS", "", "", "USUARIO GPS", "", "", "CLAVE GPS"];
-        plantilla[6] = ["", "PLACA TRAILER", "", "", "MODELO TRAILER", "", "", "MODELO TRAILER"];
-        plantilla[7] = ["", "VENC. SOAT (AAAA-MM-DD)", "", "", "VENC. TECNO (AAAA-MM-DD)"];
-        plantilla[8] = ["", "NOMBRE COMPLETO", "", "", "CÉDULA", "", "", "LICENCIA"];
-        plantilla[9] = ["", "Nombre Conductor", "", "", "12345678", "", "", "No. Licencia"];
-        plantilla[10] = ["", "", "", "", "VENC. LIC (AAAA-MM-DD)"];
-        plantilla[11] = ["", "DIRECCIÓN", "", "", "CIUDAD"];
+        plantilla[5][1] = val('v_gps_co'); plantilla[5][4] = val('v_gps_user'); plantilla[5][7] = val('v_gps_pass');
+        plantilla[6] = ["", "PLACA TRAILER", "", "", "CARROCERÍA", "", "", "MOD. TRAILER"];
+        plantilla[6][1] = val('v_trayler'); plantilla[6][4] = val('v_carro'); plantilla[6][7] = val('v_m_trailer');
+        plantilla[7] = ["", "VENC. SOAT", "", "", "VENC. TECNO"];
+        plantilla[7][1] = val('v_soat'); plantilla[7][4] = val('v_tecno');
+
+        plantilla[9] = ["", "NOMBRE COMPLETO", "", "", "CÉDULA", "", "", "LICENCIA"];
+        plantilla[9][1] = val('c_nom'); plantilla[9][4] = val('c_cc'); plantilla[9][7] = val('c_lic');
+        plantilla[10] = ["", "", "", "", "VENC. LICENCIA"];
+        plantilla[10][4] = val('c_venc_lic');
+        plantilla[11] = ["", "DIRECCIÓN", "", "", "CORREO"];
+        plantilla[11][1] = val('c_dir'); plantilla[11][4] = val('c_mail');
         plantilla[12] = ["", "CELULAR", "", "", "ARL", "", "", "EPS"];
-        plantilla[13] = ["", "CORREO", "", "", "FONDO PENSIÓN"];
-        plantilla[15] = ["", "NOMBRE TENEDOR", "", "", "NIT TENEDOR", "", "", "DIR TENEDOR"];
-        plantilla[16] = ["", "Nombre Tenedor", "", "", "Nit", "", "", "Dirección"];
-        plantilla[17] = ["", "TEL TENEDOR"];
-        plantilla[18] = ["", "MAIL TENEDOR"];
+        plantilla[12][1] = val('c_cel'); plantilla[12][4] = val('c_arl'); plantilla[12][7] = val('c_eps');
+        plantilla[13] = ["", "", "", "", "FONDO PENSIÓN"];
+        plantilla[13][4] = val('c_pension');
+
+        plantilla[16] = ["", "NOMBRE TENEDOR", "", "", "NIT TENEDOR", "", "", "DIR TENEDOR"];
+        plantilla[16][1] = val('t_nom'); plantilla[16][4] = val('t_nit'); plantilla[16][7] = val('t_dir');
+        plantilla[17][1] = val('t_tel');
+        plantilla[18][1] = val('t_mail');
+
         plantilla[19] = ["", "NOMBRE PROPIETARIO", "", "", "NIT PROPIETARIO", "", "", "DIR PROPIETARIO"];
-        plantilla[20] = ["", "TEL PROPIETARIO"];
-        plantilla[21] = ["", "MAIL PROPIETARIO"];
-        plantilla[23] = ["", "EMPRESA 1", "", "", "EMPRESA 2", "", "", "PERSONAL"];
-        plantilla[24] = ["", "Tel Empresa 1", "", "", "Tel Empresa 2", "", "", "Tel Personal"];
+        plantilla[19][1] = val('p_nom'); plantilla[19][4] = val('p_nit'); plantilla[19][7] = val('p_dir');
+        plantilla[20][1] = val('p_tel');
+        plantilla[21][1] = val('p_mail');
+
+        plantilla[24] = ["", "EMPRESA 1", "", "", "EMPRESA 2", "", "", "PERSONAL"];
+        plantilla[24][1] = val('r_e1'); plantilla[24][4] = val('r_e2'); plantilla[24][7] = val('r_per');
+        plantilla[25][1] = val('r_t1'); plantilla[25][4] = val('r_t2'); plantilla[25][7] = val('r_tp');
 
         const ws = XLSX.utils.aoa_to_sheet(plantilla);
+
+        // APLICAR LÍNEAS Y ANCHO DE COLUMNAS (Simulado vía !cols)
+        ws['!cols'] = [{wch:5}, {wch:25}, {wch:5}, {wch:5}, {wch:25}, {wch:5}, {wch:5}, {wch:25}];
+        
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Datos YEGO");
-        XLSX.writeFile(wb, "Plantilla_Carga_YEGO.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "Ficha YEGO");
+        XLSX.writeFile(wb, val('v_placa') ? `Ficha_${val('v_placa')}.xlsx` : "Plantilla_YEGO.xlsx");
     }
 </script>
 </body>
