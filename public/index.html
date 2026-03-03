@@ -24,8 +24,10 @@
         .alert-danger { border-left-color: #dc3545; background: #fdf2f2; }
         .alert-warning { border-left-color: #ffc107; background: #fffbeb; }
         .alert-success { border-left-color: #28a745; background: #f4faf6; }
+        
         /* Ocultar elementos en el PDF */
         @media print { .no-pdf { display: none !important; } }
+        .no-pdf-capture { display: none !important; }
     </style>
 </head>
 <body onload="listarTodo()">
@@ -271,11 +273,12 @@
         alert("Ficha cargada.");
     }
 
-    // --- CORRECCIÓN PDF ---
+    // --- FUNCIÓN PDF INTEGRADA Y CORREGIDA ---
     function generarPDF() {
         const elemento = document.getElementById('area-pdf');
         const placa = document.getElementById('v_placa').value || "FICHA";
         
+        // Configuración para asegurar calidad y descarga
         const opciones = {
             margin:       [10, 10, 10, 10],
             filename:     `Ficha_YEGO_${placa}.pdf`,
@@ -284,27 +287,30 @@
                 scale: 2, 
                 useCORS: true,
                 logging: false,
-                letterRendering: true
+                letterRendering: true,
+                scrollY: 0
             },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // Verificamos si la librería está lista
         if (typeof html2pdf === 'undefined') {
-            alert("La librería PDF aún no ha cargado. Por favor espere un segundo.");
+            alert("Error: La librería PDF no cargó correctamente.");
             return;
         }
 
-        html2pdf().from(elemento).set(opciones).save();
+        // Ejecutar proceso de generación y descarga
+        html2pdf().set(opciones).from(elemento).save().then(() => {
+            console.log("Descarga completada");
+        }).catch(err => {
+            console.error(err);
+            alert("Error al generar el PDF");
+        });
     }
 
-    // --- CORRECCIÓN EXCEL ---
+    // --- FUNCIÓN EXCEL INTEGRADA ---
     function generarPlantilla() {
         let pArr = Array.from({ length: 40 }, () => Array(15).fill(""));
-        
         pArr[0][0] = "SISTEMA YEGO LOGÍSTICA - REGISTRO TÉCNICO";
-        
-        // Mapeo simple de datos para que no falle por índices
         pArr[2] = ["PLACA", val('v_placa'), "MARCA", val('v_marca'), "MODELO", val('v_modelo')];
         pArr[3] = ["COLOR", val('v_color'), "CLASE", val('v_clase'), "LÍNEA", val('v_linea')];
         pArr[5] = ["CONDUCTOR", val('c_nom'), "ID", val('c_cc'), "CELULAR", val('c_cel')];
