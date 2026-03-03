@@ -73,12 +73,23 @@
                 <div class="section-header">II. CONDUCTOR Y SEGURIDAD SOCIAL</div>
                 <div class="card-body row g-2">
                     <div class="col-md-4"><label>NOMBRE COMPLETO</label><input type="text" id="c_nom" class="form-control"></div>
-                    <div class="col-md-2"><label>CÉDULA</label><input type="text" id="c_cc" class="form-control"></div>
+                    <div class="col-md-4">
+                        <label>DOCUMENTO IDENTIDAD</label>
+                        <div class="input-group">
+                            <select id="c_tipo" class="form-select" style="max-width: 90px;">
+                                <option value="CC">CC</option>
+                                <option value="CE">CE</option>
+                                <option value="PPT">PPT</option>
+                                <option value="PAS">PAS</option>
+                            </select>
+                            <input type="text" id="c_cc" class="form-control" placeholder="Número">
+                        </div>
+                    </div>
                     <div class="col-md-2"><label>LICENCIA</label><input type="text" id="c_lic" class="form-control"></div>
                     <div class="col-md-2"><label>VENC. LICENCIA</label><input type="date" id="c_venc_lic" class="form-control" onchange="alerta(this.id)"></div>
                     <div class="col-md-2"><label>CELULAR</label><input type="text" id="c_cel" class="form-control"></div>
-                    <div class="col-md-4"><label>DIRECCIÓN CONDUCTOR</label><input type="text" id="c_dir" class="form-control"></div>
-                    <div class="col-md-4"><label>CORREO CONDUCTOR</label><input type="text" id="c_mail" class="form-control"></div>
+                    <div class="col-md-3"><label>DIRECCIÓN CONDUCTOR</label><input type="text" id="c_dir" class="form-control"></div>
+                    <div class="col-md-3"><label>CORREO CONDUCTOR</label><input type="text" id="c_mail" class="form-control"></div>
                     <div class="col-md-4"><label class="text-danger">VENC. PLANILLA</label><input type="date" id="c_venc_planilla" class="form-control border-danger" onchange="alerta(this.id)"></div>
                     <div class="col-md-4"><label>EPS</label><input type="text" id="c_eps" class="form-control"></div>
                     <div class="col-md-4"><label>ARL</label><input type="text" id="c_arl" class="form-control"></div>
@@ -93,10 +104,12 @@
                             <input type="text" id="t_nom" class="form-control mb-1" placeholder="Nombre/Razón Social">
                             <div class="input-group mb-1">
                                 <select id="t_tipo" class="form-select" style="max-width: 90px;">
-                                    <option value="CC">CC</option>
                                     <option value="NIT">NIT</option>
+                                    <option value="CC">CC</option>
+                                    <option value="PPT">PPT</option>
+                                    <option value="PAS">PAS</option>
                                 </select>
-                                <input type="text" id="t_nit" class="form-control" placeholder="Número de Documento">
+                                <input type="text" id="t_nit" class="form-control" placeholder="Número">
                             </div>
                             <input type="text" id="t_dir" class="form-control mb-1" placeholder="Dirección">
                             <input type="text" id="t_tel" class="form-control mb-1" placeholder="Teléfono">
@@ -111,8 +124,10 @@
                                 <select id="p_tipo" class="form-select" style="max-width: 90px;">
                                     <option value="CC">CC</option>
                                     <option value="NIT">NIT</option>
+                                    <option value="PPT">PPT</option>
+                                    <option value="PAS">PAS</option>
                                 </select>
-                                <input type="text" id="p_nit" class="form-control" placeholder="Número de Documento">
+                                <input type="text" id="p_nit" class="form-control" placeholder="Número">
                             </div>
                             <input type="text" id="p_dir" class="form-control mb-1" placeholder="Dirección">
                             <input type="text" id="p_tel" class="form-control mb-1" placeholder="Teléfono">
@@ -211,7 +226,7 @@
         if(!val('v_placa')) return alert("Falta Placa");
         const d = {
             v: { placa: val('v_placa').toUpperCase(), marca: val('v_marca'), color: val('v_color'), clase: val('v_clase'), modelo: val('v_modelo'), repo: val('v_repo'), linea: val('v_linea'), motor: val('v_motor'), chasis: val('v_chasis'), carro: val('v_carro'), trayler: val('v_trayler'), m_trailer: val('v_m_trailer'), soat: val('v_soat'), tecno: val('v_tecno'), gps_co: val('v_gps_co'), user: val('v_gps_user'), pass: val('v_gps_pass') },
-            c: { nom: val('c_nom'), cc: val('c_cc'), cel: val('c_cel'), lic: val('c_lic'), venc_lic: val('c_venc_lic'), eps: val('c_eps'), arl: val('c_arl'), pension: val('c_pension'), venc_planilla: val('c_venc_planilla'), mail: val('c_mail'), dir: val('c_dir') },
+            c: { tipo: val('c_tipo'), nom: val('c_nom'), cc: val('c_cc'), cel: val('c_cel'), lic: val('c_lic'), venc_lic: val('c_venc_lic'), eps: val('c_eps'), arl: val('c_arl'), pension: val('c_pension'), venc_planilla: val('c_venc_planilla'), mail: val('c_mail'), dir: val('c_dir') },
             t: { tipo: val('t_tipo'), nom: val('t_nom'), nit: val('t_nit'), tel: val('t_tel'), mail: val('t_mail'), dir: val('t_dir') },
             p: { tipo: val('p_tipo'), nom: val('p_nom'), nit: val('p_nit'), tel: val('p_tel'), mail: val('p_mail'), dir: val('p_dir') },
             r: { e1: val('r_e1'), t1: val('r_t1'), e2: val('r_e2'), t2: val('r_t2'), per: val('r_per'), tp: val('r_tp') }
@@ -257,54 +272,51 @@
         const data = await res.json();
         llenar(data);
         actualizarDashboard(data);
-        alert("Ficha cargada con éxito.");
+        alert("Ficha cargada.");
     }
 
     function generarPlantilla() {
-        let plantilla = Array.from({ length: 30 }, () => Array(10).fill(""));
-        plantilla[1] = ["", "PLACA", "", "", "MARCA", "", "", "COLOR"];
-        plantilla[2] = ["", val('v_placa'), "", "", val('v_marca'), "", "", val('v_color')];
-        plantilla[3] = ["", "CLASE", "", "", "MODELO", "", "", "REPOTENCIADO"];
-        plantilla[3][1] = val('v_clase'); plantilla[3][4] = val('v_modelo'); plantilla[3][7] = val('v_repo');
-        plantilla[4] = ["", "LÍNEA", "", "", "MOTOR", "", "", "CHASIS"];
-        plantilla[4][1] = val('v_linea'); plantilla[4][4] = val('v_motor'); plantilla[4][7] = val('v_chasis');
-        plantilla[5] = ["", "PROVEEDOR GPS", "", "", "USUARIO GPS", "", "", "CLAVE GPS"];
-        plantilla[5][1] = val('v_gps_co'); plantilla[5][4] = val('v_gps_user'); plantilla[5][7] = val('v_gps_pass');
-        plantilla[6] = ["", "PLACA TRAILER", "", "", "CARROCERÍA", "", "", "MOD. TRAILER"];
-        plantilla[6][1] = val('v_trayler'); plantilla[6][4] = val('v_carro'); plantilla[6][7] = val('v_m_trailer');
-        plantilla[7] = ["", "VENC. SOAT", "", "", "VENC. TECNO"];
-        plantilla[7][1] = val('v_soat'); plantilla[7][4] = val('v_tecno');
+        let pArr = Array.from({ length: 30 }, () => Array(10).fill(""));
+        pArr[1] = ["", "PLACA", "", "", "MARCA", "", "", "COLOR"];
+        pArr[2] = ["", val('v_placa'), "", "", val('v_marca'), "", "", val('v_color')];
+        pArr[3] = ["", "CLASE", "", "", "MODELO", "", "", "REPOTENCIADO"];
+        pArr[3][1] = val('v_clase'); pArr[3][4] = val('v_modelo'); pArr[3][7] = val('v_repo');
+        pArr[4] = ["", "LÍNEA", "", "", "MOTOR", "", "", "CHASIS"];
+        pArr[4][1] = val('v_linea'); pArr[4][4] = val('v_motor'); pArr[4][7] = val('v_chasis');
+        pArr[5] = ["", "PROVEEDOR GPS", "", "", "USUARIO GPS", "", "", "CLAVE GPS"];
+        pArr[5][1] = val('v_gps_co'); pArr[5][4] = val('v_gps_user'); pArr[5][7] = val('v_gps_pass');
+        pArr[6] = ["", "PLACA TRAILER", "", "", "CARROCERÍA", "", "", "MOD. TRAILER"];
+        pArr[6][1] = val('v_trayler'); pArr[6][4] = val('v_carro'); pArr[6][7] = val('v_m_trailer');
+        pArr[7] = ["", "VENC. SOAT", "", "", "VENC. TECNO"];
+        pArr[7][1] = val('v_soat'); pArr[7][4] = val('v_tecno');
 
-        plantilla[9] = ["", "NOMBRE COMPLETO", "", "", "CÉDULA", "", "", "LICENCIA"];
-        plantilla[10] = ["", val('c_nom'), "", "", val('c_cc'), "", "", val('c_lic')];
-        plantilla[11] = ["", "", "", "", "VENC. LICENCIA"];
-        plantilla[11][4] = val('c_venc_lic');
-        plantilla[12] = ["", "DIRECCIÓN", "", "", "CORREO"];
-        plantilla[12][1] = val('c_dir'); plantilla[12][4] = val('c_mail');
-        plantilla[13] = ["", "CELULAR", "", "", "ARL", "", "", "EPS"];
-        plantilla[13][1] = val('c_cel'); plantilla[13][4] = val('c_arl'); plantilla[13][7] = val('c_eps');
-        plantilla[14] = ["", "", "", "", "FONDO PENSIÓN"];
-        plantilla[14][4] = val('c_pension');
+        pArr[9] = ["", "NOMBRE COMPLETO", "", "", "TIPO", "IDENTIFICACIÓN", "", "LICENCIA"];
+        pArr[10] = ["", val('c_nom'), "", "", val('c_tipo'), val('c_cc'), "", val('c_lic')];
+        pArr[11] = ["", "", "", "", "VENC. LICENCIA"];
+        pArr[11][4] = val('c_venc_lic');
+        pArr[12] = ["", "DIRECCIÓN", "", "", "CORREO"];
+        pArr[12][1] = val('c_dir'); pArr[12][4] = val('c_mail');
+        pArr[13] = ["", "CELULAR", "", "", "ARL", "", "", "EPS"];
+        pArr[13][1] = val('c_cel'); pArr[13][4] = val('c_arl'); pArr[13][7] = val('c_eps');
+        pArr[14] = ["", "", "", "", "FONDO PENSIÓN"];
+        pArr[14][4] = val('c_pension');
 
-        plantilla[16] = ["", "NOMBRE TENEDOR", "", "", "ID TIPO", "NIT TENEDOR", "", "DIR TENEDOR"];
-        plantilla[16][1] = val('t_nom'); plantilla[16][4] = val('t_tipo'); plantilla[16][5] = val('t_nit'); plantilla[16][7] = val('t_dir');
-        plantilla[17][1] = val('t_tel');
-        plantilla[18][1] = val('t_mail');
+        pArr[16] = ["", "TENEDOR", "", "", "TIPO", "DOCUMENTO", "", "DIRECCIÓN"];
+        pArr[16][1] = val('t_nom'); pArr[16][4] = val('t_tipo'); pArr[16][5] = val('t_nit'); pArr[16][7] = val('t_dir');
+        pArr[17][1] = val('t_tel'); pArr[18][1] = val('t_mail');
 
-        plantilla[19] = ["", "NOMBRE PROPIETARIO", "", "", "ID TIPO", "NIT PROPIETARIO", "", "DIR PROPIETARIO"];
-        plantilla[19][1] = val('p_nom'); plantilla[19][4] = val('p_tipo'); plantilla[19][5] = val('p_nit'); plantilla[19][7] = val('p_dir');
-        plantilla[20][1] = val('p_tel');
-        plantilla[21][1] = val('p_mail');
+        pArr[19] = ["", "PROPIETARIO", "", "", "TIPO", "DOCUMENTO", "", "DIRECCIÓN"];
+        pArr[19][1] = val('p_nom'); pArr[19][4] = val('p_tipo'); pArr[19][5] = val('p_nit'); pArr[19][7] = val('p_dir');
+        pArr[20][1] = val('p_tel'); pArr[21][1] = val('p_mail');
 
-        plantilla[24] = ["", "EMPRESA 1", "", "", "EMPRESA 2", "", "", "PERSONAL"];
-        plantilla[24][1] = val('r_e1'); plantilla[24][4] = val('r_e2'); plantilla[24][7] = val('r_per');
-        plantilla[25][1] = val('r_t1'); plantilla[25][4] = val('r_t2'); plantilla[25][7] = val('r_tp');
+        pArr[24] = ["", "EMPRESA 1", "", "", "EMPRESA 2", "", "", "PERSONAL"];
+        pArr[24][1] = val('r_e1'); pArr[24][4] = val('r_e2'); pArr[24][7] = val('r_per');
+        pArr[25][1] = val('r_t1'); pArr[25][4] = val('r_t2'); pArr[25][7] = val('r_tp');
 
-        const ws = XLSX.utils.aoa_to_sheet(plantilla);
-        ws['!cols'] = [{wch:5}, {wch:25}, {wch:5}, {wch:5}, {wch:10}, {wch:20}, {wch:5}, {wch:25}];
+        const ws = XLSX.utils.aoa_to_sheet(pArr);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Ficha YEGO");
-        XLSX.writeFile(wb, val('v_placa') ? `Ficha_${val('v_placa')}.xlsx` : "Plantilla_YEGO.xlsx");
+        XLSX.writeFile(wb, val('v_placa') ? `Ficha_${val('v_placa')}.xlsx` : "Plantilla.xlsx");
     }
 </script>
 </body>
