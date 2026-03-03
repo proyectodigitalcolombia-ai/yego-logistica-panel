@@ -43,7 +43,7 @@
             <div class="col-md-2"><label>MODELO</label><input type="text" id="v_modelo" class="form-control"></div>
             <div class="col-md-3"><label>MOTOR</label><input type="text" id="v_motor" class="form-control"></div>
             <div class="col-md-3"><label>CHASIS</label><input type="text" id="v_chasis" class="form-control"></div>
-            <div class="col-md-3"><label>GPS PROVEEDOR</label><input type="text" id="v_gps_co" class="form-control border-primary"></div>
+            <div class="col-md-3"><label>GPS PROVEEDOR</label><input type="text" id="v_gps_co" class="form-control"></div>
             <div class="col-md-3"><label>USUARIO GPS</label><input type="text" id="v_gps_user" class="form-control"></div>
             <div class="col-md-3"><label>CLAVE GPS</label><input type="text" id="v_gps_pass" class="form-control"></div>
             <div class="col-md-3"><label>VENC. SOAT</label><input type="date" id="v_soat" class="form-control"></div>
@@ -56,14 +56,14 @@
         <div class="card-body row g-2">
             <div class="col-md-4"><label>NOMBRE CONDUCTOR</label><input type="text" id="c_nom" class="form-control"></div>
             <div class="col-md-2"><label>CÉDULA</label><input type="text" id="c_cc" class="form-control"></div>
-            <div class="col-md-2"><label>CELULAR</label><input type="text" id="c_cel" class="form-control border-primary"></div>
+            <div class="col-md-2"><label>CELULAR</label><input type="text" id="c_cel" class="form-control"></div>
             <div class="col-md-4"><label>DIRECCIÓN CONDUCTOR</label><input type="text" id="c_dir" class="form-control"></div>
             <div class="col-md-2"><label>LICENCIA</label><input type="text" id="c_lic" class="form-control"></div>
             <div class="col-md-2"><label>VENC. LICENCIA</label><input type="date" id="c_venc_lic" class="form-control"></div>
             <div class="col-md-2"><label>EPS</label><input type="text" id="c_eps" class="form-control"></div>
             <div class="col-md-2"><label>ARL</label><input type="text" id="c_arl" class="form-control"></div>
             <div class="col-md-2"><label>FONDO PENSIÓN</label><input type="text" id="c_pension" class="form-control"></div>
-            <div class="col-md-2"><label class="text-danger">VENC. PLANILLA</label><input type="date" id="c_venc_planilla" class="form-control"></div>
+            <div class="col-md-2"><label class="text-danger">VENC. PLANILLA</label><input type="date" id="c_venc_planilla" class="form-control border-danger"></div>
             <div class="col-md-12"><label>CORREO CONDUCTOR</label><input type="text" id="c_mail" class="form-control"></div>
         </div>
 
@@ -95,7 +95,7 @@
         </div>
     </form>
 
-    <div class="section-header mt-5">V. INVENTARIO DE REGISTROS</div>
+    <div class="section-header mt-5">V. REGISTROS GUARDADOS</div>
     <div class="card-body p-0 shadow-sm border">
         <table class="table table-hover mb-0">
             <thead class="table-dark">
@@ -131,7 +131,7 @@
     }
 
     async function eliminar(p) {
-        if(confirm(`¿Borrar placa ${p}?`)) {
+        if(confirm(`¿Deseas eliminar permanentemente la placa ${p}?`)) {
             await fetch(`/eliminar/${p}`, { method: 'DELETE' });
             listarTodo();
         }
@@ -157,19 +157,19 @@
     }
 
     function llenar(d) {
-        Object.keys(d.v).forEach(k => set('v_'+k, d.v[k]));
-        Object.keys(d.c).forEach(k => set('c_'+k, d.c[k]));
-        Object.keys(d.t).forEach(k => set('t_'+k, d.t[k]));
-        Object.keys(d.p).forEach(k => set('p_'+k, d.p[k]));
-        Object.keys(d.r).forEach(k => set('r_'+k, d.r[k]));
+        if(d.v) Object.keys(d.v).forEach(k => set('v_'+k, d.v[k]));
+        if(d.c) Object.keys(d.c).forEach(k => set('c_'+k, d.c[k]));
+        if(d.t) Object.keys(d.t).forEach(k => set('t_'+k, d.t[k]));
+        if(d.p) Object.keys(d.p).forEach(k => set('p_'+k, d.p[k]));
+        if(d.r) Object.keys(d.r).forEach(k => set('r_'+k, d.r[k]));
         
         setTimeout(() => {
-            alerta('v_soat', 'SOAT'); alerta('v_tecno', 'TECNO');
-            alerta('c_venc_lic', 'LICENCIA'); alerta('c_venc_planilla', 'PLANILLA');
+            alerta('v_soat'); alerta('v_tecno');
+            alerta('c_venc_lic'); alerta('c_venc_planilla');
         }, 500);
     }
 
-    function alerta(id, label) {
+    function alerta(id) {
         const el = document.getElementById(id); if(!el || !el.value) return;
         const diff = (new Date(el.value) - new Date()) / 86400000;
         el.classList.remove('vencido', 'por-vencer');
