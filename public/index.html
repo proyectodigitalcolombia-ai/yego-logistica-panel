@@ -6,25 +6,33 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <style>
         :root { --yego-blue: #002d5a; --yego-green: #27ae60; }
         body { background: #f4f6f9; font-family: 'Segoe UI', sans-serif; font-size: 0.82rem; }
+
         .section-header { 
             background: var(--yego-blue); color: white; padding: 10px 15px; margin-top: 25px; 
             font-weight: 800; font-size: 0.95rem; border-left: 8px solid var(--yego-green); 
             text-transform: uppercase; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
+
         .card-body { background: white; border: 1px solid #ddd; padding: 12px; border-top: none; }
         label { font-weight: bold; font-size: 0.7rem; color: #444; display: block; margin-top: 5px; }
+
         .vencido { background-color: #ffdce0 !important; border: 1px solid #dc3545 !important; }
         .por-vencer { background-color: #fff3cd !important; border: 1px solid #ffc107 !important; }
+
         .btn-yego { background-color: #ffc107; color: #000; font-weight: bold; border: none; }
         .box-sub { background: #f8f9fa; border: 1px solid #eee; padding: 10px; border-radius: 4px; height: 100%; }
+
         .alert-item { padding: 8px; border-radius: 5px; margin-bottom: 8px; border-left: 5px solid #ccc; background: #fff; font-size: 0.75rem; }
         .alert-danger { border-left-color: #dc3545; background: #fdf2f2; }
         .alert-warning { border-left-color: #ffc107; background: #fffbeb; }
         .alert-success { border-left-color: #28a745; background: #f4faf6; }
+
         @media print { .no-pdf { display: none !important; } }
+
     </style>
 </head>
 <body onload="listarTodo()">
@@ -176,10 +184,10 @@
         const tabla = document.getElementById('listaTabla');
         try {
             const res = await fetch('/listar');
-            if (!res.ok) throw new Error("No se pudo conectar al servidor");
+            if (!res.ok) throw new Error("Error");
             const db = await res.json();
             if (!db || db.length === 0) {
-                tabla.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-muted">No hay registros guardados en la base de datos.</td></tr>';
+                tabla.innerHTML = '<tr><td colspan="4" class="text-center p-4">Sin datos.</td></tr>';
                 return;
             }
             tabla.innerHTML = db.map(i => `
@@ -196,60 +204,58 @@
                         </div>
                     </td>
                 </tr>`).join('');
-        } catch(e) { console.error(e); tabla.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-danger">Error al cargar datos.</td></tr>`; }
+        } catch(e) { console.error(e); }
     }
 
     async function descargarDesdeDB(placa, tipo) {
         try {
             const res = await fetch(`/consultar/${placa}`);
-            if(!res.ok) return alert("Error al conectar con la base de datos.");
             const data = await res.json();
             llenar(data);
-            
+
             if(tipo === 'pdf') {
-                setTimeout(() => {
-                    const elemento = document.getElementById('formYego');
-                    const opt = {
-                        margin: 10, filename: `Ficha_YEGO_${placa}.pdf`,
-                        image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { scale: 2, useCORS: true },
-                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                    };
-                    html2pdf().set(opt).from(elemento).save();
-                }, 500); 
+                const opt = { 
+                    margin: 10, filename: `Ficha_${placa}.pdf`, 
+                    html2canvas: { scale: 2 }, 
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+                };
+
+                const clon = document.getElementById('formYego').cloneNode(true);
+                const originalInputs = document.getElementById('formYego').querySelectorAll('input, select');
+                const clonInputs = clon.querySelectorAll('input, select');
+
+                originalInputs.forEach((inp, i) => { clonInputs[i].value = inp.value; });
+
+                const box = document.createElement('div');
+                box.innerHTML = `<h3 style="color:#002d5a;text-align:center">FICHA TÉCNICA - ${placa}</h3><hr>`;
+                box.appendChild(clon);
+
+                html2pdf().set(opt).from(box).save();
             } else {
-                let pArr = [
-                    ["SISTEMA YEGO LOGÍSTICA - FICHA TÉCNICA"],
-                    ["DATOS DEL VEHÍCULO"],
-                    ["PLACA", data.v.placa, "MARCA", data.v.marca, "MODELO", data.v.modelo],
-                    ["SOAT", data.v.soat, "TECNO", data.v.tecno],
-                    [""], ["DATOS DEL CONDUCTOR"],
-                    ["NOMBRE", data.c.nom, "ID", data.c.cc, "CEL", data.c.cel]
-                ];
-                const ws = XLSX.utils.aoa_to_sheet(pArr);
-                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet([data.v, data.c]);
+                const wb = XLSX.utils.book_new(); 
                 XLSX.utils.book_append_sheet(wb, ws, "Ficha");
-                XLSX.writeFile(wb, `Ficha_YEGO_${placa}.xlsx`);
+                XLSX.writeFile(wb, `Ficha_${placa}.xlsx`);
             }
-        } catch(e) { alert("Error en la descarga."); }
+        } catch(e) { alert("Error al descargar"); }
     }
 
     async function eliminar(p) {
-        const pass = prompt(`Ingresa la clave para eliminar ${p}:`);
+        const pass = prompt(`Clave para eliminar ${p}:`);
         if(!pass) return;
         const res = await fetch(`/eliminar/${p}`, { method: 'DELETE', headers: { 'admin-password': pass } });
-        if(res.ok) { alert("Eliminado."); listarTodo(); } else { alert("Error de clave."); }
+        if(res.ok) { alert("Eliminado."); listarTodo(); }
     }
 
     async function consultar() {
         const query = val('q');
-        if(!query) return alert("Ingresa un dato para buscar.");
+        if(!query) return;
         const res = await fetch(`/consultar/${query}`);
         if(res.ok) {
             const data = await res.json();
             llenar(data);
             actualizarDashboard(data);
-        } else alert("No encontrado.");
+        }
     }
 
     function actualizarDashboard(d) {
@@ -261,8 +267,7 @@
             if(!f.f) return;
             const diff = Math.ceil((new Date(f.f) - new Date()) / 86400000);
             let c = (diff < 0) ? 'alert-danger' : (diff <= 10) ? 'alert-warning' : 'alert-success';
-            let i = (diff < 0) ? '❌' : (diff <= 10) ? '⚠️' : '✅';
-            panel.innerHTML += `<div class="alert-item ${c}"><strong>${f.n}:</strong> ${i}<br><small>${f.f} (${diff} d)</small></div>`;
+            panel.innerHTML += `<div class="alert-item ${c}"><strong>${f.n}:</strong><br><small>${f.f} (${diff} d)</small></div>`;
         });
     }
 
@@ -275,10 +280,8 @@
             p: { tipo: val('p_tipo'), nom: val('p_nom'), nit: val('p_nit'), tel: val('p_tel'), mail: val('p_mail'), dir: val('p_dir') },
             r: { e1: val('r_e1'), t1: val('r_t1'), e2: val('r_e2'), t2: val('r_t2'), per: val('r_per'), tp: val('r_tp') }
         };
-        const res = await fetch('/guardar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(d) });
-        const resp = await res.json();
-        alert(resp.mensaje);
-        listarTodo();
+        await fetch('/guardar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(d) });
+        alert("Guardado."); listarTodo();
     }
 
     function llenar(d) {
@@ -297,21 +300,12 @@
         if(diff < 0) el.classList.add('vencido'); else if(diff <= 10) el.classList.add('por-vencer');
     }
 
-    function limpiarForm() { 
-        document.getElementById("formYego").reset(); 
-        document.querySelectorAll('.form-control').forEach(e => e.classList.remove('vencido', 'por-vencer'));
-    }
-
+    function limpiarForm() { document.getElementById("formYego").reset(); document.querySelectorAll('.form-control').forEach(e => e.classList.remove('vencido', 'por-vencer')); }
     function cargar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
-    
     async function importar() {
-        if(!document.getElementById('f').files[0]) return;
-        const formData = new FormData();
-        formData.append('archivo', document.getElementById('f').files[0]);
+        const formData = new FormData(); formData.append('archivo', document.getElementById('f').files[0]);
         const res = await fetch('/importar', { method: 'POST', body: formData });
-        const data = await res.json();
-        llenar(data);
-        alert("Importación finalizada.");
+        const data = await res.json(); llenar(data); alert("Importado.");
     }
 </script>
 </body>
