@@ -162,7 +162,7 @@
                 </tr>
             </thead>
             <tbody id="listaTabla">
-                <tr><td colspan="4" class="text-center p-4">Cargando registros...</td></tr>
+                <tr><td colspan="4" class="text-center p-4">Cargando registros de la base de datos...</td></tr>
             </tbody>
         </table>
     </div>
@@ -172,21 +172,26 @@
     const val = (id) => document.getElementById(id).value;
     const set = (id, v) => { if(document.getElementById(id)) document.getElementById(id).value = v || ''; };
 
+    // --- REVISIÓN DE LISTADO ---
     async function listarTodo() {
         const tabla = document.getElementById('listaTabla');
         try {
             const res = await fetch('/listar');
-            if (!res.ok) throw new Error("Error");
+            if (!res.ok) throw new Error("No se pudo conectar al servidor");
             const db = await res.json();
+            
             if (!db || db.length === 0) {
-                tabla.innerHTML = '<tr><td colspan="4" class="text-center p-4">Sin registros.</td></tr>';
+                tabla.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-muted">No hay registros guardados en la base de datos.</td></tr>';
                 return;
             }
+
             tabla.innerHTML = db.map(i => `
                 <tr>
                     <td class="fw-bold ps-3 align-middle">${i.v.placa}</td>
                     <td class="align-middle">${i.c.nom || 'S/N'}</td>
-                    <td class="align-middle small">SOAT: ${i.v.soat || '-'}<br>TEC: ${i.v.tecno || '-'}</td>
+                    <td class="align-middle small">
+                        SOAT: ${i.v.soat || '-'}<br>TEC: ${i.v.tecno || '-'}
+                    </td>
                     <td class="text-center">
                         <div class="btn-group btn-group-sm">
                             <button class="btn btn-primary fw-bold" onclick="cargar('${i.v.placa}')">VER</button>
@@ -197,78 +202,76 @@
                     </td>
                 </tr>
             `).join('');
-        } catch(e) { tabla.innerHTML = `<tr><td colspan="4">Error al cargar.</td></tr>`; }
+        } catch(e) { 
+            console.error(e);
+            tabla.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-danger">Error al cargar datos: ${e.message}</td></tr>`;
+        }
     }
 
     async function descargarDesdeDB(placa, tipo) {
         try {
             const res = await fetch(`/consultar/${placa}`);
-            if(!res.ok) return alert("Error.");
+            if(!res.ok) return alert("Error al conectar con la base de datos.");
             const data = await res.json();
             llenar(data);
             
             if(tipo === 'pdf') {
-                // Clonamos el formulario para que el original NO se altere ni se oculte
-                const original = document.getElementById('formYego');
-                const clon = original.cloneNode(true);
-                
-                // Aseguramos que los valores de los inputs se copien (cloneNode no copia valores dinámicos)
-                const inputsOriginales = original.querySelectorAll('input, select');
-                const inputsClonados = clon.querySelectorAll('input, select');
-                inputsOriginales.forEach((inp, i) => { inputsClonados[i].value = inp.value; });
-
-                const contenedorTemporal = document.createElement('div');
-                contenedorTemporal.style.padding = "20px";
-                contenedorTemporal.style.background = "white";
-                contenedorTemporal.innerHTML = `<h3 style="color:#002d5a;text-align:center;">YEGO LOGÍSTICA - FICHA TÉCNICA</h3><hr>`;
-                contenedorTemporal.appendChild(clon);
-
-                const opciones = {
-                    margin: 10, filename: `FICHA_YEGO_${placa}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2 },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-                
-                html2pdf().set(opciones).from(contenedorTemporal).save();
+                setTimeout(() => {
+                    const elemento = document.getElementById('area-pdf');
+                    const opciones = {
+                        margin: 10, filename: `Ficha_YEGO_${placa}.pdf`,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    };
+                    html2pdf().from(elemento).set(opciones).save();
+                }, 600); 
             } else {
-                let pArr = [["SISTEMA YEGO LOGÍSTICA"],["VEHÍCULO", data.v.placa, data.v.marca],["CONDUCTOR", data.c.nom, data.c.cc]];
+                let pArr = [
+                    ["SISTEMA YEGO LOGÍSTICA - FICHA TÉCNICA"],
+                    ["DATOS DEL VEHÍCULO"],
+                    ["PLACA", data.v.placa, "MARCA", data.v.marca, "MODELO", data.v.modelo],
+                    ["SOAT", data.v.soat, "TECNO", data.v.tecno],
+                    [""], ["DATOS DEL CONDUCTOR"],
+                    ["NOMBRE", data.c.nom, "ID", data.c.cc, "CEL", data.c.cel]
+                ];
                 const ws = XLSX.utils.aoa_to_sheet(pArr);
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Ficha");
-                XLSX.writeFile(wb, `Ficha_${placa}.xlsx`);
+                XLSX.writeFile(wb, `Ficha_YEGO_${placa}.xlsx`);
             }
-        } catch(e) { alert("Error."); }
+        } catch(e) { alert("Error en la descarga."); }
     }
 
     async function eliminar(p) {
-        const pass = prompt(`Clave para ${p}:`);
+        const pass = prompt(`Ingresa la clave para eliminar ${p}:`);
         if(!pass) return;
         const res = await fetch(`/eliminar/${p}`, { method: 'DELETE', headers: { 'admin-password': pass } });
-        if(res.ok) { alert("Eliminado."); listarTodo(); }
+        if(res.ok) { alert("Eliminado."); listarTodo(); } else { alert("Error de clave."); }
     }
 
     async function consultar() {
         const query = val('q');
-        if(!query) return;
+        if(!query) return alert("Ingresa un dato para buscar.");
         const res = await fetch(`/consultar/${query}`);
         if(res.ok) {
             const data = await res.json();
             llenar(data);
             actualizarDashboard(data);
-        }
+        } else alert("No encontrado.");
     }
 
     function actualizarDashboard(d) {
         document.getElementById('placa-activa').innerText = `Placa: ${d.v.placa}`;
         const panel = document.getElementById('panel-vencimientos');
-        panel.innerHTML = '<h6 class="fw-bold">Estado</h6>';
-        const fechas = [{n:'SOAT',f:d.v.soat},{n:'TECNO',f:d.v.tecno}];
+        panel.innerHTML = '<h6 class="fw-bold mb-3 border-bottom pb-1">Estado de Documentos</h6>';
+        const fechas = [{n:'SOAT',f:d.v.soat},{n:'TECNO',f:d.v.tecno},{n:'LICENCIA',f:d.c.venc_lic},{n:'PLANILLA',f:d.c.venc_planilla}];
         fechas.forEach(f => {
             if(!f.f) return;
             const diff = Math.ceil((new Date(f.f) - new Date()) / 86400000);
-            let c = (diff < 0) ? 'alert-danger' : 'alert-success';
-            panel.innerHTML += `<div class="alert-item ${c}"><strong>${f.n}:</strong> ${f.f}</div>`;
+            let c = (diff < 0) ? 'alert-danger' : (diff <= 10) ? 'alert-warning' : 'alert-success';
+            let i = (diff < 0) ? '❌' : (diff <= 10) ? '⚠️' : '✅';
+            panel.innerHTML += `<div class="alert-item ${c}"><strong>${f.n}:</strong> ${i}<br><small>${f.f} (${diff} d)</small></div>`;
         });
     }
 
@@ -282,7 +285,8 @@
             r: { e1: val('r_e1'), t1: val('r_t1'), e2: val('r_e2'), t2: val('r_t2'), per: val('r_per'), tp: val('r_tp') }
         };
         const res = await fetch('/guardar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(d) });
-        alert("Guardado.");
+        const resp = await res.json();
+        alert(resp.mensaje);
         listarTodo();
     }
 
@@ -302,7 +306,10 @@
         if(diff < 0) el.classList.add('vencido'); else if(diff <= 10) el.classList.add('por-vencer');
     }
 
-    function limpiarForm() { document.getElementById("formYego").reset(); }
+    function limpiarForm() { 
+        document.getElementById("formYego").reset(); 
+        document.querySelectorAll('.form-control').forEach(e => e.classList.remove('vencido', 'por-vencer'));
+    }
 
     function cargar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
     
@@ -313,7 +320,7 @@
         const res = await fetch('/importar', { method: 'POST', body: formData });
         const data = await res.json();
         llenar(data);
-        alert("Importado.");
+        alert("Importación finalizada.");
     }
 </script>
 </body>
