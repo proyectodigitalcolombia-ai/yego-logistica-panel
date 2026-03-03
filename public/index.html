@@ -31,9 +31,8 @@
 
 <nav class="navbar bg-dark text-white p-2 no-pdf">
     <div class="container d-flex justify-content-between">
-        <span>YEGO LOGÍSTICA - SEGURIDAD</span>
+        <span>YEGO LOGÍSTICA - SEGURIDAD OPERATIVA</span>
         <div>
-            <button id="btnPDF" class="btn btn-danger btn-sm fw-bold me-2" onclick="generarPDF()">📥 DESCARGAR PDF</button>
             <button class="btn btn-warning btn-sm fw-bold me-2" onclick="generarPlantilla()">📥 EXCEL</button>
             <button class="btn btn-outline-light btn-sm me-2" onclick="limpiarForm()">🆕 NUEVO</button>
             <button class="btn btn-success btn-sm fw-bold" onclick="document.getElementById('f').click()">📤 IMPORTAR EXCEL</button>
@@ -104,13 +103,13 @@
                             <input type="text" id="t_nom" class="form-control mb-1" placeholder="Nombre/Razón Social">
                             <div class="input-group mb-1">
                                 <select id="t_tipo" class="form-select" style="max-width: 90px;">
-                                    <option value="NIT">NIT</option><option value="CC">CC</option><option value="PPT">PPT</option><option value="PAS">PAS</option>
+                                    <option value="NIT">NIT</option><option value="CC">CC</option><option value="PAS">PAS</option>
                                 </select>
                                 <input type="text" id="t_nit" class="form-control" placeholder="Número">
                             </div>
                             <input type="text" id="t_dir" class="form-control mb-1" placeholder="Dirección">
                             <input type="text" id="t_tel" class="form-control mb-1" placeholder="Teléfono">
-                            <input type="text" id="t_mail" class="form-control" placeholder="Correo">
+                            <input type="text" id="t_mail" class="form-control" placeholder="Correo Electrónico">
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -119,22 +118,22 @@
                             <input type="text" id="p_nom" class="form-control mb-1" placeholder="Nombre/Razón Social">
                             <div class="input-group mb-1">
                                 <select id="p_tipo" class="form-select" style="max-width: 90px;">
-                                    <option value="CC">CC</option><option value="NIT">NIT</option><option value="PPT">PPT</option><option value="PAS">PAS</option>
+                                    <option value="CC">CC</option><option value="NIT">NIT</option><option value="PAS">PAS</option>
                                 </select>
                                 <input type="text" id="p_nit" class="form-control" placeholder="Número">
                             </div>
                             <input type="text" id="p_dir" class="form-control mb-1" placeholder="Dirección">
                             <input type="text" id="p_tel" class="form-control mb-1" placeholder="Teléfono">
-                            <input type="text" id="p_mail" class="form-control" placeholder="Correo">
+                            <input type="text" id="p_mail" class="form-control" placeholder="Correo Electrónico">
                         </div>
                     </div>
                 </div>
 
                 <div class="section-header">IV. REFERENCIAS</div>
                 <div class="card-body row g-2">
-                    <div class="col-md-4"><label>EMPRESA 1</label><input type="text" id="r_e1" class="form-control mb-1"><input type="text" id="r_t1" class="form-control"></div>
-                    <div class="col-md-4"><label>EMPRESA 2</label><input type="text" id="r_e2" class="form-control mb-1"><input type="text" id="r_t2" class="form-control"></div>
-                    <div class="col-md-4"><label>PERSONAL</label><input type="text" id="r_per" class="form-control mb-1"><input type="text" id="r_tp" class="form-control"></div>
+                    <div class="col-md-4"><label>EMPRESA 1</label><input type="text" id="r_e1" class="form-control mb-1" placeholder="Nombre"><input type="text" id="r_t1" class="form-control" placeholder="Teléfono"></div>
+                    <div class="col-md-4"><label>EMPRESA 2</label><input type="text" id="r_e2" class="form-control mb-1" placeholder="Nombre"><input type="text" id="r_t2" class="form-control" placeholder="Teléfono"></div>
+                    <div class="col-md-4"><label>PERSONAL</label><input type="text" id="r_per" class="form-control mb-1" placeholder="Nombre"><input type="text" id="r_tp" class="form-control" placeholder="Teléfono"></div>
                 </div>
             </form>
         </div>
@@ -146,7 +145,7 @@
                     <small id="placa-activa">Placa: -</small>
                 </div>
                 <div id="panel-vencimientos" class="p-3 border rounded bg-white shadow-sm" style="min-height: 200px;">
-                    <p class="text-muted text-center mt-4">Consulta una placa...</p>
+                    <p class="text-muted text-center mt-4">Consulta una placa para ver sus alertas...</p>
                 </div>
             </div>
         </div>
@@ -179,19 +178,42 @@
                     <td>${i.v.soat || '-'}</td>
                     <td>${i.v.tecno || '-'}</td>
                     <td>
-                        <button class="btn btn-primary btn-sm" onclick="cargar('${i.v.placa}')">VER</button>
-                        <button class="btn btn-danger btn-sm" onclick="eliminar('${i.v.placa}')">🗑️</button>
+                        <button class="btn btn-primary btn-sm fw-bold" onclick="cargar('${i.v.placa}')">VER</button>
+                        <button class="btn btn-danger btn-sm fw-bold" title="Descargar PDF" onclick="descargarDesdeLista('${i.v.placa}')">📥 PDF</button>
+                        <button class="btn btn-secondary btn-sm" title="Borrar Registro" onclick="eliminar('${i.v.placa}')">🗑️</button>
                     </td>
                 </tr>
             `).join('');
-        } catch(e) {}
+        } catch(e) { console.error("Error al listar:", e); }
+    }
+
+    async function descargarDesdeLista(placa) {
+        const res = await fetch(`/consultar/${placa}`);
+        if(!res.ok) return alert("Error al obtener datos");
+        const data = await res.json();
+        
+        // Cargamos los datos en el formulario antes de "fotografiarlo"
+        llenar(data);
+        
+        const elemento = document.getElementById('area-pdf');
+        const opciones = {
+            margin: 10,
+            filename: `Ficha_YEGO_${placa}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        
+        alert("Generando PDF de la placa " + placa + ". Espere un momento...");
+        html2pdf().set(opciones).from(elemento).save();
     }
 
     async function eliminar(p) {
-        const pass = prompt(`Para eliminar la placa ${p}, ingresa la clave de administrador:`);
+        const pass = prompt(`Para eliminar el vehículo ${p}, ingrese la clave de administrador:`);
         if(!pass) return;
         const res = await fetch(`/eliminar/${p}`, { method: 'DELETE', headers: { 'admin-password': pass } });
-        if(res.ok) { alert("Eliminado."); listarTodo(); limpiarForm(); } else { alert("Error al eliminar."); }
+        if(res.ok) { alert("Registro eliminado exitosamente."); listarTodo(); limpiarForm(); } 
+        else { alert("Error al eliminar o contraseña incorrecta."); }
     }
 
     async function consultar() {
@@ -200,26 +222,25 @@
             const data = await res.json();
             llenar(data);
             actualizarDashboard(data);
-        } else alert("No encontrado");
+        } else alert("Vehículo no encontrado en la base de datos.");
     }
 
     function actualizarDashboard(d) {
-        document.getElementById('placa-activa').innerText = `Placa: ${d.v.placa}`;
+        document.getElementById('placa-activa').innerText = `Placa Seleccionada: ${d.v.placa}`;
         const panel = document.getElementById('panel-vencimientos');
-        panel.innerHTML = '<h6 class="fw-bold mb-3 border-bottom pb-1">Estado de Vencimientos</h6>';
-        const fechas = [{n:'SOAT',f:d.v.soat},{n:'TECNO',f:d.v.tecno},{n:'LICENCIA',f:d.c.venc_lic},{n:'PLANILLA',f:d.c.venc_planilla}];
+        panel.innerHTML = '<h6 class="fw-bold mb-3 border-bottom pb-1">Estado de Documentos</h6>';
+        const fechas = [{n:'SOAT',f:d.v.soat},{n:'TECNOMECÁNICA',f:d.v.tecno},{n:'LICENCIA',f:d.c.venc_lic},{n:'PLANILLA',f:d.c.venc_planilla}];
         fechas.forEach(f => {
             if(!f.f) return;
             const diff = Math.ceil((new Date(f.f) - new Date()) / 86400000);
-            let c = 'alert-success', i = '✅', m = `Faltan ${diff} días`;
-            if(diff < 0) { c = 'alert-danger'; i = '❌'; m = 'VENCIDO'; }
-            else if(diff <= 10) { c = 'alert-warning'; i = '⚠️'; if(diff <= 6) m = `¡URGENTE! ${diff} días`; }
-            panel.innerHTML += `<div class="alert-item ${c}"><strong>${f.n}:</strong> ${i} <br> <small>${m} (${f.f})</small></div>`;
+            let c = (diff < 0) ? 'alert-danger' : (diff <= 10) ? 'alert-warning' : 'alert-success';
+            let i = (diff < 0) ? '❌ VENCIDO' : (diff <= 10) ? '⚠️ PRÓXIMO' : '✅ VIGENTE';
+            panel.innerHTML += `<div class="alert-item ${c}"><strong>${f.n}:</strong> ${i}<br><small>Fecha: ${f.f} (${diff} días)</small></div>`;
         });
     }
 
     async function guardar() {
-        if(!val('v_placa')) return alert("Falta Placa");
+        if(!val('v_placa')) return alert("El campo PLACA es obligatorio para guardar.");
         const d = {
             v: { placa: val('v_placa').toUpperCase(), marca: val('v_marca'), color: val('v_color'), clase: val('v_clase'), modelo: val('v_modelo'), repo: val('v_repo'), linea: val('v_linea'), motor: val('v_motor'), chasis: val('v_chasis'), carro: val('v_carro'), trayler: val('v_trayler'), m_trailer: val('v_m_trailer'), soat: val('v_soat'), tecno: val('v_tecno'), gps_co: val('v_gps_co'), user: val('v_gps_user'), pass: val('v_gps_pass') },
             c: { tipo: val('c_tipo'), nom: val('c_nom'), cc: val('c_cc'), cel: val('c_cel'), lic: val('c_lic'), venc_lic: val('c_venc_lic'), eps: val('c_eps'), arl: val('c_arl'), pension: val('c_pension'), venc_planilla: val('c_venc_planilla'), mail: val('c_mail'), dir: val('c_dir') },
@@ -234,16 +255,12 @@
     }
 
     function llenar(d) {
-        if(d.v) Object.keys(d.v).forEach(k => {
-            if(k === 'user') set('v_gps_user', d.v[k]);
-            else if(k === 'pass') set('v_gps_pass', d.v[k]);
-            else set('v_'+k, d.v[k]);
-        });
+        if(d.v) Object.keys(d.v).forEach(k => set(k === 'user' ? 'v_gps_user' : k === 'pass' ? 'v_gps_pass' : 'v_'+k, d.v[k]));
         if(d.c) Object.keys(d.c).forEach(k => set('c_'+k, d.c[k]));
         if(d.t) Object.keys(d.t).forEach(k => set('t_'+k, d.t[k]));
         if(d.p) Object.keys(d.p).forEach(k => set('p_'+k, d.p[k]));
         if(d.r) Object.keys(d.r).forEach(k => set('r_'+k, d.r[k]));
-        setTimeout(() => { ['v_soat', 'v_tecno', 'c_venc_lic', 'c_venc_planilla'].forEach(alerta); }, 500);
+        ['v_soat', 'v_tecno', 'c_venc_lic', 'c_venc_planilla'].forEach(alerta);
     }
 
     function alerta(id) {
@@ -256,10 +273,19 @@
     function limpiarForm() { 
         document.getElementById("formYego").reset(); 
         document.querySelectorAll('.form-control').forEach(e => e.classList.remove('vencido', 'por-vencer'));
+        document.getElementById('panel-vencimientos').innerHTML = '<p class="text-muted text-center mt-4">Consulta una placa...</p>';
     }
 
     function cargar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
     
+    function generarPlantilla() {
+        const d = [{ PLACA: val('v_placa'), CONDUCTOR: val('c_nom'), CEL: val('c_cel'), SOAT: val('v_soat'), TECNO: val('v_tecno') }];
+        const ws = XLSX.utils.json_to_sheet(d);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Ficha");
+        XLSX.writeFile(wb, `Ficha_YEGO_${val('v_placa') || 'General'}.xlsx`);
+    }
+
     async function importar() {
         if(!document.getElementById('f').files[0]) return;
         const formData = new FormData();
@@ -267,54 +293,7 @@
         const res = await fetch('/importar', { method: 'POST', body: formData });
         const data = await res.json();
         llenar(data);
-        alert("Ficha cargada.");
-    }
-
-    // --- FUNCIÓN PDF CORREGIDA Y REFORZADA ---
-    async function generarPDF() {
-        const btn = document.getElementById('btnPDF');
-        const elemento = document.getElementById('area-pdf');
-        const placa = document.getElementById('v_placa').value || "FICHA";
-        
-        btn.innerText = "⏳ GENERANDO...";
-        btn.disabled = true;
-
-        const opciones = {
-            margin:       10,
-            filename:     `Ficha_YEGO_${placa}.pdf`,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { 
-                scale: 2, 
-                useCORS: true,
-                logging: false,
-                letterRendering: true
-            },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
-        try {
-            // Usamos el método asíncrono para asegurar que el navegador dispare la descarga
-            await html2pdf().from(elemento).set(opciones).save();
-        } catch (error) {
-            console.error("Error al generar PDF:", error);
-            alert("No se pudo descargar el PDF. Intente de nuevo.");
-        } finally {
-            btn.innerText = "📥 DESCARGAR PDF";
-            btn.disabled = false;
-        }
-    }
-
-    function generarPlantilla() {
-        let pArr = Array.from({ length: 40 }, () => Array(15).fill(""));
-        pArr[0][0] = "SISTEMA YEGO LOGÍSTICA - REGISTRO TÉCNICO";
-        pArr[2] = ["PLACA", val('v_placa'), "MARCA", val('v_marca'), "MODELO", val('v_modelo')];
-        pArr[3] = ["COLOR", val('v_color'), "CLASE", val('v_clase'), "LÍNEA", val('v_linea')];
-        pArr[5] = ["CONDUCTOR", val('c_nom'), "ID", val('c_cc'), "CELULAR", val('c_cel')];
-        pArr[6] = ["VENC. SOAT", val('v_soat'), "VENC. TECNO", val('v_tecno'), "VENC. LIC", val('c_venc_lic')];
-        const ws = XLSX.utils.aoa_to_sheet(pArr);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Datos");
-        XLSX.writeFile(wb, `Ficha_${val('v_placa') || 'General'}.xlsx`);
+        alert("Ficha importada correctamente.");
     }
 </script>
 </body>
