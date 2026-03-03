@@ -2,149 +2,151 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>YEGO LOGÍSTICA - CONTROL TOTAL</title>
+    <title>YEGO LOGÍSTICA - PANEL</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        :root { --yego-blue: #1c252e; --yego-green: #27ae60; --yego-accent: #0d6efd; }
-        body { background: #f4f6f9; font-size: 0.85rem; font-family: sans-serif; }
-        .navbar { background-color: var(--yego-blue) !important; border-bottom: 3px solid var(--yego-green); }
-        .section-header { background: #002d5a; color: white; padding: 6px 12px; font-weight: bold; border-left: 4px solid #27ae60; margin-top: 10px; }
-        .card-body { background: white; border: 1px solid #dee2e6; padding: 12px; }
-        .form-label { font-weight: bold; margin-bottom: 2px; font-size: 0.75rem; color: #444; }
+        :root { --yego-blue: #002d5a; --yego-green: #27ae60; }
+        body { background: #f4f6f9; font-size: 0.85rem; }
+        .section-header { background: var(--yego-blue); color: white; padding: 8px 15px; margin-top: 15px; font-weight: bold; border-left: 5px solid var(--yego-green); }
+        .card-body { background: white; border: 1px solid #ddd; padding: 15px; }
+        .vencido { background-color: #ffdce0 !important; border: 2px solid #dc3545 !important; }
+        .por-vencer { background-color: #fff3cd !important; border: 2px solid #ffc107 !important; }
         .table-danger { background-color: #f8d7da !important; }
         .table-warning { background-color: #fff3cd !important; }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-dark p-2 shadow">
+<nav class="navbar navbar-dark bg-dark p-2">
     <div class="container-fluid">
-        <span class="navbar-brand fw-bold">YEGO LOGÍSTICA - CONTROL TOTAL</span>
+        <span class="navbar-brand">YEGO LOGÍSTICA</span>
         <div>
-            <button class="btn btn-outline-info btn-sm me-2" onclick="cambiarClave()">🔐 CLAVE</button>
-            <button class="btn btn-success btn-sm" onclick="location.reload()">🆕 NUEVO</button>
+            <button class="btn btn-outline-info btn-sm me-2" onclick="cambiarClaveAdmin()">🔐 CLAVE</button>
+            <a href="/descargar-plantilla" class="btn btn-outline-light btn-sm me-2">📊 PLANTILLA</a>
+            <button class="btn btn-success btn-sm" onclick="limpiarForm()">🆕 NUEVO</button>
         </div>
     </div>
 </nav>
 
 <div class="container-fluid mt-3">
-    <div class="row g-2 mb-3 bg-white p-3 shadow-sm border rounded">
-        <div class="col-md-7"><input type="text" id="q" class="form-control" placeholder="Buscar Placa o Cédula..."></div>
-        <div class="col-md-2"><button class="btn btn-primary w-100 fw-bold" onclick="consultar()">BUSCAR</button></div>
-        <div class="col-md-3"><button class="btn btn-warning w-100 fw-bold border-dark" onclick="guardar()">GUARDAR / ACTUALIZAR</button></div>
+    <div class="row g-2 mb-3 bg-white p-3 shadow-sm border">
+        <div class="col-md-8"><input type="text" id="q" class="form-control" placeholder="Placa o Cédula..."></div>
+        <div class="col-md-2"><button class="btn btn-primary w-100" onclick="consultar()">BUSCAR</button></div>
+        <div class="col-md-2"><button class="btn btn-warning w-100 fw-bold" onclick="guardar()">GUARDAR</button></div>
     </div>
 
     <form id="formYego">
-        <div class="row g-3">
-            <div class="col-md-4">
-                <div class="section-header text-uppercase">I. Vehículo y GPS</div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="section-header">I. VEHÍCULO</div>
                 <div class="card-body row g-2">
-                    <div class="col-6"><label class="form-label">PLACA</label><input type="text" id="v_placa" class="form-control form-control-sm"></div>
-                    <div class="col-6"><label class="form-label">VENC. SOAT</label><input type="date" id="v_soat" class="form-control form-control-sm"></div>
-                    <div class="col-6"><label class="form-label">VENC. TECNO</label><input type="date" id="v_tecno" class="form-control form-control-sm"></div>
-                    <div class="col-6"><label class="form-label">PROVEEDOR GPS</label><input type="text" id="v_gps_prov" class="form-control form-control-sm"></div>
-                    <div class="col-12"><label class="form-label">USUARIO GPS</label><input type="text" id="v_gps_user" class="form-control form-control-sm"></div>
+                    <div class="col-6"><label>PLACA</label><input type="text" id="v_placa" class="form-control"></div>
+                    <div class="col-6"><label>MARCA</label><input type="text" id="v_marca" class="form-control"></div>
+                    <div class="col-4"><label>MODELO</label><input type="text" id="v_modelo" class="form-control"></div>
+                    <div class="col-4"><label>VENC. SOAT</label><input type="date" id="v_soat" class="form-control"></div>
+                    <div class="col-4"><label>VENC. TECNO</label><input type="date" id="v_tecno" class="form-control"></div>
                 </div>
             </div>
-
-            <div class="col-md-4">
-                <div class="section-header text-uppercase">II. Conductor / Seguridad</div>
+            <div class="col-md-6">
+                <div class="section-header">II. CONDUCTOR / SEG. SOCIAL</div>
                 <div class="card-body row g-2">
-                    <div class="col-12"><label class="form-label">NOMBRE</label><input type="text" id="c_nom" class="form-control form-control-sm"></div>
-                    <div class="col-6"><label class="form-label">CÉDULA</label><input type="text" id="c_cc" class="form-control form-control-sm"></div>
-                    <div class="col-6"><label class="form-label">VENC. LICENCIA</label><input type="date" id="c_venc_lic" class="form-control form-control-sm"></div>
-                    <div class="col-12"><label class="form-label text-danger">VENC. PLANILLA</label><input type="date" id="c_venc_planilla" class="form-control form-control-sm border-danger"></div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="section-header text-uppercase">III. Propietarios / Tenedores</div>
-                <div class="card-body row g-2">
-                    <div class="col-12"><label class="form-label">NOMBRE TENEDOR</label><input type="text" id="t_nom" class="form-control form-control-sm"></div>
-                    <div class="col-12"><label class="form-label">CORREO TENEDOR</label><input type="email" id="t_correo" class="form-control form-control-sm"></div>
-                    <div class="col-12"><label class="form-label">NOMBRE PROPIETARIO</label><input type="text" id="p_nom" class="form-control form-control-sm"></div>
-                    <div class="col-12"><label class="form-label">CORREO PROPIETARIO</label><input type="email" id="p_correo" class="form-control form-control-sm"></div>
+                    <div class="col-8"><label>NOMBRE</label><input type="text" id="c_nom" class="form-control"></div>
+                    <div class="col-4"><label>VENC. LICENCIA</label><input type="date" id="c_venc_lic" class="form-control"></div>
+                    <div class="col-4"><label>EPS</label><input type="text" id="c_eps" class="form-control"></div>
+                    <div class="col-4"><label>ARL</label><input type="text" id="c_arl" class="form-control"></div>
+                    <div class="col-4"><label class="text-danger">VENC. PLANILLA</label><input type="date" id="c_venc_planilla" class="form-control"></div>
                 </div>
             </div>
         </div>
     </form>
 
     <div class="section-header mt-4 d-flex justify-content-between">
-        <span>IV. INVENTARIO GENERAL (CONTROL DE VENCIMIENTOS)</span>
-        <span id="cont">Vehículos: 0</span>
+        <span>III. CONTROL GENERAL DE FLOTA</span>
+        <span id="contadorFlota">Total: 0</span>
     </div>
-    <div class="table-responsive bg-white border">
-        <table class="table table-sm table-hover mb-0 align-middle">
+    <div class="card-body p-0 shadow-sm">
+        <table class="table table-sm table-hover mb-0">
             <thead class="table-dark">
                 <tr>
-                    <th class="ps-2">PLACA</th><th>CONDUCTOR</th><th>SOAT</th><th>TECNO</th><th>PLANILLA</th><th class="text-center">ACCIONES</th>
+                    <th>PLACA</th><th>CONDUCTOR</th><th>SOAT</th><th>TECNO</th><th>PLANILLA</th><th class="text-center">ACCIONES</th>
                 </tr>
             </thead>
-            <tbody id="lista" class="fw-bold"></tbody>
+            <tbody id="tablaVehiculos"></tbody>
         </table>
     </div>
 </div>
 
 <script>
-    const set = (id, v) => document.getElementById(id).value = v || '';
-    const val = (id) => document.getElementById(id).value;
+    window.onload = listarVehiculos;
 
-    window.onload = listar;
+    function getClase(fecha) {
+        if(!fecha) return "";
+        const diff = (new Date(fecha) - new Date()) / 86400000;
+        if(diff < 0) return "table-danger";
+        if(diff <= 10) return "table-warning";
+        return "";
+    }
 
-    async function listar() {
+    async function listarVehiculos() {
         const res = await fetch('/listar');
-        const db = await res.json();
-        document.getElementById('cont').innerText = `Vehículos: ${db.length}`;
-        document.getElementById('lista').innerHTML = db.map(v => {
-            const cls = (f) => {
-                if(!f) return "";
-                const d = (new Date(f) - new Date()) / 86400000;
-                return d < 0 ? "table-danger" : (d <= 10 ? "table-warning" : "");
-            };
-            return `<tr>
-                <td class="ps-2">${v.v.placa}</td>
+        const vhc = await res.json();
+        document.getElementById('contadorFlota').innerText = `Total: ${vhc.length}`;
+        const t = document.getElementById('tablaVehiculos');
+        t.innerHTML = vhc.map(v => `
+            <tr>
+                <td class="fw-bold">${v.v.placa}</td>
                 <td>${v.c.nom}</td>
-                <td class="${cls(v.v.soat)}">${v.v.soat || ''}</td>
-                <td class="${cls(v.v.tecno)}">${v.v.tecno || ''}</td>
-                <td class="${cls(v.c.venc_planilla)}">${v.c.venc_planilla || ''}</td>
+                <td class="${getClase(v.v.soat)}">${v.v.soat || ''}</td>
+                <td class="${getClase(v.v.tecno)}">${v.v.tecno || ''}</td>
+                <td class="${getClase(v.c.venc_planilla)}">${v.c.venc_planilla || ''}</td>
                 <td class="text-center">
-                    <button class="btn btn-primary btn-sm py-0" onclick="cargar('${v.v.placa}')">VER</button>
-                    <button class="btn btn-danger btn-sm py-0" onclick="eliminar('${v.v.placa}')">🗑️</button>
+                    <button class="btn btn-primary btn-sm" onclick="cargarParaEditar('${v.v.placa}')">VER</button>
+                    <button class="btn btn-danger btn-sm" onclick="eliminarVehiculo('${v.v.placa}')">🗑️</button>
                 </td>
-            </tr>`;
-        }).join('');
+            </tr>
+        `).join('');
     }
 
     async function guardar() {
         const d = {
-            v: { placa: val('v_placa').toUpperCase(), soat: val('v_soat'), tecno: val('v_tecno'), gps_prov: val('v_gps_prov'), gps_user: val('v_gps_user') },
-            c: { nom: val('c_nom'), cc: val('c_cc'), venc_lic: val('c_venc_lic'), venc_planilla: val('c_venc_planilla') },
-            t: { nom: val('t_nom'), correo: val('t_correo') },
-            p: { nom: val('p_nom'), correo: val('p_correo') }
+            v: { placa: val('v_placa'), marca: val('v_marca'), modelo: val('v_modelo'), soat: val('v_soat'), tecno: val('v_tecno') },
+            c: { nom: val('c_nom'), venc_lic: val('c_venc_lic'), eps: val('c_eps'), arl: val('c_arl'), venc_planilla: val('c_venc_planilla') }
         };
-        if(!d.v.placa) return alert("Ingrese Placa");
         await fetch('/guardar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(d) });
-        alert("✅ Guardado con éxito");
-        listar();
+        alert("Guardado");
+        listarVehiculos();
+    }
+
+    async function eliminarVehiculo(placa) {
+        const pw = prompt("Clave de seguridad:");
+        if(!pw) return;
+        const res = await fetch(`/eliminar/${placa}`, { method: 'DELETE', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({clave: pw}) });
+        if(res.ok) { alert("Eliminado"); listarVehiculos(); } else alert("Clave incorrecta");
+    }
+
+    async function cambiarClaveAdmin() {
+        const actual = prompt("Clave actual:");
+        const nueva = prompt("Nueva clave:");
+        if(actual && nueva) {
+            const res = await fetch('/cambiar-clave', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({claveActual: actual, claveNueva: nueva}) });
+            const data = await res.json();
+            alert(data.mensaje || data.error);
+        }
     }
 
     async function consultar() {
-        const res = await fetch(`/consultar/${val('q')}`);
+        const res = await fetch(`/consultar/${document.getElementById('q').value}`);
         if(res.ok) {
             const d = await res.json();
-            set('v_placa', d.v.placa); set('v_soat', d.v.soat); set('v_tecno', d.v.tecno); set('v_gps_prov', d.v.gps_prov); set('v_gps_user', d.v.gps_user);
-            set('c_nom', d.c.nom); set('c_cc', d.c.cc); set('c_venc_lic', d.c.venc_lic); set('c_venc_planilla', d.c.venc_planilla);
-            set('t_nom', d.t.nom); set('t_correo', d.t.correo); set('p_nom', d.p.nom); set('p_correo', d.p.correo);
+            set('v_placa', d.v.placa); set('v_marca', d.v.marca); set('v_modelo', d.v.modelo); set('v_soat', d.v.soat); set('v_tecno', d.v.tecno);
+            set('c_nom', d.c.nom); set('c_venc_lic', d.c.venc_lic); set('c_eps', d.c.eps); set('c_arl', d.c.arl); set('c_venc_planilla', d.c.venc_planilla);
         } else alert("No encontrado");
     }
 
-    async function eliminar(p) {
-        const pw = prompt("Clave:");
-        const res = await fetch(`/eliminar/${p}`, { method: 'DELETE', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({clave: pw}) });
-        if(res.ok) { alert("Eliminado"); listar(); } else alert("Error en clave");
-    }
-
-    function cargar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
+    function val(id) { return document.getElementById(id).value; }
+    function set(id, v) { document.getElementById(id).value = v || ''; }
+    function limpiarForm() { document.getElementById('formYego').reset(); }
+    function cargarParaEditar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
 </script>
 </body>
 </html>
