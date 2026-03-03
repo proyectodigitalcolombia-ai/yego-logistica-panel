@@ -7,11 +7,15 @@ const cors = require('cors');
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });
-const DB_PATH = '/data/vehiculos.json';
 
-if (!fs.existsSync(DB_PATH)) {
-    try { fs.writeFileSync(DB_PATH, JSON.stringify([], null, 2)); } catch (e) {}
-}
+// Configuración de rutas de datos segura
+const DATA_DIR = path.join(__dirname, 'data');
+const DB_PATH = path.join(DATA_DIR, 'vehiculos.json');
+const CONFIG_PATH = path.join(DATA_DIR, 'config.json');
+
+if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
+if (!fs.existsSync(DB_PATH)) fs.writeFileSync(DB_PATH, JSON.stringify([], null, 2));
+if (!fs.existsSync(CONFIG_PATH)) fs.writeFileSync(CONFIG_PATH, JSON.stringify({ claveAdmin: 'admin1234' }, null, 2));
 
 app.use(cors());
 app.use(express.json());
@@ -21,11 +25,16 @@ const leerDB = () => {
     try { return JSON.parse(fs.readFileSync(DB_PATH, 'utf-8')); } catch (e) { return []; }
 };
 
+const leerConfig = () => JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
+
+// RUTA: Listar todos para la tabla
+app.get('/listar', (req, res) => res.json(leerDB()));
+
+// RUTA: Importar Excel (Mapeo exacto de tu plantilla)
 app.post('/importar', upload.single('archivo'), (req, res) => {
     try {
         const workbook = xlsx.readFile(req.file.path);
         const data = xlsx.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
-        
         const info = {
             v: { 
                 placa: data[2]?.[1] || '', marca: data[2]?.[4] || '', color: data[2]?.[7] || '', 
@@ -63,6 +72,14 @@ app.post('/guardar', (req, res) => {
     res.json({ mensaje: "✅ Información actualizada en la base de datos." });
 });
 
+app.delete('/eliminar/:placa', (req, res) => {
+    const { clave } = req.body;
+    if (clave !== leerConfig().claveAdmin) return res.status(401).json({ error: "Clave incorrecta" });
+    let db = leerDB().filter(i => i.v.placa.toUpperCase() !== req.params.placa.toUpperCase());
+    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+    res.json({ mensaje: "✅ Registro eliminado." });
+});
+
 app.get('/consultar/:t', (req, res) => {
     const db = leerDB();
     const t = req.params.t.toUpperCase();
@@ -70,5 +87,5 @@ app.get('/consultar/:t', (req, res) => {
     if (r) res.json(r); else res.status(404).json({ error: "No encontrado" });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Servidor YEGO activo`));
+const PORT = 3000;
+app.listen(PORT, () => console.log(`🚀 Servidor YEGO activo en puerto ${PORT}`));
