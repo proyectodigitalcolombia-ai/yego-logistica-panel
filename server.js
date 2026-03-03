@@ -9,6 +9,7 @@ const app = express();
 const upload = multer({ dest: 'uploads/' });
 const DB_PATH = '/data/vehiculos.json';
 
+// Crear base de datos si no existe
 if (!fs.existsSync(DB_PATH)) {
     try { fs.writeFileSync(DB_PATH, JSON.stringify([], null, 2)); } catch (e) {}
 }
@@ -39,7 +40,8 @@ app.post('/importar', upload.single('archivo'), (req, res) => {
                 nom: data[9]?.[1] || '', cc: data[9]?.[4] || '', lic: data[9]?.[7] || '',
                 cat: data[10]?.[1] || '', venc_lic: data[10]?.[4] || '', dir: data[10]?.[7] || '',
                 tel: data[11]?.[1] || '', ciu: data[11]?.[4] || '', cel: data[12]?.[1] || '',
-                arl: data[12]?.[4] || '', eps: data[12]?.[7] || '', mail: data[13]?.[1] || ''
+                arl: data[12]?.[4] || '', eps: data[12]?.[7] || '', mail: data[13]?.[1] || '',
+                pension: '', venc_cc: '', venc_eps: '', venc_arl: '', venc_planilla: ''
             },
             t: { nom: data[16]?.[1] || '', nit: data[16]?.[4] || '', dir: data[16]?.[7] || '', tel: data[17]?.[1] || '', mail: data[18]?.[1] || '' },
             p: { nom: data[19]?.[1] || '', nit: data[19]?.[4] || '', dir: data[19]?.[7] || '', tel: data[20]?.[1] || '', mail: data[21]?.[1] || '' },
@@ -60,7 +62,7 @@ app.post('/guardar', (req, res) => {
     const index = db.findIndex(i => i.v.placa.toUpperCase() === nuevo.v.placa.toUpperCase());
     if (index !== -1) db[index] = nuevo; else db.push(nuevo);
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-    res.json({ mensaje: "✅ Datos de Conductor y Vehículo actualizados." });
+    res.json({ mensaje: "✅ Registro guardado exitosamente." });
 });
 
 app.get('/consultar/:t', (req, res) => {
@@ -71,4 +73,4 @@ app.get('/consultar/:t', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 YEGO Online`));
+app.listen(PORT, () => console.log(`🚀 YEGO Server Online`));
