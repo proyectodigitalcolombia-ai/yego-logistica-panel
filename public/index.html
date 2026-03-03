@@ -88,8 +88,8 @@
                     <div class="col-md-2"><label>LICENCIA</label><input type="text" id="c_lic" class="form-control"></div>
                     <div class="col-md-2"><label>VENC. LICENCIA</label><input type="date" id="c_venc_lic" class="form-control" onchange="alerta(this.id)"></div>
                     <div class="col-md-2"><label>CELULAR</label><input type="text" id="c_cel" class="form-control"></div>
-                    <div class="col-md-3"><label>DIRECCIÓN CONDUCTOR</label><input type="text" id="c_dir" class="form-control"></div>
-                    <div class="col-md-3"><label>CORREO CONDUCTOR</label><input type="text" id="c_mail" class="form-control"></div>
+                    <div class="col-md-3"><label>DIRECCIÓN</label><input type="text" id="c_dir" class="form-control"></div>
+                    <div class="col-md-3"><label>CORREO</label><input type="text" id="c_mail" class="form-control"></div>
                     <div class="col-md-4"><label class="text-danger">VENC. PLANILLA</label><input type="date" id="c_venc_planilla" class="form-control border-danger" onchange="alerta(this.id)"></div>
                     <div class="col-md-4"><label>EPS</label><input type="text" id="c_eps" class="form-control"></div>
                     <div class="col-md-4"><label>ARL</label><input type="text" id="c_arl" class="form-control"></div>
@@ -191,10 +191,22 @@
         `).join('');
     }
 
+    // 🛡️ FUNCIÓN ELIMINAR CON RESTRICCIÓN DE USUARIO
     async function eliminar(p) {
-        if(confirm(`¿Deseas eliminar la placa ${p}?`)) {
-            await fetch(`/eliminar/${p}`, { method: 'DELETE' });
+        const pass = prompt(`Para eliminar la placa ${p}, ingresa la clave de administrador:`);
+        if(!pass) return;
+
+        const res = await fetch(`/eliminar/${p}`, { 
+            method: 'DELETE',
+            headers: { 'admin-password': pass } 
+        });
+
+        if(res.ok) {
+            alert("Registro eliminado con éxito.");
             listarTodo();
+        } else {
+            const err = await res.json();
+            alert(err.error || "Error al eliminar");
         }
     }
 
