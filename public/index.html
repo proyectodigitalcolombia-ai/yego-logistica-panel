@@ -168,28 +168,30 @@
     const set = (id, v) => { if(document.getElementById(id)) document.getElementById(id).value = v || ''; };
 
     async function listarTodo() {
-        const res = await fetch('/listar');
-        const db = await res.json();
-        const tabla = document.getElementById('listaTabla');
-        tabla.innerHTML = db.map(i => `
-            <tr>
-                <td class="fw-bold ps-3">${i.v.placa}</td>
-                <td>${i.c.nom}</td>
-                <td>${i.v.soat || '-'}</td>
-                <td>${i.v.tecno || '-'}</td>
-                <td>
-                    <button class="btn btn-primary btn-sm" onclick="cargar('${i.v.placa}')">VER</button>
-                    <button class="btn btn-danger btn-sm" onclick="eliminar('${i.v.placa}')">🗑️</button>
-                </td>
-            </tr>
-        `).join('');
+        try {
+            const res = await fetch('/listar');
+            const db = await res.json();
+            const tabla = document.getElementById('listaTabla');
+            tabla.innerHTML = db.map(i => `
+                <tr>
+                    <td class="fw-bold ps-3">${i.v.placa}</td>
+                    <td>${i.c.nom}</td>
+                    <td>${i.v.soat || '-'}</td>
+                    <td>${i.v.tecno || '-'}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="cargar('${i.v.placa}')">VER</button>
+                        <button class="btn btn-danger btn-sm" onclick="eliminar('${i.v.placa}')">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch(e) {}
     }
 
     async function eliminar(p) {
-        const pass = prompt(`Para eliminar la placa ${p}, ingresa la clave de administrador:`);
+        const pass = prompt(`Para eliminar la placa ${p}, ingresa la clave:`);
         if(!pass) return;
         const res = await fetch(`/eliminar/${p}`, { method: 'DELETE', headers: { 'admin-password': pass } });
-        if(res.ok) { alert("Eliminado."); listarTodo(); } else { alert("Clave incorrecta."); }
+        if(res.ok) { alert("Eliminado."); listarTodo(); } else { alert("Error al eliminar."); }
     }
 
     async function consultar() {
@@ -254,7 +256,6 @@
     function limpiarForm() { 
         document.getElementById("formYego").reset(); 
         document.querySelectorAll('.form-control').forEach(e => e.classList.remove('vencido', 'por-vencer'));
-        document.getElementById('panel-vencimientos').innerHTML = '<p class="text-muted text-center mt-4">Consulta una placa...</p>';
     }
 
     function cargar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
@@ -266,46 +267,50 @@
         const res = await fetch('/importar', { method: 'POST', body: formData });
         const data = await res.json();
         llenar(data);
-        actualizarDashboard(data);
         alert("Ficha cargada.");
     }
 
+    // --- CORRECCIÓN PDF ---
     function generarPDF() {
         const elemento = document.getElementById('area-pdf');
-        const placa = document.getElementById('v_placa').value || "Ficha";
+        if (!elemento) return alert("No hay datos para exportar");
+
+        const placa = document.getElementById('v_placa').value || "FICHA";
+        
+        // Configuraciones para máxima compatibilidad
         const opciones = {
-            margin: [10, 5, 10, 5],
-            filename: `Ficha_YEGO_${placa}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, logging: false },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            margin:       [10, 10, 10, 10],
+            filename:     `Ficha_YEGO_${placa}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { 
+                scale: 2, 
+                useCORS: true, 
+                letterRendering: true,
+                scrollY: 0
+            },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
-        html2pdf().set(opciones).from(elemento).save();
+
+        // Ejecutar proceso de descarga
+        html2pdf().from(elemento).set(opciones).save().then(() => {
+            console.log("PDF generado exitosamente");
+        }).catch(err => {
+            console.error("Error al generar PDF:", err);
+            alert("Error al generar PDF. Intente nuevamente.");
+        });
     }
 
     function generarPlantilla() {
         let pArr = Array.from({ length: 30 }, () => Array(10).fill(""));
-        pArr[0] = ["FICHA TÉCNICA YEGO LOGÍSTICA", "", "", "", "", "", "", ""];
-        pArr[1] = ["", "PLACA", "", "MARCA", "", "COLOR", "", "CLASE"];
-        pArr[2] = ["", val('v_placa'), "", val('v_marca'), "", val('v_color'), "", val('v_clase')];
-        pArr[3] = ["", "MODELO", "", "REPOTENCIADO", "", "LÍNEA", "", "MOTOR"];
-        pArr[4] = ["", val('v_modelo'), "", val('v_repo'), "", val('v_linea'), "", val('v_motor')];
-        pArr[5] = ["", "CHASIS", "", "CARROCERÍA", "", "TRAILER", "", "MOD. TRAILER"];
-        pArr[6] = ["", val('v_chasis'), "", val('v_carro'), "", val('v_trayler'), "", val('v_m_trailer')];
-        pArr[7] = ["", "VENC. SOAT", "", "VENC. TECNO", "", "GPS", "", ""];
-        pArr[8] = ["", val('v_soat'), "", val('v_tecno'), "", val('v_gps_co'), "", ""];
+        pArr[0] = ["SISTEMA YEGO LOGÍSTICA - FICHA TÉCNICA"];
+        pArr[2] = ["PLACA", val('v_placa'), "MARCA", val('v_marca'), "COLOR", val('v_color')];
+        pArr[3] = ["CLASE", val('v_clase'), "MODELO", val('v_modelo'), "VENC. SOAT", val('v_soat')];
+        pArr[5] = ["CONDUCTOR", val('c_nom'), "ID", val('c_cc'), "TEL", val('c_cel')];
         
-        pArr[10] = ["DATOS CONDUCTOR", "", "", "", "", "", "", ""];
-        pArr[11] = ["", "NOMBRE", "", "CC", "", "LICENCIA", "", "VENC. LIC"];
-        pArr[12] = ["", val('c_nom'), "", val('c_cc'), "", val('c_lic'), "", val('c_venc_lic')];
-        
-        pArr[15] = ["TENEDOR", val('t_nom'), "ID", val('t_nit'), "TEL", val('t_tel'), "MAIL", val('t_mail')];
-        pArr[16] = ["PROPIETARIO", val('p_nom'), "ID", val('p_nit'), "TEL", val('p_tel'), "MAIL", val('p_mail')];
-
         const ws = XLSX.utils.aoa_to_sheet(pArr);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Ficha YEGO");
-        XLSX.writeFile(wb, `Ficha_${val('v_placa') || 'Yego'}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, "Ficha");
+        XLSX.writeFile(wb, `Excel_${val('v_placa') || 'Yego'}.xlsx`);
     }
 </script>
 </body>
