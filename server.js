@@ -36,7 +36,7 @@ app.post('/importar', upload.single('archivo'), (req, res) => {
                 soat: data[7]?.[1] || '', tecno: data[7]?.[4] || ''
             },
             c: { 
-                nom: data[9]?.[1] || '', cc: data[9]?.[4] || '', lic: data[9]?.[7] || '',
+                tipo: '', nom: data[9]?.[1] || '', cc: data[9]?.[4] || '', lic: data[9]?.[7] || '',
                 venc_lic: data[10]?.[4] || '', dir: data[11]?.[1] || '', cel: data[12]?.[1] || '',
                 arl: data[12]?.[4] || '', eps: data[12]?.[7] || '', pension: data[13]?.[4] || '', 
                 mail: data[13]?.[1] || '', venc_planilla: data[14]?.[4] || ''
@@ -74,4 +74,4 @@ app.delete('/eliminar/:placa', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 YEGO Server Activo (NODE_VERSION 20)`));
+app.listen(PORT, () => console.log(`🚀 YEGO Server Activo`));
