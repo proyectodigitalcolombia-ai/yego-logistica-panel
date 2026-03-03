@@ -2,206 +2,148 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>YEGO LOGÍSTICA - PANEL PORTABLE</title>
+    <title>YEGO LOGÍSTICA - PANEL UNIFICADO</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root { --yego-blue: #002d5a; --yego-green: #27ae60; }
-        body { background: #f4f6f9; font-size: 0.85rem; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f4f6f9; font-size: 0.82rem; }
         .section-header { background: var(--yego-blue); color: white; padding: 8px 15px; margin-top: 15px; font-weight: bold; border-left: 5px solid var(--yego-green); }
         .card-body { background: white; border: 1px solid #ddd; padding: 15px; }
-        .table-danger { background-color: #f8d7da !important; color: #721c24; }
-        .table-warning { background-color: #fff3cd !important; color: #856404; }
-        .btn-yego { background-color: var(--yego-green); color: white; border: none; }
-        .btn-yego:hover { background-color: #219150; color: white; }
+        .table-danger { background-color: #f8d7da !important; }
+        .table-warning { background-color: #fff3cd !important; }
     </style>
 </head>
 <body>
 
 <nav class="navbar navbar-dark bg-dark p-2">
     <div class="container-fluid">
-        <span class="navbar-brand fw-bold">YEGO LOGÍSTICA - GESTIÓN LOCAL</span>
+        <span class="navbar-brand">YEGO LOGÍSTICA - CONTROL TOTAL</span>
         <div>
-            <button class="btn btn-outline-info btn-sm me-2" onclick="cambiarClaveAdmin()">🔐 SEGURIDAD</button>
-            <button class="btn btn-outline-light btn-sm me-2" onclick="exportarBackup()">💾 BACKUP (JSON)</button>
-            <button class="btn btn-success btn-sm" onclick="limpiarForm()">🆕 NUEVO REGISTRO</button>
+            <button class="btn btn-outline-info btn-sm me-2" onclick="cambiarClaveAdmin()">🔐 CLAVE</button>
+            <button class="btn btn-success btn-sm" onclick="limpiarForm()">🆕 NUEVO</button>
         </div>
     </div>
 </nav>
 
 <div class="container-fluid mt-3">
     <div class="row g-2 mb-3 bg-white p-3 shadow-sm border">
-        <div class="col-md-7"><input type="text" id="q" class="form-control" placeholder="Buscar por Placa o Cédula..."></div>
+        <div class="col-md-7"><input type="text" id="q" class="form-control" placeholder="Buscar Placa o Cédula..."></div>
         <div class="col-md-2"><button class="btn btn-primary w-100" onclick="consultar()">BUSCAR</button></div>
         <div class="col-md-3"><button class="btn btn-warning w-100 fw-bold" onclick="guardar()">GUARDAR / ACTUALIZAR</button></div>
     </div>
 
     <form id="formYego">
         <div class="row">
-            <div class="col-md-6">
-                <div class="section-header">I. DATOS DEL VEHÍCULO</div>
+            <div class="col-md-4">
+                <div class="section-header">I. VEHÍCULO Y GPS</div>
                 <div class="card-body row g-2">
-                    <div class="col-6"><label class="fw-bold">PLACA</label><input type="text" id="v_placa" class="form-control"></div>
-                    <div class="col-6"><label class="fw-bold">MARCA</label><input type="text" id="v_marca" class="form-control"></div>
-                    <div class="col-4"><label class="fw-bold">MODELO</label><input type="text" id="v_modelo" class="form-control"></div>
-                    <div class="col-4"><label class="fw-bold">VENC. SOAT</label><input type="date" id="v_soat" class="form-control"></div>
-                    <div class="col-4"><label class="fw-bold">VENC. TECNO</label><input type="date" id="v_tecno" class="form-control"></div>
+                    <div class="col-6"><label>PLACA</label><input type="text" id="v_placa" class="form-control"></div>
+                    <div class="col-6"><label>VENC. SOAT</label><input type="date" id="v_soat" class="form-control"></div>
+                    <div class="col-6"><label>VENC. TECNO</label><input type="date" id="v_tecno" class="form-control"></div>
+                    <div class="col-6"><label>PROVEEDOR GPS</label><input type="text" id="v_gps_prov" class="form-control"></div>
+                    <div class="col-12"><label>USUARIO GPS</label><input type="text" id="v_gps_user" class="form-control"></div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="section-header">II. CONDUCTOR Y SEGURIDAD SOCIAL</div>
+            <div class="col-md-4">
+                <div class="section-header">II. CONDUCTOR / SEGURIDAD</div>
                 <div class="card-body row g-2">
-                    <div class="col-8"><label class="fw-bold">NOMBRE CONDUCTOR</label><input type="text" id="c_nom" class="form-control"></div>
-                    <div class="col-4"><label class="fw-bold">VENC. LICENCIA</label><input type="date" id="c_venc_lic" class="form-control"></div>
-                    <div class="col-4"><label class="fw-bold">EPS</label><input type="text" id="c_eps" class="form-control"></div>
-                    <div class="col-4"><label class="fw-bold">ARL</label><input type="text" id="c_arl" class="form-control"></div>
-                    <div class="col-4"><label class="fw-bold text-danger">VENC. PLANILLA</label><input type="date" id="c_venc_planilla" class="form-control border-danger"></div>
+                    <div class="col-12"><label>NOMBRE</label><input type="text" id="c_nom" class="form-control"></div>
+                    <div class="col-6"><label>CÉDULA</label><input type="text" id="c_cc" class="form-control"></div>
+                    <div class="col-6"><label>VENC. LICENCIA</label><input type="date" id="c_venc_lic" class="form-control"></div>
+                    <div class="col-12"><label class="text-danger fw-bold">VENC. PLANILLA</label><input type="date" id="c_venc_planilla" class="form-control border-danger"></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="section-header">III. PROPIETARIOS / TENEDORES</div>
+                <div class="card-body row g-2">
+                    <div class="col-12"><label>NOMBRE TENEDOR</label><input type="text" id="t_nom" class="form-control"></div>
+                    <div class="col-12"><label>CORREO TENEDOR</label><input type="email" id="t_correo" class="form-control"></div>
+                    <div class="col-12"><label>NOMBRE PROPIETARIO</label><input type="text" id="p_nom" class="form-control"></div>
+                    <div class="col-12"><label>CORREO PROPIETARIO</label><input type="email" id="p_correo" class="form-control"></div>
                 </div>
             </div>
         </div>
     </form>
 
-    <div class="section-header mt-4 d-flex justify-content-between align-items-center">
-        <span>III. INVENTARIO Y ALERTAS DE VENCIMIENTO</span>
-        <span class="badge bg-light text-dark" id="contadorFlota">Vehículos: 0</span>
-    </div>
-    <div class="card-body p-0 shadow-sm overflow-hidden">
+    <div class="section-header mt-4">IV. INVENTARIO GENERAL (CONTROL DE VENCIMIENTOS)</div>
+    <div class="card-body p-0 shadow-sm">
         <table class="table table-sm table-hover mb-0">
             <thead class="table-dark">
                 <tr>
-                    <th class="ps-3">PLACA</th><th>CONDUCTOR</th><th class="text-center">SOAT</th><th class="text-center">TECNO</th><th class="text-center">PLANILLA</th><th class="text-center">ACCIONES</th>
+                    <th>PLACA</th><th>CONDUCTOR</th><th>SOAT</th><th>TECNO</th><th>PLANILLA</th><th class="text-center">ACCIONES</th>
                 </tr>
             </thead>
-            <tbody id="tablaVehiculos" class="fw-semibold"></tbody>
+            <tbody id="tablaVehiculos" class="fw-bold"></tbody>
         </table>
     </div>
 </div>
 
 <script>
-    // Inicialización de datos locales
-    let DB = JSON.parse(localStorage.getItem('yego_db')) || [];
-    let CLAVE = localStorage.getItem('yego_clave') || 'admin1234';
+    // --- Lógica de Negocio ---
+    window.onload = listar;
 
-    window.onload = listarVehiculos;
-
-    function getClase(fecha) {
-        if(!fecha) return "";
-        const diff = (new Date(fecha) - new Date()) / 86400000;
-        if(diff < 0) return "table-danger";
-        if(diff <= 10) return "table-warning";
-        return "";
+    function getClase(f) {
+        if(!f) return "";
+        const d = (new Date(f) - new Date()) / 86400000;
+        return d < 0 ? "table-danger" : (d <= 10 ? "table-warning" : "");
     }
 
-    function listarVehiculos() {
-        document.getElementById('contadorFlota').innerText = `Vehículos: ${DB.length}`;
-        const t = document.getElementById('tablaVehiculos');
-        t.innerHTML = DB.map(v => `
+    async function listar() {
+        const res = await fetch('/listar');
+        const db = await res.json();
+        document.getElementById('tablaVehiculos').innerHTML = db.map(v => `
             <tr>
-                <td class="ps-3 fw-bold">${v.v.placa}</td>
+                <td class="ps-2">${v.v.placa}</td>
                 <td>${v.c.nom}</td>
-                <td class="text-center ${getClase(v.v.soat)}">${v.v.soat || '---'}</td>
-                <td class="text-center ${getClase(v.v.tecno)}">${v.v.tecno || '---'}</td>
-                <td class="text-center ${getClase(v.c.venc_planilla)}">${v.c.venc_planilla || '---'}</td>
+                <td class="${getClase(v.v.soat)}">${v.v.soat || ''}</td>
+                <td class="${getClase(v.v.tecno)}">${v.v.tecno || ''}</td>
+                <td class="${getClase(v.c.venc_planilla)}">${v.c.venc_planilla || ''}</td>
                 <td class="text-center">
-                    <button class="btn btn-primary btn-sm" onclick="cargarParaEditar('${v.v.placa}')">VER</button>
-                    <button class="btn btn-danger btn-sm" onclick="eliminarVehiculo('${v.v.placa}')">🗑️</button>
+                    <button class="btn btn-primary btn-sm" onclick="cargar('${v.v.placa}')">VER</button>
+                    <button class="btn btn-danger btn-sm" onclick="eliminar('${v.v.placa}')">🗑️</button>
                 </td>
             </tr>
         `).join('');
     }
 
-    function guardar() {
-        const placa = document.getElementById('v_placa').value.toUpperCase();
-        if(!placa) return alert("La placa es obligatoria");
-
-        const data = {
-            v: { 
-                placa: placa, 
-                marca: document.getElementById('v_marca').value, 
-                modelo: document.getElementById('v_modelo').value, 
-                soat: document.getElementById('v_soat').value, 
-                tecno: document.getElementById('v_tecno').value 
-            },
-            c: { 
-                nom: document.getElementById('c_nom').value, 
-                venc_lic: document.getElementById('c_venc_lic').value, 
-                eps: document.getElementById('c_eps').value, 
-                arl: document.getElementById('c_arl').value, 
-                venc_planilla: document.getElementById('c_venc_planilla').value 
-            }
+    async function guardar() {
+        const d = {
+            v: { placa: val('v_placa').toUpperCase(), soat: val('v_soat'), tecno: val('v_tecno'), gps_prov: val('v_gps_prov'), gps_user: val('v_gps_user') },
+            c: { nom: val('c_nom'), cc: val('c_cc'), venc_lic: val('c_venc_lic'), venc_planilla: val('c_venc_planilla') },
+            t: { nom: val('t_nom'), correo: val('t_correo') },
+            p: { nom: val('p_nom'), correo: val('p_correo') }
         };
-
-        const index = DB.findIndex(i => i.v.placa === placa);
-        if(index !== -1) DB[index] = data; else DB.push(data);
-
-        localStorage.setItem('yego_db', JSON.stringify(DB));
-        alert("✅ Datos guardados en este equipo");
-        listarVehiculos();
+        await fetch('/guardar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(d) });
+        alert("✅ Información Unificada y Guardada");
+        listar();
     }
 
-    function consultar() {
-        const busqueda = document.getElementById('q').value.toUpperCase();
-        const registro = DB.find(i => i.v.placa === busqueda);
-        if(registro) {
-            llenarForm(registro);
-        } else {
-            alert("No encontrado");
-        }
+    async function eliminar(p) {
+        const pw = prompt("Clave admin:");
+        const res = await fetch(`/eliminar/${p}`, { method: 'DELETE', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({clave: pw}) });
+        if(res.ok) { alert("Eliminado"); listar(); } else alert("Clave incorrecta");
     }
 
-    function llenarForm(d) {
-        document.getElementById('v_placa').value = d.v.placa;
-        document.getElementById('v_marca').value = d.v.marca;
-        document.getElementById('v_modelo').value = d.v.modelo;
-        document.getElementById('v_soat').value = d.v.soat;
-        document.getElementById('v_tecno').value = d.v.tecno;
-        document.getElementById('c_nom').value = d.c.nom;
-        document.getElementById('c_venc_lic').value = d.c.venc_lic;
-        document.getElementById('c_eps').value = d.c.eps;
-        document.getElementById('c_arl').value = d.c.arl;
-        document.getElementById('c_venc_planilla').value = d.c.venc_planilla;
+    async function consultar() {
+        const res = await fetch(`/consultar/${val('q')}`);
+        if(res.ok) {
+            const d = await res.json();
+            set('v_placa', d.v.placa); set('v_soat', d.v.soat); set('v_tecno', d.v.tecno); set('v_gps_prov', d.v.gps_prov); set('v_gps_user', d.v.gps_user);
+            set('c_nom', d.c.nom); set('c_cc', d.c.cc); set('c_venc_lic', d.c.venc_lic); set('c_venc_planilla', d.c.venc_planilla);
+            set('t_nom', d.t.nom); set('t_correo', d.t.correo); set('p_nom', d.p.nom); set('p_correo', d.p.correo);
+        } else alert("No encontrado");
     }
 
-    function eliminarVehiculo(placa) {
-        const pw = prompt("Clave de seguridad para eliminar:");
-        if(pw === CLAVE) {
-            DB = DB.filter(i => i.v.placa !== placa);
-            localStorage.setItem('yego_db', JSON.stringify(DB));
-            listarVehiculos();
-        } else if (pw !== null) {
-            alert("Clave incorrecta");
-        }
-    }
-
-    function cambiarClaveAdmin() {
-        const actual = prompt("Clave actual:");
-        if(actual === CLAVE) {
-            const nueva = prompt("Nueva clave:");
-            if(nueva) {
-                CLAVE = nueva;
-                localStorage.setItem('yego_clave', CLAVE);
-                alert("Clave actualizada");
-            }
-        } else if (actual !== null) {
-            alert("Clave actual incorrecta");
-        }
-    }
-
+    function val(id) { return document.getElementById(id).value; }
+    function set(id, v) { document.getElementById(id).value = v || ''; }
     function limpiarForm() { document.getElementById('formYego').reset(); }
-    
-    function cargarParaEditar(p) {
-        const registro = DB.find(i => i.v.placa === p);
-        llenarForm(registro);
-        window.scrollTo(0,0);
-    }
+    function cargar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
 
-    function exportarBackup() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(DB));
-        const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", "backup_yego.json");
-        document.body.appendChild(downloadAnchorNode);
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
+    async function cambiarClaveAdmin() {
+        const a = prompt("Clave actual:");
+        const n = prompt("Nueva clave:");
+        const res = await fetch('/cambiar-clave', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({claveActual: a, claveNueva: n}) });
+        const data = await res.json(); alert(data.mensaje || data.error);
     }
 </script>
 </body>
