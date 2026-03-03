@@ -7,22 +7,29 @@ const cors = require('cors');
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });
+// Ruta absoluta al disco montado en Render
 const DB_PATH = '/data/vehiculos.json';
 
-// 🛡️ PROTECCIÓN REFORZADA:
-// Intenta leer de la variable de entorno, si no existe, usa la clave manual.
+// 🛡️ PROTECCIÓN REFORZADA
 const ADMIN_PASS = (process.env.ADMIN_PASSWORD || "admin123").trim(); 
 
-if (!fs.existsSync('/data')) { try { fs.mkdirSync('/data', { recursive: true }); } catch (e) {} }
-if (!fs.existsSync(DB_PATH)) { try { fs.writeFileSync(DB_PATH, JSON.stringify([], null, 2)); } catch (e) {} }
+// Asegurar que la carpeta y el archivo existan en el disco de Render
+if (!fs.existsSync('/data')) { 
+    try { fs.mkdirSync('/data', { recursive: true }); } catch (e) { console.error("Error creando carpeta data:", e); } 
+}
+if (!fs.existsSync(DB_PATH)) { 
+    try { fs.writeFileSync(DB_PATH, JSON.stringify([], null, 2)); } catch (e) { console.error("Error creando DB inicial:", e); } 
+}
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- Lógica de Base de Datos y Rutas de Consulta (SIN CAMBIOS) ---
 const leerDB = () => {
-    try { return JSON.parse(fs.readFileSync(DB_PATH, 'utf-8')); } catch (e) { return []; }
+    try { 
+        const data = fs.readFileSync(DB_PATH, 'utf-8');
+        return JSON.parse(data); 
+    } catch (e) { return []; }
 };
 
 app.get('/listar', (req, res) => res.json(leerDB()));
@@ -44,30 +51,29 @@ app.post('/importar', upload.single('archivo'), (req, res) => {
 });
 
 app.post('/guardar', (req, res) => {
-    let db = leerDB();
-    const nuevo = req.body;
-    const index = db.findIndex(i => i.v.placa.toUpperCase() === nuevo.v.placa.toUpperCase());
-    if (index !== -1) db[index] = nuevo; else db.push(nuevo);
-    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-    res.json({ mensaje: "✅ Registro YEGO actualizado." });
+    try {
+        let db = leerDB();
+        const nuevo = req.body;
+        if (!nuevo.v || !nuevo.v.placa) return res.status(400).json({error: "Placa requerida"});
+        const index = db.findIndex(i => i.v.placa.toUpperCase() === nuevo.v.placa.toUpperCase());
+        if (index !== -1) db[index] = nuevo; else db.push(nuevo);
+        fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+        res.json({ mensaje: "✅ Guardado en Disco Render" });
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.get('/consultar/:t', (req, res) => {
     const db = leerDB();
     const t = req.params.t.toUpperCase();
-    const r = db.find(i => i.v.placa.toUpperCase() === t || i.c.cc.toString() === t);
+    const r = db.find(i => i.v.placa.toUpperCase() === t || (i.c.cc && i.c.cc.toString() === t));
     if (r) res.json(r); else res.status(404).json({ error: "No encontrado" });
 });
 
-// 🛡️ ELIMINACIÓN PROTEGIDA (BLOQUEO REFORZADO)
 app.delete('/eliminar/:placa', (req, res) => {
     const passwordEnviada = req.headers['admin-password'];
-    
-    // Si la contraseña enviada no coincide con la variable NI con la fija
     if (passwordEnviada !== ADMIN_PASS) {
-        return res.status(403).json({ error: "Clave de administrador incorrecta." });
+        return res.status(403).json({ error: "Clave incorrecta" });
     }
-
     let db = leerDB();
     const nuevaDB = db.filter(i => i.v.placa.toUpperCase() !== req.params.placa.toUpperCase());
     fs.writeFileSync(DB_PATH, JSON.stringify(nuevaDB, null, 2));
@@ -75,4 +81,7 @@ app.delete('/eliminar/:placa', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server Activo - NODE ${process.env.NODE_VERSION}`));
+app.listen(PORT, () => {
+    console.log(`🚀 YEGO Server - Puerto ${PORT}`);
+    console.log(`📁 Base de datos en: ${DB_PATH}`);
+});
