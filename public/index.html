@@ -2,160 +2,151 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>SISTEMA YEGO LOGÍSTICA</title>
+    <title>YEGO LOGÍSTICA - PANEL</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root { --yego-blue: #002d5a; --yego-green: #27ae60; }
-        body { background: #f4f6f9; font-family: 'Segoe UI', sans-serif; font-size: 0.85rem; }
-        .section-header { background: var(--yego-blue); color: white; padding: 10px; margin-top: 20px; font-weight: bold; border-left: 5px solid var(--yego-green); text-transform: uppercase; }
-        .card-body { background: white; border: 1px solid #ddd; padding: 15px; border-top: none; }
-        .form-control { border-radius: 0; }
-        label { font-weight: bold; font-size: 0.72rem; color: #555; display: block; margin-top: 8px; }
+        body { background: #f4f6f9; font-size: 0.85rem; }
+        .section-header { background: var(--yego-blue); color: white; padding: 8px 15px; margin-top: 15px; font-weight: bold; border-left: 5px solid var(--yego-green); }
+        .card-body { background: white; border: 1px solid #ddd; padding: 15px; }
         .vencido { background-color: #ffdce0 !important; border: 2px solid #dc3545 !important; }
         .por-vencer { background-color: #fff3cd !important; border: 2px solid #ffc107 !important; }
-        .btn-yego { background-color: #ffc107; color: #000; font-weight: bold; border: none; }
+        .table-danger { background-color: #f8d7da !important; }
+        .table-warning { background-color: #fff3cd !important; }
     </style>
 </head>
 <body>
 
-<nav class="navbar bg-dark text-white p-2">
-    <div class="container d-flex justify-content-between">
-        <span>YEGO LOGÍSTICA - CONTROL DE SEGURIDAD</span>
+<nav class="navbar navbar-dark bg-dark p-2">
+    <div class="container-fluid">
+        <span class="navbar-brand">YEGO LOGÍSTICA</span>
         <div>
-            <button class="btn btn-outline-light btn-sm me-2" onclick="limpiarForm()">🆕 NUEVO / LIMPIAR</button>
-            <button class="btn btn-success btn-sm fw-bold" onclick="document.getElementById('f').click()">📥 IMPORTAR EXCEL</button>
+            <button class="btn btn-outline-info btn-sm me-2" onclick="cambiarClaveAdmin()">🔐 CLAVE</button>
+            <a href="/descargar-plantilla" class="btn btn-outline-light btn-sm me-2">📊 PLANTILLA</a>
+            <button class="btn btn-success btn-sm" onclick="limpiarForm()">🆕 NUEVO</button>
         </div>
-        <input type="file" id="f" style="display:none" onchange="importar()">
     </div>
 </nav>
 
-<div class="container mt-4 mb-5">
-    <div class="row g-2 mb-4 bg-white p-3 shadow-sm border">
-        <div class="col-md-6"><input type="text" id="q" class="form-control form-control-lg" placeholder="Buscar Placa o Cédula..."></div>
-        <div class="col-md-2"><button class="btn btn-primary btn-lg w-100" onclick="consultar()">BUSCAR</button></div>
-        <div class="col-md-4"><button class="btn btn-yego btn-lg w-100 shadow" onclick="guardar()">GUARDAR / ACTUALIZAR</button></div>
+<div class="container-fluid mt-3">
+    <div class="row g-2 mb-3 bg-white p-3 shadow-sm border">
+        <div class="col-md-8"><input type="text" id="q" class="form-control" placeholder="Placa o Cédula..."></div>
+        <div class="col-md-2"><button class="btn btn-primary w-100" onclick="consultar()">BUSCAR</button></div>
+        <div class="col-md-2"><button class="btn btn-warning w-100 fw-bold" onclick="guardar()">GUARDAR</button></div>
     </div>
 
     <form id="formYego">
-        <div class="section-header">I. INFORMACIÓN TÉCNICA Y GPS</div>
-        <div class="card-body">
-            <div class="row g-2">
-                <div class="col-md-2"><label>PLACA</label><input type="text" id="v_placa" class="form-control"></div>
-                <div class="col-md-2"><label>MARCA</label><input type="text" id="v_marca" class="form-control"></div>
-                <div class="col-md-2"><label>MODELO</label><input type="text" id="v_modelo" class="form-control"></div>
-                <div class="col-md-3"><label>MOTOR</label><input type="text" id="v_motor" class="form-control"></div>
-                <div class="col-md-3"><label>CHASIS</label><input type="text" id="v_chasis" class="form-control"></div>
-                <div class="col-md-3"><label>PROVEEDOR GPS</label><input type="text" id="v_gps_co" class="form-control border-primary"></div>
-                <div class="col-md-3"><label>USUARIO GPS</label><input type="text" id="v_gps_user" class="form-control"></div>
-                <div class="col-md-3"><label>CLAVE GPS</label><input type="text" id="v_gps_pass" class="form-control"></div>
-                <div class="col-md-3"><label>VENC. SOAT</label><input type="date" id="v_soat" class="form-control"></div>
-                <div class="col-md-3"><label>VENC. TECNO</label><input type="date" id="v_tecno" class="form-control"></div>
-                <div class="col-md-3"><label>PLACA TRAYLER</label><input type="text" id="v_trayler" class="form-control"></div>
-                <div class="col-md-3"><label>REPOTENCIADO</label><input type="text" id="v_repo" class="form-control"></div>
-            </div>
-        </div>
-
-        <div class="section-header">II. CONDUCTOR Y SEGURIDAD SOCIAL</div>
-        <div class="card-body">
-            <div class="row g-2">
-                <div class="col-md-4"><label>NOMBRE CONDUCTOR</label><input type="text" id="c_nom" class="form-control"></div>
-                <div class="col-md-2"><label>CÉDULA</label><input type="text" id="c_cc" class="form-control"></div>
-                <div class="col-md-2"><label>CELULAR</label><input type="text" id="c_cel" class="form-control border-primary"></div>
-                <div class="col-md-2"><label>LICENCIA</label><input type="text" id="c_lic" class="form-control"></div>
-                <div class="col-md-2"><label>VENC. LICENCIA</label><input type="date" id="c_venc_lic" class="form-control border-danger"></div>
-                
-                <div class="col-md-3"><label>NOMBRE EPS</label><input type="text" id="c_eps" class="form-control" placeholder="Ej: Sanitas"></div>
-                <div class="col-md-3"><label>NOMBRE ARL</label><input type="text" id="c_arl" class="form-control" placeholder="Ej: Sura"></div>
-                <div class="col-md-3"><label>FONDO PENSIÓN</label><input type="text" id="c_pension" class="form-control" placeholder="Ej: Porvenir"></div>
-                <div class="col-md-3"><label class="text-danger">VENC. PLANILLA UNIFICADA</label><input type="date" id="c_venc_planilla" class="form-control border-danger"></div>
-                
-                <div class="col-md-4"><label>CORREO ELECTRÓNICO</label><input type="text" id="c_mail" class="form-control"></div>
-            </div>
-        </div>
-
-        <div class="section-header">III. TENEDOR Y PROPIETARIO</div>
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-6 border-end">
-                    <label class="text-primary fw-bold">DATOS TENEDOR</label>
-                    <input type="text" id="t_nom" class="form-control mb-1" placeholder="Nombre">
-                    <input type="text" id="t_nit" class="form-control mb-1" placeholder="Cédula/NIT">
-                    <input type="text" id="t_tel" class="form-control mb-1" placeholder="Teléfono">
-                    <input type="text" id="t_mail" class="form-control mb-1" placeholder="Correo">
-                    <input type="text" id="t_dir" class="form-control" placeholder="Dirección">
-                </div>
-                <div class="col-md-6">
-                    <label class="text-primary fw-bold">DATOS PROPIETARIO</label>
-                    <input type="text" id="p_nom" class="form-control mb-1" placeholder="Nombre">
-                    <input type="text" id="p_nit" class="form-control mb-1" placeholder="Cédula/NIT">
-                    <input type="text" id="p_tel" class="form-control mb-1" placeholder="Teléfono">
-                    <input type="text" id="p_mail" class="form-control mb-1" placeholder="Correo">
-                    <input type="text" id="p_dir" class="form-control" placeholder="Dirección">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="section-header">I. VEHÍCULO</div>
+                <div class="card-body row g-2">
+                    <div class="col-6"><label>PLACA</label><input type="text" id="v_placa" class="form-control"></div>
+                    <div class="col-6"><label>MARCA</label><input type="text" id="v_marca" class="form-control"></div>
+                    <div class="col-4"><label>MODELO</label><input type="text" id="v_modelo" class="form-control"></div>
+                    <div class="col-4"><label>VENC. SOAT</label><input type="date" id="v_soat" class="form-control"></div>
+                    <div class="col-4"><label>VENC. TECNO</label><input type="date" id="v_tecno" class="form-control"></div>
                 </div>
             </div>
-        </div>
-
-        <div class="section-header">IV. REFERENCIAS</div>
-        <div class="card-body">
-            <div class="row g-2">
-                <div class="col-md-4"><label>EMPRESA 1</label><input type="text" id="r_e1" class="form-control mb-1" placeholder="Empresa"><input type="text" id="r_t1" class="form-control" placeholder="Tel"></div>
-                <div class="col-md-4"><label>EMPRESA 2</label><input type="text" id="r_e2" class="form-control mb-1" placeholder="Empresa"><input type="text" id="r_t2" class="form-control" placeholder="Tel"></div>
-                <div class="col-md-4"><label>PERSONAL</label><input type="text" id="r_per" class="form-control mb-1" placeholder="Nombre"><input type="text" id="r_tp" class="form-control" placeholder="Tel"></div>
+            <div class="col-md-6">
+                <div class="section-header">II. CONDUCTOR / SEG. SOCIAL</div>
+                <div class="card-body row g-2">
+                    <div class="col-8"><label>NOMBRE</label><input type="text" id="c_nom" class="form-control"></div>
+                    <div class="col-4"><label>VENC. LICENCIA</label><input type="date" id="c_venc_lic" class="form-control"></div>
+                    <div class="col-4"><label>EPS</label><input type="text" id="c_eps" class="form-control"></div>
+                    <div class="col-4"><label>ARL</label><input type="text" id="c_arl" class="form-control"></div>
+                    <div class="col-4"><label class="text-danger">VENC. PLANILLA</label><input type="date" id="c_venc_planilla" class="form-control"></div>
+                </div>
             </div>
         </div>
     </form>
+
+    <div class="section-header mt-4 d-flex justify-content-between">
+        <span>III. CONTROL GENERAL DE FLOTA</span>
+        <span id="contadorFlota">Total: 0</span>
+    </div>
+    <div class="card-body p-0 shadow-sm">
+        <table class="table table-sm table-hover mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>PLACA</th><th>CONDUCTOR</th><th>SOAT</th><th>TECNO</th><th>PLANILLA</th><th class="text-center">ACCIONES</th>
+                </tr>
+            </thead>
+            <tbody id="tablaVehiculos"></tbody>
+        </table>
+    </div>
 </div>
 
 <script>
-    function alerta(id, label) {
-        const el = document.getElementById(id);
-        if(!el || !el.value) return "";
-        const diff = (new Date(el.value) - new Date()) / 86400000;
-        el.classList.remove('vencido', 'por-vencer');
-        if(diff < 0) { el.classList.add('vencido'); return `❌ ${label} VENCIDO\n`; }
-        if(diff <= 10) { el.classList.add('por-vencer'); return `⚠️ ${label} POR VENCER (Próx. 10 días)\n`; }
+    window.onload = listarVehiculos;
+
+    function getClase(fecha) {
+        if(!fecha) return "";
+        const diff = (new Date(fecha) - new Date()) / 86400000;
+        if(diff < 0) return "table-danger";
+        if(diff <= 10) return "table-warning";
         return "";
     }
 
-    async function consultar() {
-        const res = await fetch(`/consultar/${document.getElementById('q').value}`);
-        if(res.ok) llenar(await res.json()); else alert("Registro no encontrado");
+    async function listarVehiculos() {
+        const res = await fetch('/listar');
+        const vhc = await res.json();
+        document.getElementById('contadorFlota').innerText = `Total: ${vhc.length}`;
+        const t = document.getElementById('tablaVehiculos');
+        t.innerHTML = vhc.map(v => `
+            <tr>
+                <td class="fw-bold">${v.v.placa}</td>
+                <td>${v.c.nom}</td>
+                <td class="${getClase(v.v.soat)}">${v.v.soat || ''}</td>
+                <td class="${getClase(v.v.tecno)}">${v.v.tecno || ''}</td>
+                <td class="${getClase(v.c.venc_planilla)}">${v.c.venc_planilla || ''}</td>
+                <td class="text-center">
+                    <button class="btn btn-primary btn-sm" onclick="cargarParaEditar('${v.v.placa}')">VER</button>
+                    <button class="btn btn-danger btn-sm" onclick="eliminarVehiculo('${v.v.placa}')">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
     }
 
     async function guardar() {
         const d = {
-            v: { placa: val('v_placa'), marca: val('v_marca'), modelo: val('v_modelo'), motor: val('v_motor'), chasis: val('v_chasis'), trayler: val('v_trayler'), repo: val('v_repo'), soat: val('v_soat'), tecno: val('v_tecno'), gps_co: val('v_gps_co'), user: val('v_gps_user'), pass: val('v_gps_pass') },
-            c: { nom: val('c_nom'), cc: val('c_cc'), cel: val('c_cel'), lic: val('c_lic'), venc_lic: val('c_venc_lic'), eps: val('c_eps'), arl: val('c_arl'), pension: val('c_pension'), venc_planilla: val('c_venc_planilla'), mail: val('c_mail') },
-            t: { nom: val('t_nom'), nit: val('t_nit'), tel: val('t_tel'), mail: val('t_mail'), dir: val('t_dir') },
-            p: { nom: val('p_nom'), nit: val('p_nit'), tel: val('p_tel'), mail: val('p_mail'), dir: val('p_dir') },
-            r: { e1: val('r_e1'), t1: val('r_t1'), e2: val('r_e2'), t2: val('r_t2'), per: val('r_per'), tp: val('r_tp') }
+            v: { placa: val('v_placa'), marca: val('v_marca'), modelo: val('v_modelo'), soat: val('v_soat'), tecno: val('v_tecno') },
+            c: { nom: val('c_nom'), venc_lic: val('c_venc_lic'), eps: val('c_eps'), arl: val('c_arl'), venc_planilla: val('c_venc_planilla') }
         };
-        const res = await fetch('/guardar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(d) });
-        alert((await res.json()).mensaje);
+        await fetch('/guardar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(d) });
+        alert("Guardado");
+        listarVehiculos();
     }
 
-    function llenar(d) {
-        set('v_placa', d.v.placa); set('v_marca', d.v.marca); set('v_modelo', d.v.modelo); set('v_motor', d.v.motor); set('v_chasis', d.v.chasis); set('v_trayler', d.v.trayler); set('v_repo', d.v.repo); set('v_soat', d.v.soat); set('v_tecno', d.v.tecno); set('v_gps_co', d.v.gps_co); set('v_gps_user', d.v.user); set('v_gps_pass', d.v.pass);
-        set('c_nom', d.c.nom); set('c_cc', d.c.cc); set('c_cel', d.c.cel); set('c_lic', d.c.lic); set('c_venc_lic', d.c.venc_lic); set('c_eps', d.c.eps); set('c_arl', d.c.arl); set('c_pension', d.c.pension); set('c_venc_planilla', d.c.venc_planilla); set('c_mail', d.c.mail);
-        set('t_nom', d.t.nom); set('t_nit', d.t.nit); set('t_tel', d.t.tel); set('t_mail', d.t.mail); set('t_dir', d.t.dir);
-        set('p_nom', d.p.nom); set('p_nit', d.p.nit); set('p_tel', d.p.tel); set('p_mail', d.p.mail); set('p_dir', d.p.dir);
-        set('r_e1', d.r.e1); set('r_t1', d.r.t1); set('r_e2', d.r.e2); set('r_t2', d.r.t2); set('r_per', d.r.per); set('r_tp', d.r.tp);
+    async function eliminarVehiculo(placa) {
+        const pw = prompt("Clave de seguridad:");
+        if(!pw) return;
+        const res = await fetch(`/eliminar/${placa}`, { method: 'DELETE', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({clave: pw}) });
+        if(res.ok) { alert("Eliminado"); listarVehiculos(); } else alert("Clave incorrecta");
+    }
 
-        setTimeout(() => {
-            let m = alerta('v_soat', 'SOAT') + alerta('v_tecno', 'TECNO') + alerta('c_venc_lic', 'LICENCIA') + alerta('c_venc_planilla', 'PLANILLA SEG. SOCIAL');
-            if(m) alert("🚥 ESTADO DE DOCUMENTOS:\n\n" + m);
-        }, 800);
+    async function cambiarClaveAdmin() {
+        const actual = prompt("Clave actual:");
+        const nueva = prompt("Nueva clave:");
+        if(actual && nueva) {
+            const res = await fetch('/cambiar-clave', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({claveActual: actual, claveNueva: nueva}) });
+            const data = await res.json();
+            alert(data.mensaje || data.error);
+        }
+    }
+
+    async function consultar() {
+        const res = await fetch(`/consultar/${document.getElementById('q').value}`);
+        if(res.ok) {
+            const d = await res.json();
+            set('v_placa', d.v.placa); set('v_marca', d.v.marca); set('v_modelo', d.v.modelo); set('v_soat', d.v.soat); set('v_tecno', d.v.tecno);
+            set('c_nom', d.c.nom); set('c_venc_lic', d.c.venc_lic); set('c_eps', d.c.eps); set('c_arl', d.c.arl); set('c_venc_planilla', d.c.venc_planilla);
+        } else alert("No encontrado");
     }
 
     function val(id) { return document.getElementById(id).value; }
-    function set(id, v) { if(document.getElementById(id)) document.getElementById(id).value = v || ''; }
-    function limpiarForm() { document.getElementById("formYego").reset(); document.querySelectorAll('.form-control').forEach(e => e.classList.remove('vencido', 'por-vencer')); }
-    async function importar() {
-        const formData = new FormData();
-        formData.append('archivo', document.getElementById('f').files[0]);
-        const res = await fetch('/importar', { method: 'POST', body: formData });
-        llenar(await res.json());
-    }
+    function set(id, v) { document.getElementById(id).value = v || ''; }
+    function limpiarForm() { document.getElementById('formYego').reset(); }
+    function cargarParaEditar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
 </script>
 </body>
 </html>
