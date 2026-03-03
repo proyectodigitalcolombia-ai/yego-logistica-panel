@@ -3,17 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEMA YEGO LOGÍSTICA - GESTIÓN DE SEGURIDAD</title>
+    <title>SISTEMA YEGO LOGÍSTICA - GESTIÓN DE SEGURIDAD OPERATIVA</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
     <style>
-        :root { --yego-blue: #002d5a; --yego-green: #27ae60; --yego-yellow: #ffc107; }
+        /* CONFIGURACIÓN DE COLORES CORPORATIVOS YEGO */
+        :root { 
+            --yego-blue: #002d5a; 
+            --yego-green: #27ae60; 
+            --yego-yellow: #ffc107; 
+            --bg-light: #f4f6f9;
+        }
         
-        body { background: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 0.85rem; color: #333; }
+        body { 
+            background: var(--bg-light); 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            font-size: 0.85rem; 
+            color: #333; 
+        }
 
+        /* DISEÑO DE ENCABEZADOS DE SECCIÓN */
         .section-header { 
             background: var(--yego-blue); 
             color: white; 
@@ -33,163 +45,249 @@
             padding: 20px; 
             border-top: none; 
             border-radius: 0 0 4px 4px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
-        label { font-weight: 700; font-size: 0.75rem; color: #555; display: block; margin-top: 8px; margin-bottom: 3px; }
+        /* ESTILOS DE FORMULARIO */
+        label { 
+            font-weight: 700; 
+            font-size: 0.72rem; 
+            color: #555; 
+            display: block; 
+            margin-top: 10px; 
+            margin-bottom: 4px; 
+            text-transform: uppercase;
+        }
 
-        .form-control, .form-select { font-size: 0.85rem; border-radius: 4px; border: 1px solid #ccc; transition: all 0.3s; }
+        .form-control, .form-select { 
+            font-size: 0.85rem; 
+            border-radius: 5px; 
+            border: 1px solid #ced4da; 
+            padding: 8px 12px;
+            transition: all 0.2s ease-in-out; 
+        }
 
-        .form-control:focus { border-color: var(--yego-blue); box-shadow: 0 0 0 0.2rem rgba(0,45,90,0.1); }
+        .form-control:focus { 
+            border-color: var(--yego-blue); 
+            box-shadow: 0 0 0 0.25rem rgba(0,45,90,0.1); 
+        }
 
-        .vencido { background-color: #ffdce0 !important; border: 2px solid #dc3545 !important; color: #842029; }
+        /* CLASES DE ALERTA PARA VENCIMIENTOS */
+        .vencido { 
+            background-color: #ffdce0 !important; 
+            border: 2px solid #dc3545 !important; 
+            color: #842029 !important; 
+            font-weight: bold;
+        }
 
-        .por-vencer { background-color: #fff3cd !important; border: 2px solid #ffc107 !important; color: #664d03; }
+        .por-vencer { 
+            background-color: #fff3cd !important; 
+            border: 2px solid #ffc107 !important; 
+            color: #664d03 !important; 
+        }
 
-        .btn-yego { background-color: var(--yego-yellow); color: #000; font-weight: 800; border: none; transition: 0.3s; }
+        /* BOTONES PERSONALIZADOS */
+        .btn-yego { 
+            background-color: var(--yego-yellow); 
+            color: #000; 
+            font-weight: 800; 
+            border: none; 
+            padding: 10px 20px;
+            transition: all 0.3s; 
+        }
 
-        .btn-yego:hover { background-color: #e5ac00; transform: translateY(-1px); }
+        .btn-yego:hover { 
+            background-color: #e5ac00; 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
 
-        .box-sub { background: #f9f9f9; border: 1px solid #eaeaea; padding: 15px; border-radius: 6px; height: 100%; }
+        .box-sub { 
+            background: #f8f9fa; 
+            border: 1px solid #e9ecef; 
+            padding: 18px; 
+            border-radius: 8px; 
+            height: 100%; 
+        }
 
-        .alert-item { padding: 10px; border-radius: 6px; margin-bottom: 10px; border-left: 6px solid #adb5bd; background: #fff; font-size: 0.8rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        /* PANEL DE ALERTAS DERECHO */
+        .alert-item { 
+            padding: 12px; 
+            border-radius: 8px; 
+            margin-bottom: 12px; 
+            border-left: 6px solid #adb5bd; 
+            background: #fff; 
+            font-size: 0.82rem; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+        }
 
-        .alert-danger { border-left-color: #dc3545; background: #fff5f5; }
+        .alert-danger { border-left-color: #dc3545; background: #fff8f8; }
+        .alert-warning { border-left-color: #ffc107; background: #fffdf5; }
+        .alert-success { border-left-color: #28a745; background: #f6fff8; }
 
-        .alert-warning { border-left-color: #ffc107; background: #fffdf2; }
+        .table-container { 
+            background: white; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08); 
+        }
 
-        .alert-success { border-left-color: #28a745; background: #f4fff7; }
-
-        .table-container { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-
-        @media print { .no-pdf { display: none !important; } }
+        /* CONFIGURACIÓN PARA EXPORTACIÓN PDF */
+        @media print { 
+            .no-pdf { display: none !important; } 
+            body { background: white; }
+            .container-fluid { padding: 0 !important; }
+        }
     </style>
 </head>
 <body onload="listarTodo()">
 
-<nav class="navbar navbar-dark bg-dark p-2 no-pdf shadow">
-    <div class="container-fluid d-flex justify-content-between px-4">
-        <span class="navbar-brand fw-bold" style="letter-spacing: 1px;">YEGO LOGÍSTICA - SEGURIDAD</span>
-        <div>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark p-2 no-pdf shadow-sm">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand fw-bold" href="#">YEGO LOGÍSTICA - SEGURIDAD OPERATIVA</a>
+        <div class="d-flex align-items-center">
             <button class="btn btn-outline-light btn-sm me-3" onclick="limpiarForm()">🆕 NUEVO REGISTRO</button>
-            <button class="btn btn-success btn-sm fw-bold" onclick="document.getElementById('f').click()">📤 IMPORTAR EXCEL</button>
+            <button class="btn btn-success btn-sm fw-bold shadow-sm" onclick="document.getElementById('f').click()">📤 IMPORTAR EXCEL</button>
+            <input type="file" id="f" style="display:none" onchange="importar()">
         </div>
-        <input type="file" id="f" style="display:none" onchange="importar()">
     </div>
 </nav>
 
-<div class="container-fluid mt-4 mb-5 px-5">
+<div class="container-fluid mt-4 mb-5 px-lg-5">
     <div class="row g-4">
+        
         <div class="col-lg-9" id="area-pdf">
             
-            <div class="row g-2 mb-4 bg-white p-3 shadow-sm border rounded no-pdf">
+            <div class="row g-3 mb-4 bg-white p-4 shadow-sm border rounded no-pdf">
                 <div class="col-md-7">
-                    <input type="text" id="q" class="form-control form-control-lg" placeholder="Buscar por Placa o Cédula...">
+                    <input type="text" id="q" class="form-control form-control-lg" placeholder="Ingrese Placa o Cédula del conductor...">
                 </div>
                 <div class="col-md-2">
                     <button class="btn btn-primary btn-lg w-100 fw-bold" onclick="consultar()">BUSCAR</button>
                 </div>
                 <div class="col-md-3">
-                    <button class="btn btn-yego btn-lg w-100 fw-bold" onclick="guardar()">GUARDAR / ACTUALIZAR</button>
+                    <button class="btn btn-yego btn-lg w-100 fw-bold" onclick="guardar()">GUARDAR REGISTRO</button>
                 </div>
             </div>
 
             <form id="formYego">
-                <div class="section-header">I. INFORMACIÓN DEL VEHÍCULO Y GPS</div>
+                
+                <div class="section-header">I. INFORMACIÓN TÉCNICA DEL VEHÍCULO Y GPS</div>
                 <div class="card-body row g-3">
-                    <div class="col-md-2"><label>PLACA</label><input type="text" id="v_placa" class="form-control fw-bold text-uppercase"></div>
+                    <div class="col-md-2">
+                        <label>PLACA VEHÍCULO</label>
+                        <input type="text" id="v_placa" class="form-control fw-bold text-uppercase" placeholder="ABC-123">
+                    </div>
                     <div class="col-md-2"><label>MARCA</label><input type="text" id="v_marca" class="form-control"></div>
                     <div class="col-md-2"><label>COLOR</label><input type="text" id="v_color" class="form-control"></div>
                     <div class="col-md-2"><label>CLASE</label><input type="text" id="v_clase" class="form-control"></div>
                     <div class="col-md-2"><label>MODELO</label><input type="text" id="v_modelo" class="form-control"></div>
                     <div class="col-md-2"><label>REPOTENCIADO</label><input type="text" id="v_repo" class="form-control"></div>
+                    
                     <div class="col-md-3"><label>LÍNEA</label><input type="text" id="v_linea" class="form-control"></div>
-                    <div class="col-md-3"><label>MOTOR</label><input type="text" id="v_motor" class="form-control"></div>
-                    <div class="col-md-3"><label>CHASIS</label><input type="text" id="v_chasis" class="form-control"></div>
+                    <div class="col-md-3"><label>NÚMERO MOTOR</label><input type="text" id="v_motor" class="form-control"></div>
+                    <div class="col-md-3"><label>NÚMERO CHASIS</label><input type="text" id="v_chasis" class="form-control"></div>
                     <div class="col-md-3"><label>CARROCERÍA</label><input type="text" id="v_carro" class="form-control"></div>
-                    <div class="col-md-3"><label>PROVEEDOR GPS</label><input type="text" id="v_gps_co" class="form-control border-primary"></div>
+                    
+                    <div class="col-md-3">
+                        <label>PROVEEDOR GPS</label>
+                        <input type="text" id="v_gps_co" class="form-control border-primary" placeholder="Nombre Empresa GPS">
+                    </div>
                     <div class="col-md-3"><label>USUARIO GPS</label><input type="text" id="v_gps_user" class="form-control"></div>
-                    <div class="col-md-3"><label>CLAVE GPS</label><input type="text" id="v_gps_pass" class="form-control"></div>
+                    <div class="col-md-3"><label>CLAVE ACCESO GPS</label><input type="text" id="v_gps_pass" class="form-control"></div>
                     <div class="col-md-3"><label>PLACA TRAILER</label><input type="text" id="v_trayler" class="form-control"></div>
+                    
                     <div class="col-md-4"><label>MODELO TRAILER</label><input type="text" id="v_m_trailer" class="form-control"></div>
-                    <div class="col-md-4"><label>VENC. SOAT</label><input type="date" id="v_soat" class="form-control" onchange="alerta(this.id)"></div>
-                    <div class="col-md-4"><label>VENC. TECNOMECÁNICA</label><input type="date" id="v_tecno" class="form-control" onchange="alerta(this.id)"></div>
+                    <div class="col-md-4">
+                        <label>VENCIMIENTO SOAT</label>
+                        <input type="date" id="v_soat" class="form-control" onchange="alerta(this.id)">
+                    </div>
+                    <div class="col-md-4">
+                        <label>VENCIMIENTO TECNOMECÁNICA</label>
+                        <input type="date" id="v_tecno" class="form-control" onchange="alerta(this.id)">
+                    </div>
                 </div>
 
                 <div class="section-header">II. DATOS DEL CONDUCTOR Y SEGURIDAD SOCIAL</div>
                 <div class="card-body row g-3">
-                    <div class="col-md-4"><label>NOMBRE COMPLETO</label><input type="text" id="c_nom" class="form-control"></div>
+                    <div class="col-md-5"><label>NOMBRE COMPLETO DEL CONDUCTOR</label><input type="text" id="c_nom" class="form-control"></div>
                     <div class="col-md-4">
-                        <label>DOCUMENTO IDENTIDAD</label>
+                        <label>DOCUMENTO DE IDENTIDAD</label>
                         <div class="input-group">
-                            <select id="c_tipo" class="form-select" style="max-width: 90px;">
-                                <option value="CC">CC</option><option value="CE">CE</option><option value="PPT">PPT</option><option value="PAS">PAS</option>
+                            <select id="c_tipo" class="form-select" style="max-width: 95px;">
+                                <option value="CC">CC</option><option value="CE">CE</option><option value="PPT">PPT</option>
                             </select>
-                            <input type="text" id="c_cc" class="form-control" placeholder="Número">
+                            <input type="text" id="c_cc" class="form-control" placeholder="Número de Cédula">
                         </div>
                     </div>
-                    <div class="col-md-2"><label>LICENCIA</label><input type="text" id="c_lic" class="form-control"></div>
-                    <div class="col-md-2"><label>VENC. LICENCIA</label><input type="date" id="c_venc_lic" class="form-control" onchange="alerta(this.id)"></div>
-                    <div class="col-md-2"><label>CELULAR</label><input type="text" id="c_cel" class="form-control"></div>
-                    <div class="col-md-3"><label>DIRECCIÓN RESIDENCIA</label><input type="text" id="c_dir" class="form-control"></div>
+                    <div class="col-md-3"><label>NÚMERO LICENCIA</label><input type="text" id="c_lic" class="form-control"></div>
+                    
+                    <div class="col-md-3"><label>VENCIMIENTO LICENCIA</label><input type="date" id="c_venc_lic" class="form-control" onchange="alerta(this.id)"></div>
+                    <div class="col-md-3"><label>TELÉFONO CELULAR</label><input type="text" id="c_cel" class="form-control"></div>
+                    <div class="col-md-3"><label>CIUDAD RESIDENCIA</label><input type="text" id="c_dir" class="form-control"></div>
                     <div class="col-md-3"><label>CORREO ELECTRÓNICO</label><input type="text" id="c_mail" class="form-control"></div>
-                    <div class="col-md-4"><label class="text-danger">VENCIMIENTO PLANILLA</label><input type="date" id="c_venc_planilla" class="form-control border-danger" onchange="alerta(this.id)"></div>
-                    <div class="col-md-4"><label>EPS</label><input type="text" id="c_eps" class="form-control"></div>
-                    <div class="col-md-4"><label>ARL</label><input type="text" id="c_arl" class="form-control"></div>
-                    <div class="col-md-4"><label>FONDO DE PENSIÓN</label><input type="text" id="c_pension" class="form-control"></div>
+                    
+                    <div class="col-md-3">
+                        <label class="text-danger">VENCIMIENTO SEG. SOCIAL</label>
+                        <input type="date" id="c_venc_planilla" class="form-control border-danger" onchange="alerta(this.id)">
+                    </div>
+                    <div class="col-md-3"><label>ENTIDAD EPS</label><input type="text" id="c_eps" class="form-control"></div>
+                    <div class="col-md-3"><label>ENTIDAD ARL</label><input type="text" id="c_arl" class="form-control"></div>
+                    <div class="col-md-3"><label>FONDO PENSIÓN</label><input type="text" id="c_pension" class="form-control"></div>
                 </div>
 
-                <div class="section-header">III. INFORMACIÓN DE TENEDOR Y PROPIETARIO</div>
+                <div class="section-header">III. INFORMACIÓN DE TENEDOR Y PROPIETARIO DEL VEHÍCULO</div>
                 <div class="card-body row g-4">
                     <div class="col-md-6">
                         <div class="box-sub shadow-sm">
                             <label class="text-primary fw-bold mb-2">DATOS DEL TENEDOR</label>
-                            <input type="text" id="t_nom" class="form-control mb-2" placeholder="Nombre o Razón Social">
+                            <input type="text" id="t_nom" class="form-control mb-2" placeholder="Nombre completo o Razón Social">
                             <div class="input-group mb-2">
                                 <select id="t_tipo" class="form-select" style="max-width: 90px;"><option value="NIT">NIT</option><option value="CC">CC</option></select>
-                                <input type="text" id="t_nit" class="form-control" placeholder="Número">
+                                <input type="text" id="t_nit" class="form-control" placeholder="Identificación">
                             </div>
-                            <input type="text" id="t_dir" class="form-control mb-2" placeholder="Dirección">
-                            <input type="text" id="t_tel" class="form-control mb-2" placeholder="Teléfono de Contacto">
-                            <input type="text" id="t_mail" class="form-control" placeholder="Correo Electrónico">
+                            <input type="text" id="t_dir" class="form-control mb-2" placeholder="Dirección de oficina/casa">
+                            <input type="text" id="t_tel" class="form-control mb-2" placeholder="Teléfonos de contacto">
+                            <input type="text" id="t_mail" class="form-control" placeholder="Correo electrónico institucional">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="box-sub shadow-sm">
                             <label class="text-primary fw-bold mb-2">DATOS DEL PROPIETARIO</label>
-                            <input type="text" id="p_nom" class="form-control mb-2" placeholder="Nombre o Razón Social">
+                            <input type="text" id="p_nom" class="form-control mb-2" placeholder="Nombre según Tarjeta de Propiedad">
                             <div class="input-group mb-2">
                                 <select id="p_tipo" class="form-select" style="max-width: 90px;"><option value="CC">CC</option><option value="NIT">NIT</option></select>
-                                <input type="text" id="p_nit" class="form-control" placeholder="Número">
+                                <input type="text" id="p_nit" class="form-control" placeholder="Identificación">
                             </div>
-                            <input type="text" id="p_dir" class="form-control mb-2" placeholder="Dirección">
-                            <input type="text" id="p_tel" class="form-control mb-2" placeholder="Teléfono de Contacto">
-                            <input type="text" id="p_mail" class="form-control" placeholder="Correo Electrónico">
+                            <input type="text" id="p_dir" class="form-control mb-2" placeholder="Dirección registrada">
+                            <input type="text" id="p_tel" class="form-control mb-2" placeholder="Teléfonos de contacto">
+                            <input type="text" id="p_mail" class="form-control" placeholder="Correo electrónico personal">
                         </div>
                     </div>
                 </div>
 
-                <div class="section-header">IV. REFERENCIAS</div>
+                <div class="section-header">IV. REFERENCIAS LABORALES Y PERSONALES</div>
                 <div class="card-body row g-3">
                     <div class="col-md-4">
                         <div class="box-sub">
                             <label>REFERENCIA EMPRESA 1</label>
-                            <input type="text" id="r_e1" class="form-control mb-1" placeholder="Nombre Empresa">
-                            <input type="text" id="r_t1" class="form-control" placeholder="Teléfono">
+                            <input type="text" id="r_e1" class="form-control mb-2" placeholder="Nombre de la Empresa">
+                            <input type="text" id="r_t1" class="form-control" placeholder="Teléfono/Celular">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="box-sub">
                             <label>REFERENCIA EMPRESA 2</label>
-                            <input type="text" id="r_e2" class="form-control mb-1" placeholder="Nombre Empresa">
-                            <input type="text" id="r_t2" class="form-control" placeholder="Teléfono">
+                            <input type="text" id="r_e2" class="form-control mb-2" placeholder="Nombre de la Empresa">
+                            <input type="text" id="r_t2" class="form-control" placeholder="Teléfono/Celular">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="box-sub">
                             <label>REFERENCIA PERSONAL</label>
-                            <input type="text" id="r_per" class="form-control mb-1" placeholder="Nombre Contacto">
-                            <input type="text" id="r_tp" class="form-control" placeholder="Teléfono">
+                            <input type="text" id="r_per" class="form-control mb-2" placeholder="Nombre de quien refiere">
+                            <input type="text" id="r_tp" class="form-control" placeholder="Teléfono/Celular">
                         </div>
                     </div>
                 </div>
@@ -197,26 +295,29 @@
         </div>
 
         <div class="col-lg-3 no-pdf">
-            <div class="sticky-top" style="top: 20px;">
+            <div class="sticky-top" style="top: 20px; z-index: 100;">
                 <div class="card bg-dark text-white p-3 mb-3 shadow">
-                    <h6 class="mb-1 text-warning fw-bold">⚠️ PANEL DE VENCIMIENTOS</h6>
-                    <small id="placa-activa" class="text-light">Placa consultada: -</small>
+                    <h6 class="mb-1 text-warning fw-bold">⚠️ MONITOR DE DOCUMENTOS</h6>
+                    <small id="placa-activa" class="text-light opacity-75">Placa en pantalla: Ninguna</small>
                 </div>
                 <div id="panel-vencimientos" class="p-4 border rounded bg-white shadow-sm" style="min-height: 250px;">
-                    <p class="text-muted text-center mt-5 small">Consulte una placa para ver el estado de documentos...</p>
+                    <div class="text-center mt-5">
+                        <p class="text-muted small">Realice una consulta para evaluar los vencimientos técnicos y legales.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="section-header mt-5 no-pdf">V. LISTADO MAESTRO DE REGISTROS</div>
-    <div class="table-container mt-2 no-pdf">
+    <div class="section-header mt-5 no-pdf">V. LISTADO DE VEHÍCULOS Y CONDUCTORES REGISTRADOS</div>
+    <div class="table-container mt-2 no-pdf mb-5">
         <table class="table table-hover align-middle mb-0">
             <thead class="table-dark">
                 <tr>
                     <th class="ps-4">PLACA</th>
-                    <th>CONDUCTOR</th>
-                    <th class="text-center">GESTIÓN DE DOCUMENTOS</th>
+                    <th>CONDUCTOR ASIGNADO</th>
+                    <th>MODELO</th>
+                    <th class="text-center">GESTIÓN DE ARCHIVOS</th>
                 </tr>
             </thead>
             <tbody id="listaTabla"></tbody>
@@ -225,37 +326,58 @@
 </div>
 
 <script>
+    // --- UTILIDADES DE FORMULARIO ---
     const val = (id) => document.getElementById(id).value;
     const set = (id, v) => { if(document.getElementById(id)) document.getElementById(id).value = v || ''; };
 
-    // --- FUNCIÓN PDF ROBUSTA ---
+    // --- FUNCIÓN DE GENERACIÓN DE PDF MEJORADA (ASÍNCRONA) ---
     async function descargarPDF(placa) {
-        console.log("Generando PDF para placa:", placa);
+        // Obtenemos el botón para dar feedback al usuario
+        const btn = event.target;
+        const textoOriginal = btn.innerHTML;
+        
         try {
-            const resp = await fetch(`/consultar/${placa}`);
-            const data = await resp.json();
-            llenar(data); // Aseguramos que el formulario tenga los datos
-            
-            await new Promise(r => setTimeout(r, 800)); // Espera para renderizado
+            btn.innerHTML = "⌛ PROCESANDO...";
+            btn.disabled = true;
 
-            const element = document.getElementById('area-pdf');
-            const opt = {
+            // Consultamos los datos más recientes antes de imprimir
+            const res = await fetch(`/consultar/${placa}`);
+            const data = await res.json();
+            llenar(data); 
+
+            // Pequeña pausa para asegurar que el DOM se actualizó con los datos
+            await new Promise(resolve => setTimeout(resolve, 600));
+
+            const elemento = document.getElementById('area-pdf');
+            const opciones = {
                 margin: 10,
                 filename: `YEGO_FICHA_${placa}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true,
+                    logging: false,
+                    letterRendering: true
+                },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            html2pdf().from(element).set(opt).save()
-                .then(() => alert("PDF generado con éxito."))
-                .catch(err => console.error(err));
-        } catch(e) {
-            alert("Error al generar PDF.");
-            console.log(e);
+            // Ejecución del proceso PDF
+            await html2pdf().from(elemento).set(opciones).save();
+            
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+            console.log("PDF generado para la placa: " + placa);
+
+        } catch (error) {
+            console.error("Error en PDF:", error);
+            btn.innerHTML = "❌ ERROR";
+            btn.disabled = false;
+            alert("Error al intentar generar el archivo PDF.");
         }
     }
 
+    // --- CARGA DE DATOS EN LA TABLA ---
     async function listarTodo() {
         try {
             const res = await fetch('/listar');
@@ -264,9 +386,10 @@
             tabla.innerHTML = db.map(i => `
                 <tr>
                     <td class="fw-bold ps-4 text-primary">${i.v.placa}</td>
-                    <td>${i.c.nom || 'SIN NOMBRE'}</td>
+                    <td>${i.c.nom || 'PENDIENTE'}</td>
+                    <td>${i.v.modelo || '-'}</td>
                     <td class="text-center">
-                        <div class="btn-group">
+                        <div class="btn-group shadow-sm">
                             <button class="btn btn-sm btn-outline-primary fw-bold" onclick="cargar('${i.v.placa}')">VER</button>
                             <button class="btn btn-sm btn-danger fw-bold" onclick="descargarPDF('${i.v.placa}')">PDF</button>
                             <button class="btn btn-sm btn-warning fw-bold" onclick="descargarExcel('${i.v.placa}')">EXCEL</button>
@@ -275,83 +398,151 @@
                     </td>
                 </tr>
             `).join('');
-        } catch(e) { console.log("Error al listar", e); }
+        } catch(e) { 
+            console.log("Error en listarTodo:", e); 
+        }
     }
 
+    // --- ACCIÓN DE BÚSQUEDA ---
     async function consultar() {
-        const p = val('q'); if(!p) return;
-        const res = await fetch(`/consultar/${p}`);
+        const query = val('q'); 
+        if(!query) return alert("Ingrese una placa para buscar.");
+        
+        const res = await fetch(`/consultar/${query}`);
         if(res.ok) {
             const d = await res.json();
             llenar(d);
             actualizarDashboard(d);
-        } else alert("Registro no encontrado.");
+        } else {
+            alert("No se encontró ningún registro con esa placa.");
+        }
     }
 
+    // --- FUNCIÓN PARA LLENAR EL FORMULARIO ---
     function llenar(d) {
+        if(!d) return;
+        // Mapeo dinámico de campos
         if(d.v) Object.keys(d.v).forEach(k => set(k==='user'?'v_gps_user':k==='pass'?'v_gps_pass':'v_'+k, d.v[k]));
         if(d.c) Object.keys(d.c).forEach(k => set('c_'+k, d.c[k]));
         if(d.t) Object.keys(d.t).forEach(k => set('t_'+k, d.t[k]));
         if(d.p) Object.keys(d.p).forEach(k => set('p_'+k, d.p[k]));
         if(d.r) Object.keys(d.r).forEach(k => set('r_'+k, d.r[k]));
-        setTimeout(() => { ['v_soat','v_tecno','c_venc_lic','c_venc_planilla'].forEach(alerta); }, 150);
+        
+        // Disparar validación de alertas visuales
+        setTimeout(() => { 
+            ['v_soat', 'v_tecno', 'c_venc_lic', 'c_venc_planilla'].forEach(alerta); 
+        }, 200);
     }
 
+    // --- FUNCIÓN GUARDAR / ACTUALIZAR ---
     async function guardar() {
-        const d = {
+        if(!val('v_placa')) return alert("La placa es obligatoria.");
+        
+        const data = {
             v: { placa: val('v_placa').toUpperCase(), marca: val('v_marca'), color: val('v_color'), clase: val('v_clase'), modelo: val('v_modelo'), repo: val('v_repo'), linea: val('v_linea'), motor: val('v_motor'), chasis: val('v_chasis'), carro: val('v_carro'), trayler: val('v_trayler'), m_trailer: val('v_m_trailer'), soat: val('v_soat'), tecno: val('v_tecno'), gps_co: val('v_gps_co'), user: val('v_gps_user'), pass: val('v_gps_pass') },
             c: { tipo: val('c_tipo'), nom: val('c_nom'), cc: val('c_cc'), cel: val('c_cel'), lic: val('c_lic'), venc_lic: val('c_venc_lic'), eps: val('c_eps'), arl: val('c_arl'), pension: val('c_pension'), venc_planilla: val('c_venc_planilla'), mail: val('c_mail'), dir: val('c_dir') },
             t: { tipo: val('t_tipo'), nom: val('t_nom'), nit: val('t_nit'), tel: val('t_tel'), mail: val('t_mail'), dir: val('t_dir') },
             p: { tipo: val('p_tipo'), nom: val('p_nom'), nit: val('p_nit'), tel: val('p_tel'), mail: val('p_mail'), dir: val('p_dir') },
             r: { e1: val('r_e1'), t1: val('r_t1'), e2: val('r_e2'), t2: val('r_t2'), per: val('r_per'), tp: val('r_tp') }
         };
-        await fetch('/guardar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(d) });
-        alert("¡Datos guardados correctamente!");
-        listarTodo();
+
+        const res = await fetch('/guardar', { 
+            method: 'POST', 
+            headers: {'Content-Type': 'application/json'}, 
+            body: JSON.stringify(data) 
+        });
+
+        if(res.ok) { 
+            alert("Información sincronizada correctamente."); 
+            listarTodo(); 
+        }
     }
 
+    // --- SISTEMA DE ALERTAS VISUALES ---
     function alerta(id) {
-        const el = document.getElementById(id); if(!el || !el.value) return;
-        const diff = (new Date(el.value) - new Date()) / 86400000;
+        const el = document.getElementById(id); 
+        if(!el || !el.value) return;
+        
+        const hoy = new Date();
+        const fechaDoc = new Date(el.value);
+        const diffDias = Math.ceil((fechaDoc - hoy) / (1000 * 60 * 60 * 24));
+        
         el.classList.remove('vencido', 'por-vencer');
-        if(diff < 0) el.classList.add('vencido'); else if(diff <= 10) el.classList.add('por-vencer');
+        if(diffDias < 0) {
+            el.classList.add('vencido');
+        } else if(diffDias <= 15) {
+            el.classList.add('por-vencer');
+        }
     }
 
+    // --- ACTUALIZACIÓN DEL MONITOR DERECHO ---
     function actualizarDashboard(d) {
-        document.getElementById('placa-activa').innerText = `Placa consultada: ${d.v.placa}`;
+        document.getElementById('placa-activa').innerText = `Placa en pantalla: ${d.v.placa}`;
         const panel = document.getElementById('panel-vencimientos');
-        panel.innerHTML = '<h6 class="fw-bold mb-3 border-bottom pb-1">Estado actual:</h6>';
-        const fechas = [{n:'SOAT',f:d.v.soat},{n:'TECNO',f:d.v.tecno},{n:'LICENCIA',f:d.c.venc_lic},{n:'PLANILLA',f:d.c.venc_planilla}];
-        fechas.forEach(f => {
-            if(!f.f) return;
-            const diff = Math.ceil((new Date(f.f) - new Date()) / 86400000);
-            let c = (diff < 0) ? 'alert-danger' : (diff <= 10) ? 'alert-warning' : 'alert-success';
-            panel.innerHTML += `<div class="alert-item ${c}"><strong>${f.n}:</strong><br><small>${f.f} (${diff} días)</small></div>`;
+        panel.innerHTML = '<h6 class="fw-bold mb-3 border-bottom pb-2">RESUMEN TÉCNICO:</h6>';
+        
+        const docs = [
+            { nombre: 'SOAT', fecha: d.v.soat },
+            { nombre: 'TECNO', fecha: d.v.tecno },
+            { nombre: 'LICENCIA', fecha: d.c.venc_lic },
+            { nombre: 'PLANILLA', fecha: d.c.venc_planilla }
+        ];
+
+        docs.forEach(doc => {
+            if(!doc.fecha) return;
+            const dias = Math.ceil((new Date(doc.fecha) - new Date()) / 86400000);
+            const clase = (dias < 0) ? 'alert-danger' : (dias <= 15) ? 'alert-warning' : 'alert-success';
+            const msg = (dias < 0) ? 'VENCIDO' : `Faltan ${dias} días`;
+            
+            panel.innerHTML += `
+                <div class="alert-item ${clase}">
+                    <strong>${doc.nombre}:</strong> ${doc.fecha}<br>
+                    <small class="fw-bold">${msg}</small>
+                </div>`;
         });
     }
 
-    function limpiarForm() { document.getElementById("formYego").reset(); document.getElementById("q").value = ""; }
-    function cargar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
+    // --- FUNCIONES ADICIONALES ---
+    function limpiarForm() { 
+        document.getElementById("formYego").reset(); 
+        document.getElementById("q").value = ""; 
+        document.getElementById('panel-vencimientos').innerHTML = '<p class="text-muted text-center mt-5">Monitor reiniciado.</p>';
+    }
+
+    function cargar(p) { 
+        document.getElementById('q').value = p; 
+        consultar(); 
+        window.scrollTo({ top: 0, behavior: 'smooth' }); 
+    }
 
     async function eliminar(p) {
-        const pw = prompt("Clave de Administrador:"); if(!pw) return;
-        const res = await fetch(`/eliminar/${p}`, { method:'DELETE', headers:{'admin-password':pw} });
-        if(res.ok) { alert("Registro eliminado."); listarTodo(); } else alert("Clave incorrecta.");
+        const pass = prompt("Para eliminar el registro de la placa " + p + ", ingrese la clave de administración:");
+        if(!pass) return;
+        const res = await fetch(`/eliminar/${p}`, { method:'DELETE', headers:{'admin-password':pass} });
+        if(res.ok) { alert("Registro borrado."); listarTodo(); } else { alert("Acceso denegado."); }
     }
 
     async function descargarExcel(p) {
         const res = await fetch(`/consultar/${p}`);
         const d = await res.json();
-        const ws = XLSX.utils.aoa_to_sheet([["REPORTE YEGO SEGURIDAD"],["PLACA",d.v.placa],["CONDUCTOR",d.c.nom],["SOAT",d.v.soat]]);
-        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Ficha");
-        XLSX.writeFile(wb, `YEGO_${p}.xlsx`);
+        const info = [
+            ["FICHA TÉCNICA YEGO LOGÍSTICA"],
+            ["PLACA", d.v.placa], ["CONDUCTOR", d.c.nom], ["ID", d.c.cc], ["TEL", d.c.cel],
+            ["SOAT", d.v.soat], ["TECNO", d.v.tecno], ["PLANILLA", d.c.venc_planilla]
+        ];
+        const ws = XLSX.utils.aoa_to_sheet(info);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Datos");
+        XLSX.writeFile(wb, `Reporte_Yego_${p}.xlsx`);
     }
 
     async function importar() {
-        const file = document.getElementById('f').files[0]; if(!file) return;
+        const file = document.getElementById('f').files[0];
+        if(!file) return;
         const fd = new FormData(); fd.append('archivo', file);
         await fetch('/importar', { method:'POST', body:fd });
-        alert("Importación finalizada."); listarTodo();
+        alert("Proceso de importación finalizado."); 
+        listarTodo();
     }
 </script>
 </body>
