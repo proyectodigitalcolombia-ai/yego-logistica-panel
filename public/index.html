@@ -24,7 +24,6 @@
         .alert-danger { border-left-color: #dc3545; background: #fdf2f2; }
         .alert-warning { border-left-color: #ffc107; background: #fffbeb; }
         .alert-success { border-left-color: #28a745; background: #f4faf6; }
-        /* Ocultar elementos en el PDF */
         @media print { .no-pdf { display: none !important; } }
     </style>
 </head>
@@ -190,7 +189,7 @@
         const pass = prompt(`Para eliminar la placa ${p}, ingresa la clave de administrador:`);
         if(!pass) return;
         const res = await fetch(`/eliminar/${p}`, { method: 'DELETE', headers: { 'admin-password': pass } });
-        if(res.ok) { alert("Eliminado."); listarTodo(); } else { alert((await res.json()).error); }
+        if(res.ok) { alert("Eliminado."); listarTodo(); } else { alert("Clave incorrecta."); }
     }
 
     async function consultar() {
@@ -227,7 +226,8 @@
             r: { e1: val('r_e1'), t1: val('r_t1'), e2: val('r_e2'), t2: val('r_t2'), per: val('r_per'), tp: val('r_tp') }
         };
         const res = await fetch('/guardar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(d) });
-        alert((await res.json()).mensaje);
+        const resp = await res.json();
+        alert(resp.mensaje);
         listarTodo();
     }
 
@@ -274,10 +274,10 @@
         const elemento = document.getElementById('area-pdf');
         const placa = document.getElementById('v_placa').value || "Ficha";
         const opciones = {
-            margin: 10,
+            margin: [10, 5, 10, 5],
             filename: `Ficha_YEGO_${placa}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
+            html2canvas: { scale: 2, useCORS: true, logging: false },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
         html2pdf().set(opciones).from(elemento).save();
@@ -285,46 +285,27 @@
 
     function generarPlantilla() {
         let pArr = Array.from({ length: 30 }, () => Array(10).fill(""));
-        pArr[1] = ["", "PLACA", "", "", "MARCA", "", "", "COLOR"];
-        pArr[2] = ["", val('v_placa'), "", "", val('v_marca'), "", "", val('v_color')];
-        pArr[3] = ["", "CLASE", "", "", "MODELO", "", "", "REPOTENCIADO"];
-        pArr[3][1] = val('v_clase'); pArr[3][4] = val('v_modelo'); pArr[3][7] = val('v_repo');
-        pArr[4] = ["", "LÍNEA", "", "", "MOTOR", "", "", "CHASIS"];
-        pArr[4][1] = val('v_linea'); pArr[4][4] = val('v_motor'); pArr[4][7] = val('v_chasis');
-        pArr[5] = ["", "PROVEEDOR GPS", "", "", "USUARIO GPS", "", "", "CLAVE GPS"];
-        pArr[5][1] = val('v_gps_co'); pArr[5][4] = val('v_gps_user'); pArr[5][7] = val('v_gps_pass');
-        pArr[6] = ["", "PLACA TRAILER", "", "", "CARROCERÍA", "", "", "MOD. TRAILER"];
-        pArr[6][1] = val('v_trayler'); pArr[6][4] = val('v_carro'); pArr[6][7] = val('v_m_trailer');
-        pArr[7] = ["", "VENC. SOAT", "", "", "VENC. TECNO"];
-        pArr[7][1] = val('v_soat'); pArr[7][4] = val('v_tecno');
-
-        pArr[9] = ["", "NOMBRE COMPLETO", "", "", "TIPO", "IDENTIFICACIÓN", "", "LICENCIA"];
-        pArr[10] = ["", val('c_nom'), "", "", val('c_tipo'), val('c_cc'), "", val('c_lic')];
-        pArr[11] = ["", "", "", "", "VENC. LICENCIA"];
-        pArr[11][4] = val('c_venc_lic');
-        pArr[12] = ["", "DIRECCIÓN", "", "", "CORREO"];
-        pArr[12][1] = val('c_dir'); pArr[12][4] = val('c_mail');
-        pArr[13] = ["", "CELULAR", "", "", "ARL", "", "", "EPS"];
-        pArr[13][1] = val('c_cel'); pArr[13][4] = val('c_arl'); pArr[13][7] = val('c_eps');
-        pArr[14] = ["", "", "", "", "FONDO PENSIÓN"];
-        pArr[14][4] = val('c_pension');
-
-        pArr[16] = ["", "TENEDOR", "", "", "TIPO", "DOCUMENTO", "", "DIRECCIÓN"];
-        pArr[16][1] = val('t_nom'); pArr[16][4] = val('t_tipo'); pArr[16][5] = val('t_nit'); pArr[16][7] = val('t_dir');
-        pArr[17][1] = val('t_tel'); pArr[18][1] = val('t_mail');
-
-        pArr[19] = ["", "PROPIETARIO", "", "", "TIPO", "DOCUMENTO", "", "DIRECCIÓN"];
-        pArr[19][1] = val('p_nom'); pArr[19][4] = val('p_tipo'); pArr[19][5] = val('p_nit'); pArr[19][7] = val('p_dir');
-        pArr[20][1] = val('p_tel'); pArr[21][1] = val('p_mail');
-
-        pArr[24] = ["", "EMPRESA 1", "", "", "EMPRESA 2", "", "", "PERSONAL"];
-        pArr[24][1] = val('r_e1'); pArr[24][4] = val('r_e2'); pArr[24][7] = val('r_per');
-        pArr[25][1] = val('r_t1'); pArr[25][4] = val('r_t2'); pArr[25][7] = val('r_tp');
+        pArr[0] = ["FICHA TÉCNICA YEGO LOGÍSTICA", "", "", "", "", "", "", ""];
+        pArr[1] = ["", "PLACA", "", "MARCA", "", "COLOR", "", "CLASE"];
+        pArr[2] = ["", val('v_placa'), "", val('v_marca'), "", val('v_color'), "", val('v_clase')];
+        pArr[3] = ["", "MODELO", "", "REPOTENCIADO", "", "LÍNEA", "", "MOTOR"];
+        pArr[4] = ["", val('v_modelo'), "", val('v_repo'), "", val('v_linea'), "", val('v_motor')];
+        pArr[5] = ["", "CHASIS", "", "CARROCERÍA", "", "TRAILER", "", "MOD. TRAILER"];
+        pArr[6] = ["", val('v_chasis'), "", val('v_carro'), "", val('v_trayler'), "", val('v_m_trailer')];
+        pArr[7] = ["", "VENC. SOAT", "", "VENC. TECNO", "", "GPS", "", ""];
+        pArr[8] = ["", val('v_soat'), "", val('v_tecno'), "", val('v_gps_co'), "", ""];
+        
+        pArr[10] = ["DATOS CONDUCTOR", "", "", "", "", "", "", ""];
+        pArr[11] = ["", "NOMBRE", "", "CC", "", "LICENCIA", "", "VENC. LIC"];
+        pArr[12] = ["", val('c_nom'), "", val('c_cc'), "", val('c_lic'), "", val('c_venc_lic')];
+        
+        pArr[15] = ["TENEDOR", val('t_nom'), "ID", val('t_nit'), "TEL", val('t_tel'), "MAIL", val('t_mail')];
+        pArr[16] = ["PROPIETARIO", val('p_nom'), "ID", val('p_nit'), "TEL", val('p_tel'), "MAIL", val('p_mail')];
 
         const ws = XLSX.utils.aoa_to_sheet(pArr);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Ficha YEGO");
-        XLSX.writeFile(wb, val('v_placa') ? `Ficha_${val('v_placa')}.xlsx` : "Plantilla.xlsx");
+        XLSX.writeFile(wb, `Ficha_${val('v_placa') || 'Yego'}.xlsx`);
     }
 </script>
 </body>
