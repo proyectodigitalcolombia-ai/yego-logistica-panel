@@ -34,7 +34,7 @@
     <div class="container d-flex justify-content-between">
         <span>YEGO LOGÍSTICA - SEGURIDAD</span>
         <div>
-            <button class="btn btn-danger btn-sm fw-bold me-2" onclick="generarPDF()">📥 DESCARGAR PDF</button>
+            <button id="btnPDF" class="btn btn-danger btn-sm fw-bold me-2" onclick="generarPDF()">📥 DESCARGAR PDF</button>
             <button class="btn btn-warning btn-sm fw-bold me-2" onclick="generarPlantilla()">📥 EXCEL</button>
             <button class="btn btn-outline-light btn-sm me-2" onclick="limpiarForm()">🆕 NUEVO</button>
             <button class="btn btn-success btn-sm fw-bold" onclick="document.getElementById('f').click()">📤 IMPORTAR EXCEL</button>
@@ -181,7 +181,6 @@
                     <td>${i.v.tecno || '-'}</td>
                     <td>
                         <button class="btn btn-primary btn-sm" onclick="cargar('${i.v.placa}')">VER</button>
-                        <button class="btn btn-danger btn-sm" onclick="eliminar('${i.v.placa}')">🗑️</button>
                     </td>
                 </tr>
             `).join('');
@@ -246,26 +245,48 @@
     function limpiarForm() { document.getElementById("formYego").reset(); }
     function cargar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
 
-    // --- FUNCIÓN PDF CORREGIDA SIN PERDER LÓGICA ---
+    // --- FUNCIÓN PDF BLINDADA PARA RENDER ---
     async function generarPDF() {
-        const elemento = document.getElementById('area-pdf');
-        const placa = val('v_placa') || "FICHA";
-        const opciones = {
-            margin: 10,
-            filename: `Ficha_${placa}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
+        const btn = document.getElementById('btnPDF');
+        const textDefault = btn.innerText;
+        
         try {
-            await html2pdf().set(opciones).from(elemento).save();
-        } catch (e) { alert("Error al generar PDF"); }
+            btn.innerText = "⏳ GENERANDO...";
+            btn.disabled = true;
+
+            const element = document.getElementById('area-pdf');
+            const placa = val('v_placa') || "FICHA_YEGO";
+            
+            const opt = {
+                margin:       10,
+                filename:     `Ficha_${placa}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: true, 
+                    logging: false,
+                    letterRendering: true,
+                    scrollY: 0
+                },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Ejecución paso a paso para evitar el cuelgue en Render
+            const worker = html2pdf().set(opt).from(element);
+            await worker.save();
+            
+            console.log("Descarga exitosa");
+        } catch (err) {
+            console.error("Error capturado:", err);
+            alert("No se pudo descargar el PDF. Asegúrese de que la placa tenga datos.");
+        } finally {
+            btn.innerText = textDefault;
+            btn.disabled = false;
+        }
     }
 
     function generarPlantilla() {
-        let pArr = Array.from({ length: 10 }, () => Array(10).fill(""));
-        pArr[0] = ["PLACA", val('v_placa'), "CONDUCTOR", val('c_nom')];
-        const ws = XLSX.utils.aoa_to_sheet(pArr);
+        const ws = XLSX.utils.json_to_sheet([{ PLACA: val('v_placa'), CONDUCTOR: val('c_nom') }]);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Ficha");
         XLSX.writeFile(wb, `Ficha_${val('v_placa')}.xlsx`);
