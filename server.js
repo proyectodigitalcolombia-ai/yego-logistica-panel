@@ -31,9 +31,7 @@ app.post('/importar', upload.single('archivo'), (req, res) => {
                 placa: data[2]?.[1] || '', marca: data[2]?.[4] || '', color: data[2]?.[7] || '', 
                 clase: data[3]?.[1] || '', modelo: data[3]?.[4] || '', repo: data[3]?.[7] || '',
                 linea: data[4]?.[1] || '', motor: data[4]?.[4] || '', chasis: data[4]?.[7] || '',
-                gps_co: data[5]?.[1] || '', 
-                user: data[5]?.[4] || '', // Usuario GPS
-                pass: data[5]?.[7] || '', // Clave GPS
+                gps_co: data[5]?.[1] || '', user: data[5]?.[4] || '', pass: data[5]?.[7] || '',
                 trayler: data[6]?.[1] || '', carro: data[6]?.[4] || '', m_trailer: data[6]?.[7] || '',
                 soat: data[7]?.[1] || '', tecno: data[7]?.[4] || ''
             },
