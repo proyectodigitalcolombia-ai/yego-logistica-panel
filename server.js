@@ -55,7 +55,7 @@ app.post('/guardar', (req, res) => {
     const index = db.findIndex(i => i.v.placa.toUpperCase() === nuevo.v.placa.toUpperCase());
     if (index !== -1) db[index] = nuevo; else db.push(nuevo);
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-    res.json({ mensaje: "✅ Registro guardado con éxito." });
+    res.json({ mensaje: "✅ Registro YEGO guardado." });
 });
 
 app.get('/consultar/:t', (req, res) => {
@@ -73,4 +73,4 @@ app.delete('/eliminar/:placa', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 YEGO Server (Node v20) Online`));
+app.listen(PORT, () => console.log(`🚀 YEGO Server Activo`));
