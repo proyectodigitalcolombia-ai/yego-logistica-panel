@@ -41,8 +41,8 @@ app.post('/importar', upload.single('archivo'), (req, res) => {
                 arl: data[12]?.[4] || '', eps: data[12]?.[7] || '', pension: data[13]?.[4] || '', 
                 mail: data[13]?.[1] || '', venc_planilla: data[14]?.[4] || ''
             },
-            t: { nom: data[16]?.[1] || '', nit: data[16]?.[4] || '', dir: data[16]?.[7] || '', tel: data[17]?.[1] || '', mail: data[18]?.[1] || '' },
-            p: { nom: data[19]?.[1] || '', nit: data[19]?.[4] || '', dir: data[19]?.[7] || '', tel: data[20]?.[1] || '', mail: data[21]?.[1] || '' },
+            t: { tipo: '', nom: data[16]?.[1] || '', nit: data[16]?.[4] || '', dir: data[16]?.[7] || '', tel: data[17]?.[1] || '', mail: data[18]?.[1] || '' },
+            p: { tipo: '', nom: data[19]?.[1] || '', nit: data[19]?.[4] || '', dir: data[19]?.[7] || '', tel: data[20]?.[1] || '', mail: data[21]?.[1] || '' },
             r: { e1: data[24]?.[1] || '', t1: data[25]?.[1] || '', e2: data[24]?.[4] || '', t2: data[25]?.[4] || '', per: data[24]?.[7] || '', tp: data[25]?.[7] || '' }
         };
         fs.unlinkSync(req.file.path);
