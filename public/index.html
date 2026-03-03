@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <title>SISTEMA YEGO LOGÍSTICA - GESTIÓN DE SEGURIDAD</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root { --yego-blue: #002d5a; --yego-green: #27ae60; }
         body { background: #f4f6f9; font-family: 'Segoe UI', sans-serif; font-size: 0.82rem; }
@@ -101,7 +101,9 @@
                             <label class="text-primary fw-bold">DATOS DEL TENEDOR</label>
                             <input type="text" id="t_nom" class="form-control mb-1" placeholder="Nombre/Razón Social">
                             <div class="input-group mb-1">
-                                <select id="t_tipo" class="form-select" style="max-width: 90px;"><option value="NIT">NIT</option><option value="CC">CC</option></select>
+                                <select id="t_tipo" class="form-select" style="max-width: 90px;">
+                                    <option value="NIT">NIT</option><option value="CC">CC</option><option value="PPT">PPT</option><option value="PAS">PAS</option>
+                                </select>
                                 <input type="text" id="t_nit" class="form-control" placeholder="Número">
                             </div>
                             <input type="text" id="t_dir" class="form-control mb-1" placeholder="Dirección">
@@ -114,7 +116,9 @@
                             <label class="text-primary fw-bold">DATOS DEL PROPIETARIO</label>
                             <input type="text" id="p_nom" class="form-control mb-1" placeholder="Nombre/Razón Social">
                             <div class="input-group mb-1">
-                                <select id="p_tipo" class="form-select" style="max-width: 90px;"><option value="CC">CC</option><option value="NIT">NIT</option></select>
+                                <select id="p_tipo" class="form-select" style="max-width: 90px;">
+                                    <option value="CC">CC</option><option value="NIT">NIT</option><option value="PPT">PPT</option><option value="PAS">PAS</option>
+                                </select>
                                 <input type="text" id="p_nit" class="form-control" placeholder="Número">
                             </div>
                             <input type="text" id="p_dir" class="form-control mb-1" placeholder="Dirección">
@@ -135,17 +139,31 @@
 
         <div class="col-lg-3 no-pdf">
             <div class="sticky-top" style="top: 20px;">
-                <div class="card bg-dark text-white p-3 mb-2 shadow"><h6 class="mb-0 text-warning">⚠️ PANEL ALERTAS</h6><small id="placa-activa">Placa: -</small></div>
-                <div id="panel-vencimientos" class="p-3 border rounded bg-white shadow-sm" style="min-height: 200px;"><p class="text-muted text-center mt-4 small">Sin datos...</p></div>
+                <div class="card bg-dark text-white p-3 mb-2 shadow">
+                    <h6 class="mb-0 text-warning">⚠️ PANEL DE ALERTAS</h6>
+                    <small id="placa-activa">Placa: -</small>
+                </div>
+                <div id="panel-vencimientos" class="p-3 border rounded bg-white shadow-sm" style="min-height: 200px;">
+                    <p class="text-muted text-center mt-4 small">Consulte una placa...</p>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="section-header mt-4 no-pdf">V. LISTADO DE REGISTROS</div>
-    <div class="card-body p-0 border shadow-sm mt-2 no-pdf">
+    <div class="card-body p-0 border shadow-sm mt-2 no-pdf" style="min-height: 100px;">
         <table class="table table-hover mb-0">
-            <thead class="table-dark"><tr><th class="ps-3">PLACA</th><th>CONDUCTOR</th><th class="text-center">GESTIÓN / DESCARGAS</th></tr></thead>
-            <tbody id="listaTabla"></tbody>
+            <thead class="table-dark">
+                <tr>
+                    <th class="ps-3">PLACA</th>
+                    <th>CONDUCTOR</th>
+                    <th>VENCIMIENTOS</th>
+                    <th class="text-center">GESTIÓN / DESCARGAS</th>
+                </tr>
+            </thead>
+            <tbody id="listaTabla">
+                <tr><td colspan="4" class="text-center p-4">Cargando registros de la base de datos...</td></tr>
+            </tbody>
         </table>
     </div>
 </div>
@@ -154,93 +172,93 @@
     const val = (id) => document.getElementById(id).value;
     const set = (id, v) => { if(document.getElementById(id)) document.getElementById(id).value = v || ''; };
 
+    // --- REVISIÓN DE LISTADO ---
     async function listarTodo() {
+        const tabla = document.getElementById('listaTabla');
         try {
             const res = await fetch('/listar');
+            if (!res.ok) throw new Error("No se pudo conectar al servidor");
             const db = await res.json();
-            const tabla = document.getElementById('listaTabla');
+            
+            if (!db || db.length === 0) {
+                tabla.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-muted">No hay registros guardados en la base de datos.</td></tr>';
+                return;
+            }
+
             tabla.innerHTML = db.map(i => `
                 <tr>
                     <td class="fw-bold ps-3 align-middle">${i.v.placa}</td>
                     <td class="align-middle">${i.c.nom || 'S/N'}</td>
+                    <td class="align-middle small">
+                        SOAT: ${i.v.soat || '-'}<br>TEC: ${i.v.tecno || '-'}
+                    </td>
                     <td class="text-center">
-                        <button class="btn btn-primary btn-sm fw-bold" onclick="cargar('${i.v.placa}')">VER</button>
-                        <button class="btn btn-danger btn-sm fw-bold" onclick="ejecutarPDF('${i.v.placa}')">📄 PDF</button>
-                        <button class="btn btn-warning btn-sm fw-bold" onclick="descargarExcel('${i.v.placa}')">📊 EXCEL</button>
-                        <button class="btn btn-dark btn-sm" onclick="eliminar('${i.v.placa}')">🗑️</button>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-primary fw-bold" onclick="cargar('${i.v.placa}')">VER</button>
+                            <button class="btn btn-danger fw-bold" onclick="descargarDesdeDB('${i.v.placa}', 'pdf')">📄 PDF</button>
+                            <button class="btn btn-warning fw-bold" onclick="descargarDesdeDB('${i.v.placa}', 'xlsx')">📊 EXCEL</button>
+                            <button class="btn btn-dark" onclick="eliminar('${i.v.placa}')">🗑️</button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
-        } catch(e) { console.log("Error listar", e); }
+        } catch(e) { 
+            console.error(e);
+            tabla.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-danger">Error al cargar datos: ${e.message}</td></tr>`;
+        }
     }
 
-    async function ejecutarPDF(placa) {
+    async function descargarDesdeDB(placa, tipo) {
         try {
             const res = await fetch(`/consultar/${placa}`);
+            if(!res.ok) return alert("Error al conectar con la base de datos.");
             const data = await res.json();
             llenar(data);
-            // El truco: Forzar una espera para que el DOM se actualice antes de html2pdf
-            setTimeout(() => {
-                const opt = { 
-                    margin: 10, filename: `YEGO_${placa}.pdf`, 
-                    html2canvas: { scale: 2, useCORS: true }, 
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-                };
-                html2pdf().set(opt).from(document.getElementById('area-pdf')).save();
-            }, 800);
-        } catch(e) { alert("Error PDF"); }
+            
+            if(tipo === 'pdf') {
+                setTimeout(() => {
+                    const elemento = document.getElementById('area-pdf');
+                    const opciones = {
+                        margin: 10, filename: `Ficha_YEGO_${placa}.pdf`,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    };
+                    html2pdf().from(elemento).set(opciones).save();
+                }, 600); 
+            } else {
+                let pArr = [
+                    ["SISTEMA YEGO LOGÍSTICA - FICHA TÉCNICA"],
+                    ["DATOS DEL VEHÍCULO"],
+                    ["PLACA", data.v.placa, "MARCA", data.v.marca, "MODELO", data.v.modelo],
+                    ["SOAT", data.v.soat, "TECNO", data.v.tecno],
+                    [""], ["DATOS DEL CONDUCTOR"],
+                    ["NOMBRE", data.c.nom, "ID", data.c.cc, "CEL", data.c.cel]
+                ];
+                const ws = XLSX.utils.aoa_to_sheet(pArr);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Ficha");
+                XLSX.writeFile(wb, `Ficha_YEGO_${placa}.xlsx`);
+            }
+        } catch(e) { alert("Error en la descarga."); }
     }
 
-    async function descargarExcel(placa) {
-        try {
-            const res = await fetch(`/consultar/${placa}`);
-            const data = await res.json();
-            const ws = XLSX.utils.aoa_to_sheet([["REPORTE YEGO", placa], ["Conductor", data.c.nom], ["Documento", data.c.cc]]);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Datos");
-            XLSX.writeFile(wb, `YEGO_${placa}.xlsx`);
-        } catch(e) { alert("Error Excel"); }
+    async function eliminar(p) {
+        const pass = prompt(`Ingresa la clave para eliminar ${p}:`);
+        if(!pass) return;
+        const res = await fetch(`/eliminar/${p}`, { method: 'DELETE', headers: { 'admin-password': pass } });
+        if(res.ok) { alert("Eliminado."); listarTodo(); } else { alert("Error de clave."); }
     }
 
     async function consultar() {
-        const res = await fetch(`/consultar/${val('q')}`);
-        if(res.ok) { const d = await res.json(); llenar(d); actualizarDashboard(d); } else alert("No existe");
-    }
-
-    function llenar(d) {
-        if(d.v) Object.keys(d.v).forEach(k => set(k==='user'?'v_gps_user':k==='pass'?'v_gps_pass':'v_'+k, d.v[k]));
-        if(d.c) Object.keys(d.c).forEach(k => set('c_'+k, d.c[k]));
-        if(d.t) Object.keys(d.t).forEach(k => set('t_'+k, d.t[k]));
-        if(d.p) Object.keys(d.p).forEach(k => set('p_'+k, d.p[k]));
-        if(d.r) Object.keys(d.r).forEach(k => set('r_'+k, d.r[k]));
-        setTimeout(() => { ['v_soat','v_tecno','c_venc_lic','c_venc_planilla'].forEach(alerta); }, 100);
-    }
-
-    async function guardar() {
-        const d = {
-            v: { placa: val('v_placa').toUpperCase(), marca: val('v_marca'), color: val('v_color'), clase: val('v_clase'), modelo: val('v_modelo'), repo: val('v_repo'), linea: val('v_linea'), motor: val('v_motor'), chasis: val('v_chasis'), carro: val('v_carro'), trayler: val('v_trayler'), m_trailer: val('v_m_trailer'), soat: val('v_soat'), tecno: val('v_tecno'), gps_co: val('v_gps_co'), user: val('v_gps_user'), pass: val('v_gps_pass') },
-            c: { tipo: val('c_tipo'), nom: val('c_nom'), cc: val('c_cc'), cel: val('c_cel'), lic: val('c_lic'), venc_lic: val('c_venc_lic'), eps: val('c_eps'), arl: val('c_arl'), pension: val('c_pension'), venc_planilla: val('c_venc_planilla'), mail: val('c_mail'), dir: val('c_dir') },
-            t: { tipo: val('t_tipo'), nom: val('t_nom'), nit: val('t_nit'), tel: val('t_tel'), mail: val('t_mail'), dir: val('t_dir') },
-            p: { tipo: val('p_tipo'), nom: val('p_nom'), nit: val('p_nit'), tel: val('p_tel'), mail: val('p_mail'), dir: val('p_dir') },
-            r: { e1: val('r_e1'), t1: val('r_t1'), e2: val('r_e2'), t2: val('r_t2'), per: val('r_per'), tp: val('r_tp') }
-        };
-        await fetch('/guardar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(d) });
-        alert("Guardado"); listarTodo();
-    }
-
-    function alerta(id) {
-        const el = document.getElementById(id); if(!el || !el.value) return;
-        const diff = (new Date(el.value) - new Date()) / 86400000;
-        el.classList.remove('vencido', 'por-vencer');
-        if(diff < 0) el.classList.add('vencido'); else if(diff <= 10) el.classList.add('por-vencer');
-    }
-
-    function limpiarForm() { document.getElementById("formYego").reset(); }
-    function cargar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
-    async function eliminar(p) { 
-        const pw = prompt("Clave:"); if(!pw) return;
-        await fetch(`/eliminar/${p}`, { method: 'DELETE', headers: {'admin-password': pw} });
-        listarTodo();
+        const query = val('q');
+        if(!query) return alert("Ingresa un dato para buscar.");
+        const res = await fetch(`/consultar/${query}`);
+        if(res.ok) {
+            const data = await res.json();
+            llenar(data);
+            actualizarDashboard(data);
+        } else alert("No encontrado.");
     }
 
     function actualizarDashboard(d) {
@@ -252,16 +270,57 @@
             if(!f.f) return;
             const diff = Math.ceil((new Date(f.f) - new Date()) / 86400000);
             let c = (diff < 0) ? 'alert-danger' : (diff <= 10) ? 'alert-warning' : 'alert-success';
-            panel.innerHTML += `<div class="alert-item ${c}"><strong>${f.n}:</strong><br><small>${f.f} (${diff} d)</small></div>`;
+            let i = (diff < 0) ? '❌' : (diff <= 10) ? '⚠️' : '✅';
+            panel.innerHTML += `<div class="alert-item ${c}"><strong>${f.n}:</strong> ${i}<br><small>${f.f} (${diff} d)</small></div>`;
         });
     }
 
+    async function guardar() {
+        if(!val('v_placa')) return alert("Falta Placa");
+        const d = {
+            v: { placa: val('v_placa').toUpperCase(), marca: val('v_marca'), color: val('v_color'), clase: val('v_clase'), modelo: val('v_modelo'), repo: val('v_repo'), linea: val('v_linea'), motor: val('v_motor'), chasis: val('v_chasis'), carro: val('v_carro'), trayler: val('v_trayler'), m_trailer: val('v_m_trailer'), soat: val('v_soat'), tecno: val('v_tecno'), gps_co: val('v_gps_co'), user: val('v_gps_user'), pass: val('v_gps_pass') },
+            c: { tipo: val('c_tipo'), nom: val('c_nom'), cc: val('c_cc'), cel: val('c_cel'), lic: val('c_lic'), venc_lic: val('c_venc_lic'), eps: val('c_eps'), arl: val('c_arl'), pension: val('c_pension'), venc_planilla: val('c_venc_planilla'), mail: val('c_mail'), dir: val('c_dir') },
+            t: { tipo: val('t_tipo'), nom: val('t_nom'), nit: val('t_nit'), tel: val('t_tel'), mail: val('t_mail'), dir: val('t_dir') },
+            p: { tipo: val('p_tipo'), nom: val('p_nom'), nit: val('p_nit'), tel: val('p_tel'), mail: val('p_mail'), dir: val('p_dir') },
+            r: { e1: val('r_e1'), t1: val('r_t1'), e2: val('r_e2'), t2: val('r_t2'), per: val('r_per'), tp: val('r_tp') }
+        };
+        const res = await fetch('/guardar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(d) });
+        const resp = await res.json();
+        alert(resp.mensaje);
+        listarTodo();
+    }
+
+    function llenar(d) {
+        if(d.v) Object.keys(d.v).forEach(k => set(k === 'user' ? 'v_gps_user' : k === 'pass' ? 'v_gps_pass' : 'v_'+k, d.v[k]));
+        if(d.c) Object.keys(d.c).forEach(k => set('c_'+k, d.c[k]));
+        if(d.t) Object.keys(d.t).forEach(k => set('t_'+k, d.t[k]));
+        if(d.p) Object.keys(d.p).forEach(k => set('p_'+k, d.p[k]));
+        if(d.r) Object.keys(d.r).forEach(k => set('r_'+k, d.r[k]));
+        setTimeout(() => { ['v_soat', 'v_tecno', 'c_venc_lic', 'c_venc_planilla'].forEach(alerta); }, 100);
+    }
+
+    function alerta(id) {
+        const el = document.getElementById(id); if(!el || !el.value) return;
+        const diff = (new Date(el.value) - new Date()) / 86400000;
+        el.classList.remove('vencido', 'por-vencer');
+        if(diff < 0) el.classList.add('vencido'); else if(diff <= 10) el.classList.add('por-vencer');
+    }
+
+    function limpiarForm() { 
+        document.getElementById("formYego").reset(); 
+        document.querySelectorAll('.form-control').forEach(e => e.classList.remove('vencido', 'por-vencer'));
+    }
+
+    function cargar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
+    
     async function importar() {
-        const file = document.getElementById('f').files[0];
-        if(!file) return;
-        const formData = new FormData(); formData.append('archivo', file);
+        if(!document.getElementById('f').files[0]) return;
+        const formData = new FormData();
+        formData.append('archivo', document.getElementById('f').files[0]);
         const res = await fetch('/importar', { method: 'POST', body: formData });
-        const d = await res.json(); llenar(d); alert("Importado");
+        const data = await res.json();
+        llenar(data);
+        alert("Importación finalizada.");
     }
 </script>
 </body>
