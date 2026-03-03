@@ -13,6 +13,8 @@
         .vencido { background-color: #ffdce0 !important; border: 2px solid #dc3545 !important; }
         .por-vencer { background-color: #fff3cd !important; border: 2px solid #ffc107 !important; }
         .btn-yego { background-color: #ffc107; color: #000; font-weight: bold; border: none; }
+        /* Mejora visual para Tenedor/Propietario */
+        .info-box { padding: 15px; background-color: #fcfcfc; border-radius: 5px; border: 1px solid #eee; height: 100%; }
     </style>
 </head>
 <body onload="listarTodo()">
@@ -56,7 +58,7 @@
         <div class="card-body row g-2">
             <div class="col-md-4"><label>NOMBRE CONDUCTOR</label><input type="text" id="c_nom" class="form-control"></div>
             <div class="col-md-2"><label>CÉDULA</label><input type="text" id="c_cc" class="form-control"></div>
-            <div class="col-md-2"><label>CELULAR</label><input type="text" id="c_cel" class="form-control"></div>
+            <div class="col-md-2"><label>CELULAR</label><input type="text" id="c_cel" class="form-control border-primary"></div>
             <div class="col-md-4"><label>DIRECCIÓN CONDUCTOR</label><input type="text" id="c_dir" class="form-control"></div>
             <div class="col-md-2"><label>LICENCIA</label><input type="text" id="c_lic" class="form-control"></div>
             <div class="col-md-2"><label>VENC. LICENCIA</label><input type="date" id="c_venc_lic" class="form-control"></div>
@@ -69,29 +71,33 @@
 
         <div class="section-header">III. TENEDOR Y PROPIETARIO</div>
         <div class="card-body row g-3">
-            <div class="col-md-6 border-end">
-                <label class="text-primary fw-bold">DATOS TENEDOR</label>
-                <input type="text" id="t_nom" class="form-control mb-1" placeholder="Nombre">
-                <input type="text" id="t_nit" class="form-control mb-1" placeholder="NIT">
-                <input type="text" id="t_tel" class="form-control mb-1" placeholder="Tel">
-                <input type="text" id="t_mail" class="form-control mb-1" placeholder="Correo Tenedor">
-                <input type="text" id="t_dir" class="form-control" placeholder="Dirección Tenedor">
+            <div class="col-md-6">
+                <div class="info-box border-end">
+                    <label class="text-primary fw-bold">DATOS TENEDOR</label>
+                    <input type="text" id="t_nom" class="form-control mb-1" placeholder="Nombre">
+                    <input type="text" id="t_nit" class="form-control mb-1" placeholder="NIT">
+                    <input type="text" id="t_tel" class="form-control mb-1" placeholder="Teléfono">
+                    <input type="text" id="t_mail" class="form-control mb-1" placeholder="Correo Tenedor">
+                    <input type="text" id="t_dir" class="form-control" placeholder="Dirección Tenedor">
+                </div>
             </div>
             <div class="col-md-6">
-                <label class="text-primary fw-bold">DATOS PROPIETARIO</label>
-                <input type="text" id="p_nom" class="form-control mb-1" placeholder="Nombre">
-                <input type="text" id="p_nit" class="form-control mb-1" placeholder="NIT">
-                <input type="text" id="p_tel" class="form-control mb-1" placeholder="Tel">
-                <input type="text" id="p_mail" class="form-control mb-1" placeholder="Correo Propietario">
-                <input type="text" id="p_dir" class="form-control" placeholder="Dirección Propietario">
+                <div class="info-box">
+                    <label class="text-primary fw-bold">DATOS PROPIETARIO</label>
+                    <input type="text" id="p_nom" class="form-control mb-1" placeholder="Nombre">
+                    <input type="text" id="p_nit" class="form-control mb-1" placeholder="NIT">
+                    <input type="text" id="p_tel" class="form-control mb-1" placeholder="Teléfono">
+                    <input type="text" id="p_mail" class="form-control mb-1" placeholder="Correo Propietario">
+                    <input type="text" id="p_dir" class="form-control" placeholder="Dirección Propietario">
+                </div>
             </div>
         </div>
 
         <div class="section-header">IV. REFERENCIAS</div>
         <div class="card-body row g-2">
-            <div class="col-md-4"><label>EMPRESA 1</label><input type="text" id="r_e1" class="form-control mb-1"><input type="text" id="r_t1" class="form-control"></div>
-            <div class="col-md-4"><label>EMPRESA 2</label><input type="text" id="r_e2" class="form-control mb-1"><input type="text" id="r_t2" class="form-control"></div>
-            <div class="col-md-4"><label>PERSONAL</label><input type="text" id="r_per" class="form-control mb-1"><input type="text" id="r_tp" class="form-control"></div>
+            <div class="col-md-4"><label>EMPRESA 1</label><input type="text" id="r_e1" class="form-control mb-1" placeholder="Empresa"><input type="text" id="r_t1" class="form-control" placeholder="Tel"></div>
+            <div class="col-md-4"><label>EMPRESA 2</label><input type="text" id="r_e2" class="form-control mb-1" placeholder="Empresa"><input type="text" id="r_t2" class="form-control" placeholder="Tel"></div>
+            <div class="col-md-4"><label>PERSONAL</label><input type="text" id="r_per" class="form-control mb-1" placeholder="Nombre"><input type="text" id="r_tp" class="form-control" placeholder="Tel"></div>
         </div>
     </form>
 
