@@ -8,17 +8,19 @@
         :root { --yego-blue: #002d5a; --yego-green: #27ae60; }
         body { background: #f4f6f9; font-family: 'Segoe UI', sans-serif; font-size: 0.82rem; }
         
-        /* AJUSTE SOLICITADO: Mayor visibilidad para los títulos de sección */
+        /* AJUSTE DE VISIBILIDAD PARA ENCABEZADOS */
         .section-header { 
             background: var(--yego-blue); 
-            color: white; 
-            padding: 12px 15px; /* Más alto para que se vea bien */
-            margin-top: 15px; 
-            font-weight: bold; 
-            font-size: 0.9rem;
-            border-left: 7px solid var(--yego-green); 
-            text-transform: uppercase; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #ffffff; 
+            padding: 10px 15px; 
+            margin-top: 25px; /* Más espacio arriba para que no se pegue */
+            font-weight: 800; 
+            font-size: 0.95rem;
+            border-left: 8px solid var(--yego-green); 
+            text-transform: uppercase;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2); /* Sombra para que resalte del fondo */
+            display: block;
+            width: 100%;
         }
 
         .card-body { background: white; border: 1px solid #ddd; padding: 12px; border-top: none; }
