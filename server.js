@@ -1,87 +1,86 @@
 const express = require('express');
-const multer = require('multer');
-const xlsx = require('xlsx');
-const path = require('path');
-const fs = require('fs');
+const PDFDocument = require('pdfkit');
 const cors = require('cors');
 
 const app = express();
-const upload = multer({ dest: 'uploads/' });
-// Ruta absoluta al disco montado en Render
-const DB_PATH = '/data/vehiculos.json';
-
-// 🛡️ PROTECCIÓN REFORZADA
-const ADMIN_PASS = (process.env.ADMIN_PASSWORD || "admin123").trim(); 
-
-// Asegurar que la carpeta y el archivo existan en el disco de Render
-if (!fs.existsSync('/data')) { 
-    try { fs.mkdirSync('/data', { recursive: true }); } catch (e) { console.error("Error creando carpeta data:", e); } 
-}
-if (!fs.existsSync(DB_PATH)) { 
-    try { fs.writeFileSync(DB_PATH, JSON.stringify([], null, 2)); } catch (e) { console.error("Error creando DB inicial:", e); } 
-}
-
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
-const leerDB = () => {
-    try { 
-        const data = fs.readFileSync(DB_PATH, 'utf-8');
-        return JSON.parse(data); 
-    } catch (e) { return []; }
-};
+// Base de datos en memoria (Se reinicia si el servidor se apaga)
+let baseDatos = [];
 
-app.get('/listar', (req, res) => res.json(leerDB()));
-
-app.post('/importar', upload.single('archivo'), (req, res) => {
-    try {
-        const workbook = xlsx.readFile(req.file.path);
-        const data = xlsx.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
-        const info = {
-            v: { placa: data[2]?.[1] || '', marca: data[2]?.[4] || '', color: data[2]?.[7] || '', clase: data[3]?.[1] || '', modelo: data[3]?.[4] || '', repo: data[3]?.[7] || '', linea: data[4]?.[1] || '', motor: data[4]?.[4] || '', chasis: data[4]?.[7] || '', gps_co: data[5]?.[1] || '', user: data[5]?.[4] || '', pass: data[5]?.[7] || '', trayler: data[6]?.[1] || '', carro: data[6]?.[4] || '', m_trailer: data[6]?.[7] || '', soat: data[7]?.[1] || '', tecno: data[7]?.[4] || '' },
-            c: { tipo: '', nom: data[9]?.[1] || '', cc: data[9]?.[4] || '', lic: data[9]?.[7] || '', venc_lic: data[10]?.[4] || '', dir: data[11]?.[1] || '', cel: data[12]?.[1] || '', arl: data[12]?.[4] || '', eps: data[12]?.[7] || '', pension: data[13]?.[4] || '', mail: data[13]?.[1] || '', venc_planilla: data[14]?.[4] || '' },
-            t: { tipo: '', nom: data[16]?.[1] || '', nit: data[16]?.[4] || '', dir: data[16]?.[7] || '', tel: data[17]?.[1] || '', mail: data[18]?.[1] || '' },
-            p: { tipo: '', nom: data[19]?.[1] || '', nit: data[19]?.[4] || '', dir: data[19]?.[7] || '', tel: data[20]?.[1] || '', mail: data[21]?.[1] || '' },
-            r: { e1: data[24]?.[1] || '', t1: data[25]?.[1] || '', e2: data[24]?.[4] || '', t2: data[25]?.[4] || '', per: data[24]?.[7] || '', tp: data[25]?.[7] || '' }
-        };
-        fs.unlinkSync(req.file.path);
-        res.json(info);
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
+// GUARDAR O ACTUALIZAR
 app.post('/guardar', (req, res) => {
-    try {
-        let db = leerDB();
-        const nuevo = req.body;
-        if (!nuevo.v || !nuevo.v.placa) return res.status(400).json({error: "Placa requerida"});
-        const index = db.findIndex(i => i.v.placa.toUpperCase() === nuevo.v.placa.toUpperCase());
-        if (index !== -1) db[index] = nuevo; else db.push(nuevo);
-        fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-        res.json({ mensaje: "✅ Guardado en Disco Render" });
-    } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-app.get('/consultar/:t', (req, res) => {
-    const db = leerDB();
-    const t = req.params.t.toUpperCase();
-    const r = db.find(i => i.v.placa.toUpperCase() === t || (i.c.cc && i.c.cc.toString() === t));
-    if (r) res.json(r); else res.status(404).json({ error: "No encontrado" });
-});
-
-app.delete('/eliminar/:placa', (req, res) => {
-    const passwordEnviada = req.headers['admin-password'];
-    if (passwordEnviada !== ADMIN_PASS) {
-        return res.status(403).json({ error: "Clave incorrecta" });
+    const data = req.body;
+    const index = baseDatos.findIndex(i => i.v.placa === data.v.placa);
+    if (index !== -1) {
+        baseDatos[index] = data;
+    } else {
+        baseDatos.push(data);
     }
-    let db = leerDB();
-    const nuevaDB = db.filter(i => i.v.placa.toUpperCase() !== req.params.placa.toUpperCase());
-    fs.writeFileSync(DB_PATH, JSON.stringify(nuevaDB, null, 2));
-    res.json({ mensaje: "Registro eliminado." });
+    res.json({ mensaje: "Sincronizado con éxito" });
+});
+
+// LISTAR
+app.get('/listar', (req, res) => res.json(baseDatos));
+
+// CONSULTAR POR PLACA
+app.get('/consultar/:placa', (req, res) => {
+    const placa = req.params.placa.toUpperCase();
+    const registro = baseDatos.find(i => i.v.placa === placa);
+    if (!registro) return res.status(404).json({ error: "No encontrado" });
+    res.json(registro);
+});
+
+// ELIMINAR
+app.delete('/eliminar/:placa', (req, res) => {
+    const placa = req.params.placa.toUpperCase();
+    baseDatos = baseDatos.filter(i => i.v.placa !== placa);
+    res.json({ mensaje: "Eliminado" });
+});
+
+// GENERADOR DE PDF PROFESIONAL (YEGO COMPLETO)
+app.get('/descargar-pdf/:placa', (req, res) => {
+    const placa = req.params.placa.toUpperCase();
+    const d = baseDatos.find(i => i.v.placa === placa);
+
+    if (!d) return res.status(404).send("Registro no encontrado");
+
+    const doc = new PDFDocument({ margin: 40, size: 'A4' });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=FICHA_YEGO_${placa}.pdf`);
+    doc.pipe(res);
+
+    // Encabezado
+    doc.rect(40, 40, 520, 30).fill('#002d5a');
+    doc.fillColor('white').fontSize(14).text('YEGO LOGÍSTICA - FICHA DE SEGURIDAD OPERATIVA', 50, 50, { align: 'center' });
+
+    // I. VEHÍCULO
+    doc.moveDown(2).fillColor('#27ae60').fontSize(11).text('I. INFORMACIÓN TÉCNICA Y GPS', { underline: true });
+    doc.fillColor('black').fontSize(9).moveDown(0.5);
+    doc.text(`PLACA: ${d.v.placa} | MARCA: ${d.v.marca} | MODELO: ${d.v.modelo} | COLOR: ${d.v.color}`);
+    doc.text(`LÍNEA: ${d.v.linea || 'N/A'} | MOTOR: ${d.v.motor || 'N/A'} | CHASIS: ${d.v.chasis || 'N/A'}`);
+    doc.text(`CARROCERÍA: ${d.v.carro || 'N/A'} | CIUDAD: ${d.v.ciudad || 'N/A'} | COMBUSTIBLE: ${d.v.combust || 'N/A'}`);
+    doc.text(`GPS PROVEEDOR: ${d.v.gps_co || 'N/A'} | USUARIO: ${d.v.user || 'N/A'} | CLAVE: ${d.v.pass || 'N/A'}`);
+    doc.text(`VENC. SOAT: ${d.v.soat} | VENC. TECNO: ${d.v.tecno}`);
+
+    // II. CONDUCTOR
+    doc.moveDown(1.5).fillColor('#27ae60').fontSize(11).text('II. DATOS DEL CONDUCTOR', { underline: true });
+    doc.fillColor('black').fontSize(9).moveDown(0.5);
+    doc.text(`NOMBRE: ${d.c.nom} | CÉDULA: ${d.c.cc} | CELULAR: ${d.c.cel}`);
+    doc.text(`LICENCIA: ${d.c.lic} | CATEGORÍA: ${d.c.cat || 'N/A'} | VENCIMIENTO: ${d.c.venc_lic}`);
+    doc.text(`EPS: ${d.c.eps || 'N/A'} | ARL: ${d.c.arl || 'N/A'} | VENC. PLANILLA: ${d.c.venc_planilla || 'N/A'}`);
+    doc.text(`DIRECCIÓN: ${d.c.dir || 'N/A'}`);
+
+    // IV. REFERENCIAS
+    doc.moveDown(1.5).fillColor('#27ae60').fontSize(11).text('IV. REFERENCIAS DE SEGURIDAD', { underline: true });
+    doc.fillColor('black').fontSize(9).moveDown(0.5);
+    doc.text(`LABORAL 1: ${d.r?.e1 || 'N/A'} - TEL: ${d.r?.t1 || 'N/A'}`);
+    doc.text(`LABORAL 2: ${d.r?.e2 || 'N/A'} - TEL: ${d.r?.t2 || 'N/A'}`);
+    doc.text(`PERSONAL: ${d.r?.per || 'N/A'} - TEL: ${d.r?.tp || 'N/A'}`);
+
+    doc.end();
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 YEGO Server - Puerto ${PORT}`);
-    console.log(`📁 Base de datos en: ${DB_PATH}`);
-});
+app.listen(PORT, () => console.log(`Servidor Node activo en puerto ${PORT}`));
