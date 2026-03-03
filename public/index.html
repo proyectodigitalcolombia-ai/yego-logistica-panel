@@ -179,7 +179,7 @@
             if (!res.ok) throw new Error("No se pudo conectar al servidor");
             const db = await res.json();
             if (!db || db.length === 0) {
-                tabla.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-muted">No hay registros guardados.</td></tr>';
+                tabla.innerHTML = '<tr><td colspan="4" class="text-center p-4 text-muted">No hay registros guardados en la base de datos.</td></tr>';
                 return;
             }
             tabla.innerHTML = db.map(i => `
@@ -196,34 +196,27 @@
                         </div>
                     </td>
                 </tr>`).join('');
-        } catch(e) { tabla.innerHTML = `<tr><td colspan="4">Error al cargar datos.</td></tr>`; }
+        } catch(e) { console.error(e); tabla.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-danger">Error al cargar datos.</td></tr>`; }
     }
 
     async function descargarDesdeDB(placa, tipo) {
         try {
             const res = await fetch(`/consultar/${placa}`);
-            if(!res.ok) return alert("Error al consultar.");
+            if(!res.ok) return alert("Error al conectar con la base de datos.");
             const data = await res.json();
             llenar(data);
             
             if(tipo === 'pdf') {
-                const original = document.getElementById('formYego');
-                const clon = original.cloneNode(true);
-                const inputsOriginales = original.querySelectorAll('input, select');
-                const inputsClonados = clon.querySelectorAll('input, select');
-                inputsOriginales.forEach((inp, i) => { inputsClonados[i].value = inp.value; });
-
-                const contenedor = document.createElement('div');
-                contenedor.style.padding = "20px";
-                contenedor.innerHTML = `<h2 style="color:#002d5a; text-align:center;">YEGO LOGÍSTICA - FICHA TÉCNICA</h2><hr>`;
-                contenedor.appendChild(clon);
-
-                html2pdf().set({
-                    margin: 10, filename: `Ficha_YEGO_${placa}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2 },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                }).from(contenedor).save().then(() => contenedor.remove());
+                setTimeout(() => {
+                    const elemento = document.getElementById('formYego');
+                    const opt = {
+                        margin: 10, filename: `Ficha_YEGO_${placa}.pdf`,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2, useCORS: true },
+                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    };
+                    html2pdf().set(opt).from(elemento).save();
+                }, 500); 
             } else {
                 let pArr = [
                     ["SISTEMA YEGO LOGÍSTICA - FICHA TÉCNICA"],
@@ -238,25 +231,25 @@
                 XLSX.utils.book_append_sheet(wb, ws, "Ficha");
                 XLSX.writeFile(wb, `Ficha_YEGO_${placa}.xlsx`);
             }
-        } catch(e) { alert("Error en descarga."); }
+        } catch(e) { alert("Error en la descarga."); }
     }
 
     async function eliminar(p) {
-        const pass = prompt(`Clave para eliminar ${p}:`);
+        const pass = prompt(`Ingresa la clave para eliminar ${p}:`);
         if(!pass) return;
         const res = await fetch(`/eliminar/${p}`, { method: 'DELETE', headers: { 'admin-password': pass } });
-        if(res.ok) { alert("Eliminado."); listarTodo(); }
+        if(res.ok) { alert("Eliminado."); listarTodo(); } else { alert("Error de clave."); }
     }
 
     async function consultar() {
         const query = val('q');
-        if(!query) return;
+        if(!query) return alert("Ingresa un dato para buscar.");
         const res = await fetch(`/consultar/${query}`);
         if(res.ok) {
             const data = await res.json();
             llenar(data);
             actualizarDashboard(data);
-        }
+        } else alert("No encontrado.");
     }
 
     function actualizarDashboard(d) {
