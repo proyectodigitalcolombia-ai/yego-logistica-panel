@@ -2,39 +2,28 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SISTEMA YEGO LOGÍSTICA - GESTIÓN DE SEGURIDAD</title>
-    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-
     <style>
         :root { --yego-blue: #002d5a; --yego-green: #27ae60; }
         body { background: #f4f6f9; font-family: 'Segoe UI', sans-serif; font-size: 0.82rem; }
-        
-        /* Estilos Web */
         .section-header { 
             background: var(--yego-blue); color: white; padding: 10px 15px; margin-top: 25px; 
             font-weight: 800; font-size: 0.95rem; border-left: 8px solid var(--yego-green); 
-            text-transform: uppercase; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-transform: uppercase; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
         .card-body { background: white; border: 1px solid #ddd; padding: 12px; border-top: none; }
         label { font-weight: bold; font-size: 0.7rem; color: #444; display: block; margin-top: 5px; }
         .vencido { background-color: #ffdce0 !important; border: 1px solid #dc3545 !important; }
         .por-vencer { background-color: #fff3cd !important; border: 1px solid #ffc107 !important; }
+        .btn-yego { background-color: #ffc107; color: #000; font-weight: bold; border: none; }
         .box-sub { background: #f8f9fa; border: 1px solid #eee; padding: 10px; border-radius: 4px; height: 100%; }
         .alert-item { padding: 8px; border-radius: 5px; margin-bottom: 8px; border-left: 5px solid #ccc; background: #fff; font-size: 0.75rem; }
-        
-        /* ESTILOS EXCLUSIVOS PDF (Invisibles en web) */
-        #pdf-template { display: none; background: white; padding: 20px; color: #000; }
-        .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; table-layout: fixed; }
-        .pdf-table th, .pdf-table td { border: 1px solid #000; padding: 5px; vertical-align: top; word-wrap: break-word; }
-        .pdf-header-task { background: #002d5a; color: white; font-weight: bold; text-align: center; font-size: 10px; text-transform: uppercase; }
-        .pdf-label { font-size: 8px; font-weight: bold; color: #333; text-transform: uppercase; display: block; }
-        .pdf-value { font-size: 10px; font-weight: bold; color: #000; }
-        .pdf-title-main { text-align: center; border: 2px solid #000; padding: 10px; margin-bottom: 15px; }
-
+        .alert-danger { border-left-color: #dc3545; background: #fdf2f2; }
+        .alert-warning { border-left-color: #ffc107; background: #fffbeb; }
+        .alert-success { border-left-color: #28a745; background: #f4faf6; }
         @media print { .no-pdf { display: none !important; } }
     </style>
 </head>
@@ -44,30 +33,30 @@
     <div class="container d-flex justify-content-between">
         <span class="fw-bold">YEGO LOGÍSTICA - SEGURIDAD OPERATIVA</span>
         <div>
-            <button class="btn btn-outline-light btn-sm me-2" onclick="limpiarForm()">🆕 NUEVO</button>
-            <button class="btn btn-success btn-sm fw-bold" onclick="document.getElementById('f').click()">📤 EXCEL</button>
+            <button class="btn btn-outline-light btn-sm me-2" onclick="limpiarForm()">🆕 NUEVO REGISTRO</button>
+            <button class="btn btn-success btn-sm fw-bold" onclick="document.getElementById('f').click()">📤 IMPORTAR EXCEL</button>
         </div>
         <input type="file" id="f" style="display:none" onchange="importar()">
     </div>
 </nav>
 
-<div class="container-fluid mt-3 mb-5 px-4 no-pdf">
+<div class="container-fluid mt-3 mb-5 px-4">
     <div class="row g-3">
-        <div class="col-lg-9">
-            <div class="row g-2 mb-3 bg-white p-3 shadow-sm border rounded">
+        <div class="col-lg-9" id="area-pdf">
+            <div class="row g-2 mb-3 bg-white p-3 shadow-sm border rounded no-pdf">
                 <div class="col-md-7"><input type="text" id="q" class="form-control" placeholder="Buscar Placa o Cédula..."></div>
                 <div class="col-md-2"><button class="btn btn-primary w-100 fw-bold" onclick="consultar()">BUSCAR</button></div>
-                <div class="col-md-3"><button class="btn btn-warning w-100 fw-bold" onclick="guardar()">GUARDAR / ACTUALIZAR</button></div>
+                <div class="col-md-3"><button class="btn btn-yego w-100 fw-bold" onclick="guardar()">GUARDAR / ACTUALIZAR</button></div>
             </div>
 
             <form id="formYego">
-                <div class="section-header">I. VEHÍCULO Y GPS</div>
+                <div class="section-header">I. INFORMACIÓN DEL VEHÍCULO Y GPS</div>
                 <div class="card-body row g-2">
                     <div class="col-md-2"><label>PLACA</label><input type="text" id="v_placa" class="form-control fw-bold text-uppercase"></div>
                     <div class="col-md-2"><label>MARCA</label><input type="text" id="v_marca" class="form-control"></div>
-                    <div class="col-md-2"><label>MODELO</label><input type="text" id="v_modelo" class="form-control"></div>
                     <div class="col-md-2"><label>COLOR</label><input type="text" id="v_color" class="form-control"></div>
                     <div class="col-md-2"><label>CLASE</label><input type="text" id="v_clase" class="form-control"></div>
+                    <div class="col-md-2"><label>MODELO</label><input type="text" id="v_modelo" class="form-control"></div>
                     <div class="col-md-2"><label>REPOTENCIADO</label><input type="text" id="v_repo" class="form-control"></div>
                     <div class="col-md-3"><label>LÍNEA</label><input type="text" id="v_linea" class="form-control"></div>
                     <div class="col-md-3"><label>MOTOR</label><input type="text" id="v_motor" class="form-control"></div>
@@ -82,123 +71,82 @@
                     <div class="col-md-4"><label>VENC. TECNO</label><input type="date" id="v_tecno" class="form-control" onchange="alerta(this.id)"></div>
                 </div>
 
-                <div class="section-header">II. CONDUCTOR Y SEGURIDAD SOCIAL</div>
+                <div class="section-header">II. DATOS DEL CONDUCTOR Y SEGURIDAD SOCIAL</div>
                 <div class="card-body row g-2">
-                    <div class="col-md-6"><label>NOMBRE COMPLETO</label><input type="text" id="c_nom" class="form-control"></div>
-                    <div class="col-md-3">
-                        <label>ID</label>
+                    <div class="col-md-4"><label>NOMBRE COMPLETO</label><input type="text" id="c_nom" class="form-control"></div>
+                    <div class="col-md-4">
+                        <label>DOCUMENTO IDENTIDAD</label>
                         <div class="input-group">
-                            <select id="c_tipo" class="form-select" style="max-width: 70px;"><option value="CC">CC</option><option value="CE">CE</option></select>
-                            <input type="text" id="c_cc" class="form-control">
+                            <select id="c_tipo" class="form-select" style="max-width: 90px;">
+                                <option value="CC">CC</option><option value="CE">CE</option><option value="PPT">PPT</option><option value="PAS">PAS</option>
+                            </select>
+                            <input type="text" id="c_cc" class="form-control" placeholder="Número">
                         </div>
                     </div>
-                    <div class="col-md-3"><label>CELULAR</label><input type="text" id="c_cel" class="form-control"></div>
-                    <div class="col-md-3"><label>LICENCIA</label><input type="text" id="c_lic" class="form-control"></div>
-                    <div class="col-md-3"><label>VENC. LICENCIA</label><input type="date" id="c_venc_lic" class="form-control"></div>
-                    <div class="col-md-6"><label>DIRECCIÓN</label><input type="text" id="c_dir" class="form-control"></div>
-                    <div class="col-md-4"><label>PLANILLA SS VENCE</label><input type="date" id="c_venc_planilla" class="form-control border-danger"></div>
+                    <div class="col-md-2"><label>LICENCIA</label><input type="text" id="c_lic" class="form-control"></div>
+                    <div class="col-md-2"><label>VENC. LICENCIA</label><input type="date" id="c_venc_lic" class="form-control" onchange="alerta(this.id)"></div>
+                    <div class="col-md-2"><label>CELULAR</label><input type="text" id="c_cel" class="form-control"></div>
+                    <div class="col-md-3"><label>DIRECCIÓN CONDUCTOR</label><input type="text" id="c_dir" class="form-control"></div>
+                    <div class="col-md-3"><label>CORREO CONDUCTOR</label><input type="text" id="c_mail" class="form-control"></div>
+                    <div class="col-md-4"><label class="text-danger">VENC. PLANILLA</label><input type="date" id="c_venc_planilla" class="form-control border-danger" onchange="alerta(this.id)"></div>
                     <div class="col-md-4"><label>EPS</label><input type="text" id="c_eps" class="form-control"></div>
                     <div class="col-md-4"><label>ARL</label><input type="text" id="c_arl" class="form-control"></div>
+                    <div class="col-md-4"><label>FONDO PENSIÓN</label><input type="text" id="c_pension" class="form-control"></div>
                 </div>
 
-                <div class="section-header">III. TENEDOR Y PROPIETARIO</div>
+                <div class="section-header">III. INFORMACIÓN DE TENEDOR Y PROPIETARIO</div>
                 <div class="card-body row g-3">
                     <div class="col-md-6">
                         <div class="box-sub">
-                            <label class="text-primary">DATOS DEL TENEDOR</label>
-                            <input type="text" id="t_nom" class="form-control mb-1" placeholder="Nombre">
-                            <input type="text" id="t_nit" class="form-control mb-1" placeholder="NIT/CC">
-                            <input type="text" id="t_tel" class="form-control" placeholder="Teléfono">
+                            <label class="text-primary fw-bold">DATOS DEL TENEDOR</label>
+                            <input type="text" id="t_nom" class="form-control mb-1" placeholder="Nombre/Razón Social">
+                            <div class="input-group mb-1">
+                                <select id="t_tipo" class="form-select" style="max-width: 90px;"><option value="NIT">NIT</option><option value="CC">CC</option></select>
+                                <input type="text" id="t_nit" class="form-control" placeholder="Número">
+                            </div>
+                            <input type="text" id="t_dir" class="form-control mb-1" placeholder="Dirección">
+                            <input type="text" id="t_tel" class="form-control mb-1" placeholder="Teléfono">
+                            <input type="text" id="t_mail" class="form-control" placeholder="Correo">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="box-sub">
-                            <label class="text-primary">DATOS DEL PROPIETARIO</label>
-                            <input type="text" id="p_nom" class="form-control mb-1" placeholder="Nombre">
-                            <input type="text" id="p_nit" class="form-control mb-1" placeholder="NIT/CC">
-                            <input type="text" id="p_tel" class="form-control" placeholder="Teléfono">
+                            <label class="text-primary fw-bold">DATOS DEL PROPIETARIO</label>
+                            <input type="text" id="p_nom" class="form-control mb-1" placeholder="Nombre/Razón Social">
+                            <div class="input-group mb-1">
+                                <select id="p_tipo" class="form-select" style="max-width: 90px;"><option value="CC">CC</option><option value="NIT">NIT</option></select>
+                                <input type="text" id="p_nit" class="form-control" placeholder="Número">
+                            </div>
+                            <input type="text" id="p_dir" class="form-control mb-1" placeholder="Dirección">
+                            <input type="text" id="p_tel" class="form-control mb-1" placeholder="Teléfono">
+                            <input type="text" id="p_mail" class="form-control" placeholder="Correo">
                         </div>
                     </div>
+                </div>
+
+                <div class="section-header">IV. REFERENCIAS</div>
+                <div class="card-body row g-2">
+                    <div class="col-md-4"><label>EMPRESA 1</label><input type="text" id="r_e1" class="form-control mb-1" placeholder="Nombre"><input type="text" id="r_t1" class="form-control" placeholder="Tel"></div>
+                    <div class="col-md-4"><label>EMPRESA 2</label><input type="text" id="r_e2" class="form-control mb-1" placeholder="Nombre"><input type="text" id="r_t2" class="form-control" placeholder="Tel"></div>
+                    <div class="col-md-4"><label>PERSONAL</label><input type="text" id="r_per" class="form-control mb-1" placeholder="Nombre"><input type="text" id="r_tp" class="form-control" placeholder="Tel"></div>
                 </div>
             </form>
         </div>
 
-        <div class="col-lg-3">
+        <div class="col-lg-3 no-pdf">
             <div class="sticky-top" style="top: 20px;">
                 <div class="card bg-dark text-white p-3 mb-2 shadow"><h6 class="mb-0 text-warning">⚠️ PANEL ALERTAS</h6><small id="placa-activa">Placa: -</small></div>
-                <div id="panel-vencimientos" class="p-3 border rounded bg-white shadow-sm"></div>
+                <div id="panel-vencimientos" class="p-3 border rounded bg-white shadow-sm" style="min-height: 200px;"><p class="text-muted text-center mt-4 small">Sin datos...</p></div>
             </div>
         </div>
     </div>
 
-    <div class="section-header mt-4">V. LISTADO DE REGISTROS</div>
-    <div class="card-body p-0 border shadow-sm mt-2">
+    <div class="section-header mt-4 no-pdf">V. LISTADO DE REGISTROS</div>
+    <div class="card-body p-0 border shadow-sm mt-2 no-pdf">
         <table class="table table-hover mb-0">
-            <thead class="table-dark"><tr><th class="ps-3">PLACA</th><th>CONDUCTOR</th><th class="text-center">GESTIÓN</th></tr></thead>
+            <thead class="table-dark"><tr><th class="ps-3">PLACA</th><th>CONDUCTOR</th><th class="text-center">GESTIÓN / DESCARGAS</th></tr></thead>
             <tbody id="listaTabla"></tbody>
         </table>
-    </div>
-</div>
-
-<div id="pdf-template">
-    <div class="pdf-title-main">
-        <h2 style="margin:0;">YEGO LOGÍSTICA S.A.S</h2>
-        <h4 style="margin:5px 0;">FICHA TÉCNICA DE SEGURIDAD OPERATIVA</h4>
-    </div>
-
-    <table class="pdf-table">
-        <tr><td colspan="4" class="pdf-header-task">I. Información del Vehículo</td></tr>
-        <tr>
-            <td width="25%"><span class="pdf-label">Placa</span><span class="pdf-value" id="p-v_placa"></span></td>
-            <td width="25%"><span class="pdf-label">Marca</span><span class="pdf-value" id="p-v_marca"></span></td>
-            <td width="25%"><span class="pdf-label">Modelo</span><span class="pdf-value" id="p-v_modelo"></span></td>
-            <td width="25%"><span class="pdf-label">Color</span><span class="pdf-value" id="p-v_color"></span></td>
-        </tr>
-        <tr>
-            <td><span class="pdf-label">Clase</span><span class="pdf-value" id="p-v_clase"></span></td>
-            <td><span class="pdf-label">Línea</span><span class="pdf-value" id="p-v_linea"></span></td>
-            <td><span class="pdf-label">Motor</span><span class="pdf-value" id="p-v_motor"></span></td>
-            <td><span class="pdf-label">Chasis</span><span class="pdf-value" id="p-v_chasis"></span></td>
-        </tr>
-        <tr>
-            <td colspan="2"><span class="pdf-label">SOAT Vence</span><span class="pdf-value" id="p-v_soat"></span></td>
-            <td colspan="2"><span class="pdf-label">Tecno Vence</span><span class="pdf-value" id="p-v_tecno"></span></td>
-        </tr>
-    </table>
-
-    <table class="pdf-table">
-        <tr><td colspan="3" class="pdf-header-task">II. Información del Conductor</td></tr>
-        <tr>
-            <td colspan="2"><span class="pdf-label">Nombre Completo</span><span class="pdf-value" id="p-c_nom"></span></td>
-            <td><span class="pdf-label">Cédula</span><span class="pdf-value" id="p-c_cc"></span></td>
-        </tr>
-        <tr>
-            <td><span class="pdf-label">Licencia</span><span class="pdf-value" id="p-c_lic"></span></td>
-            <td><span class="pdf-label">Venc. Planilla SS</span><span class="pdf-value" id="p-c_venc_planilla"></span></td>
-            <td><span class="pdf-label">Celular</span><span class="pdf-value" id="p-c_cel"></span></td>
-        </tr>
-    </table>
-
-    <table class="pdf-table">
-        <tr>
-            <td class="pdf-header-task">III. Tenedor</td>
-            <td class="pdf-header-task">IV. Propietario</td>
-        </tr>
-        <tr>
-            <td>
-                <span class="pdf-label">Nombre:</span><span class="pdf-value" id="p-t_nom"></span><br>
-                <span class="pdf-label">NIT/CC:</span><span class="pdf-value" id="p-t_nit"></span>
-            </td>
-            <td>
-                <span class="pdf-label">Nombre:</span><span class="pdf-value" id="p-p_nom"></span><br>
-                <span class="pdf-label">NIT/CC:</span><span class="pdf-value" id="p-p_nit"></span>
-            </td>
-        </tr>
-    </table>
-
-    <div style="margin-top: 40px; display: flex; justify-content: space-between; text-align: center;">
-        <div style="width: 45%; border-top: 1px solid #000; padding-top: 5px; font-size: 10px;">Firma del Conductor</div>
-        <div style="width: 45%; border-top: 1px solid #000; padding-top: 5px; font-size: 10px;">Seguridad Operativa YEGO</div>
     </div>
 </div>
 
@@ -206,57 +154,52 @@
     const val = (id) => document.getElementById(id).value;
     const set = (id, v) => { if(document.getElementById(id)) document.getElementById(id).value = v || ''; };
 
-    // --- PDF PROFESIONAL CORREGIDO ---
+    async function listarTodo() {
+        try {
+            const res = await fetch('/listar');
+            const db = await res.json();
+            const tabla = document.getElementById('listaTabla');
+            tabla.innerHTML = db.map(i => `
+                <tr>
+                    <td class="fw-bold ps-3 align-middle">${i.v.placa}</td>
+                    <td class="align-middle">${i.c.nom || 'S/N'}</td>
+                    <td class="text-center">
+                        <button class="btn btn-primary btn-sm fw-bold" onclick="cargar('${i.v.placa}')">VER</button>
+                        <button class="btn btn-danger btn-sm fw-bold" onclick="ejecutarPDF('${i.v.placa}')">📄 PDF</button>
+                        <button class="btn btn-warning btn-sm fw-bold" onclick="descargarExcel('${i.v.placa}')">📊 EXCEL</button>
+                        <button class="btn btn-dark btn-sm" onclick="eliminar('${i.v.placa}')">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch(e) { console.log("Error listar", e); }
+    }
+
     async function ejecutarPDF(placa) {
         try {
             const res = await fetch(`/consultar/${placa}`);
             const data = await res.json();
-            
-            // Inyectar datos en la plantilla de impresión
-            const campos = [
-                'v_placa','v_marca','v_modelo','v_color','v_clase','v_linea','v_motor','v_chasis','v_soat','v_tecno',
-                'c_nom','c_cc','c_lic','c_cel','c_venc_planilla','t_nom','t_nit','p_nom','p_nit'
-            ];
-            campos.forEach(c => {
-                let valor = '';
-                if(c.startsWith('v_')) valor = data.v[c.replace('v_','')];
-                if(c.startsWith('c_')) valor = data.c[c.replace('c_','')];
-                if(c.startsWith('t_')) valor = data.t[c.replace('t_','')];
-                if(c.startsWith('p_')) valor = data.p[c.replace('p_','')];
-                if(document.getElementById('p-'+c)) document.getElementById('p-'+c).innerText = valor || '---';
-            });
-
-            const template = document.getElementById('pdf-template');
-            template.style.display = 'block';
-
-            const opt = {
-                margin: 10,
-                filename: `YEGO_FICHA_${placa}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 3, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            await html2pdf().set(opt).from(template).save();
-            template.style.display = 'none';
-
-        } catch(e) { alert("Error al generar PDF"); console.error(e); }
+            llenar(data);
+            // El truco: Forzar una espera para que el DOM se actualice antes de html2pdf
+            setTimeout(() => {
+                const opt = { 
+                    margin: 10, filename: `YEGO_${placa}.pdf`, 
+                    html2canvas: { scale: 2, useCORS: true }, 
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+                };
+                html2pdf().set(opt).from(document.getElementById('area-pdf')).save();
+            }, 800);
+        } catch(e) { alert("Error PDF"); }
     }
 
-    // --- FUNCIONES DE BASE DE DATOS ---
-    async function listarTodo() {
-        const res = await fetch('/listar');
-        const db = await res.json();
-        document.getElementById('listaTabla').innerHTML = db.map(i => `
-            <tr>
-                <td class="fw-bold ps-3">${i.v.placa}</td>
-                <td>${i.c.nom || 'S/N'}</td>
-                <td class="text-center">
-                    <button class="btn btn-primary btn-sm" onclick="cargar('${i.v.placa}')">VER</button>
-                    <button class="btn btn-danger btn-sm" onclick="ejecutarPDF('${i.v.placa}')">📄 PDF</button>
-                    <button class="btn btn-dark btn-sm" onclick="eliminar('${i.v.placa}')">🗑️</button>
-                </td>
-            </tr>`).join('');
+    async function descargarExcel(placa) {
+        try {
+            const res = await fetch(`/consultar/${placa}`);
+            const data = await res.json();
+            const ws = XLSX.utils.aoa_to_sheet([["REPORTE YEGO", placa], ["Conductor", data.c.nom], ["Documento", data.c.cc]]);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Datos");
+            XLSX.writeFile(wb, `YEGO_${placa}.xlsx`);
+        } catch(e) { alert("Error Excel"); }
     }
 
     async function consultar() {
@@ -269,15 +212,17 @@
         if(d.c) Object.keys(d.c).forEach(k => set('c_'+k, d.c[k]));
         if(d.t) Object.keys(d.t).forEach(k => set('t_'+k, d.t[k]));
         if(d.p) Object.keys(d.p).forEach(k => set('p_'+k, d.p[k]));
+        if(d.r) Object.keys(d.r).forEach(k => set('r_'+k, d.r[k]));
         setTimeout(() => { ['v_soat','v_tecno','c_venc_lic','c_venc_planilla'].forEach(alerta); }, 100);
     }
 
     async function guardar() {
         const d = {
             v: { placa: val('v_placa').toUpperCase(), marca: val('v_marca'), color: val('v_color'), clase: val('v_clase'), modelo: val('v_modelo'), repo: val('v_repo'), linea: val('v_linea'), motor: val('v_motor'), chasis: val('v_chasis'), carro: val('v_carro'), trayler: val('v_trayler'), m_trailer: val('v_m_trailer'), soat: val('v_soat'), tecno: val('v_tecno'), gps_co: val('v_gps_co'), user: val('v_gps_user'), pass: val('v_gps_pass') },
-            c: { tipo: val('c_tipo'), nom: val('c_nom'), cc: val('c_cc'), cel: val('c_cel'), lic: val('c_lic'), venc_lic: val('c_venc_lic'), eps: val('c_eps'), arl: val('c_arl'), venc_planilla: val('c_venc_planilla') },
-            t: { nom: val('t_nom'), nit: val('t_nit'), tel: val('t_tel') },
-            p: { nom: val('p_nom'), nit: val('p_nit'), tel: val('p_tel') }
+            c: { tipo: val('c_tipo'), nom: val('c_nom'), cc: val('c_cc'), cel: val('c_cel'), lic: val('c_lic'), venc_lic: val('c_venc_lic'), eps: val('c_eps'), arl: val('c_arl'), pension: val('c_pension'), venc_planilla: val('c_venc_planilla'), mail: val('c_mail'), dir: val('c_dir') },
+            t: { tipo: val('t_tipo'), nom: val('t_nom'), nit: val('t_nit'), tel: val('t_tel'), mail: val('t_mail'), dir: val('t_dir') },
+            p: { tipo: val('p_tipo'), nom: val('p_nom'), nit: val('p_nit'), tel: val('p_tel'), mail: val('p_mail'), dir: val('p_dir') },
+            r: { e1: val('r_e1'), t1: val('r_t1'), e2: val('r_e2'), t2: val('r_t2'), per: val('r_per'), tp: val('r_tp') }
         };
         await fetch('/guardar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(d) });
         alert("Guardado"); listarTodo();
@@ -290,32 +235,30 @@
         if(diff < 0) el.classList.add('vencido'); else if(diff <= 10) el.classList.add('por-vencer');
     }
 
-    function limpiarForm() { document.getElementById("formYego").reset(); document.getElementById('panel-vencimientos').innerHTML=''; }
+    function limpiarForm() { document.getElementById("formYego").reset(); }
     function cargar(p) { document.getElementById('q').value = p; consultar(); window.scrollTo(0,0); }
-    
     async function eliminar(p) { 
-        const pw = prompt("Clave Admin:");
-        if(pw) {
-            await fetch(`/eliminar/${p}`, { method: 'DELETE', headers: {'admin-password': pw} });
-            listarTodo();
-        }
+        const pw = prompt("Clave:"); if(!pw) return;
+        await fetch(`/eliminar/${p}`, { method: 'DELETE', headers: {'admin-password': pw} });
+        listarTodo();
     }
 
     function actualizarDashboard(d) {
         document.getElementById('placa-activa').innerText = `Placa: ${d.v.placa}`;
         const panel = document.getElementById('panel-vencimientos');
         panel.innerHTML = '<h6 class="fw-bold mb-3 border-bottom pb-1">Estado de Documentos</h6>';
-        const fechas = [{n:'SOAT',f:d.v.soat},{n:'TECNO',f:d.v.tecno},{n:'PLANILLA',f:d.c.venc_planilla}];
+        const fechas = [{n:'SOAT',f:d.v.soat},{n:'TECNO',f:d.v.tecno},{n:'LICENCIA',f:d.c.venc_lic},{n:'PLANILLA',f:d.c.venc_planilla}];
         fechas.forEach(f => {
             if(!f.f) return;
             const diff = Math.ceil((new Date(f.f) - new Date()) / 86400000);
-            let color = (diff < 0) ? 'alert-danger' : (diff <= 10) ? 'alert-warning' : 'alert-success';
-            panel.innerHTML += `<div class="alert-item ${color}"><strong>${f.n}:</strong><br><small>${f.f} (${diff} días)</small></div>`;
+            let c = (diff < 0) ? 'alert-danger' : (diff <= 10) ? 'alert-warning' : 'alert-success';
+            panel.innerHTML += `<div class="alert-item ${c}"><strong>${f.n}:</strong><br><small>${f.f} (${diff} d)</small></div>`;
         });
     }
 
     async function importar() {
         const file = document.getElementById('f').files[0];
+        if(!file) return;
         const formData = new FormData(); formData.append('archivo', file);
         const res = await fetch('/importar', { method: 'POST', body: formData });
         const d = await res.json(); llenar(d); alert("Importado");
