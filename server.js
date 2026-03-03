@@ -7,58 +7,84 @@ const cors = require('cors');
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });
-const DB_PATH = path.join(__dirname, 'vehiculos.json');
+
+// IMPORTANTE: Ahora la base de datos vive en el disco persistente de Render
+const DB_PATH = '/data/vehiculos.json';
+
+// Crear el archivo si no existe al iniciar para evitar errores
+if (!fs.existsSync(DB_PATH)) {
+    try {
+        fs.writeFileSync(DB_PATH, JSON.stringify([], null, 2));
+        console.log("📂 Base de datos creada en el disco persistente.");
+    } catch (e) {
+        console.error("❌ Error creando disco: Asegúrate de configurar el Disk en Render con Mount Path: /data");
+    }
+}
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Función para leer la BD
 const leerDB = () => {
-    if (!fs.existsSync(DB_PATH)) return [];
     try {
         const data = fs.readFileSync(DB_PATH, 'utf-8');
         return JSON.parse(data);
     } catch (e) { return []; }
 };
 
-// 1. IMPORTAR DESDE EXCEL
+// 1. IMPORTAR EXCEL
 app.post('/importar', upload.single('archivo'), (req, res) => {
     try {
         const workbook = xlsx.readFile(req.file.path);
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const data = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+        
         const info = {
-            v: { placa: data[2]?.[1] || '', marca: data[2]?.[4] || '', color: data[2]?.[7] || '', clase: data[3]?.[1] || '', modelo: data[3]?.[4] || '', repo: data[3]?.[7] || '', linea: data[4]?.[1] || '', motor: data[4]?.[4] || '', chasis: data[4]?.[7] || '', gps_co: data[5]?.[1] || '', user: data[5]?.[4] || '', pass: data[5]?.[7] || '', trayler: data[6]?.[1] || '', carro: data[6]?.[4] || '', m_trailer: data[6]?.[7] || '' },
-            c: { nom: data[9]?.[1] || '', cc: data[9]?.[4] || '', lic: data[9]?.[7] || '', cat: data[10]?.[1] || '', venc: data[10]?.[4] || '', dir: data[10]?.[7] || '', tel: data[11]?.[1] || '', ciu: data[11]?.[4] || '', cel: data[12]?.[1] || '', arl: data[12]?.[4] || '', eps: data[12]?.[7] || '', mail: data[13]?.[1] || '' },
-            t: { nom: data[16]?.[1] || '', nit: data[16]?.[4] || '', dir: data[16]?.[7] || '', tel: data[17]?.[1] || '', cel: data[17]?.[4] || '', ciu: data[17]?.[7] || '', mail: data[18]?.[1] || '' },
-            p: { nom: data[19]?.[1] || '', nit: data[19]?.[4] || '', dir: data[19]?.[7] || '', tel: data[20]?.[1] || '', cel: data[20]?.[4] || '', ciu: data[20]?.[7] || '', mail: data[21]?.[1] || '' },
-            r: { e1: data[24]?.[1] || '', e2: data[24]?.[4] || '', per: data[24]?.[7] || '', t1: data[25]?.[1] || '', t2: data[25]?.[4] || '', tp: data[25]?.[7] || '' }
+            v: { 
+                placa: data[2]?.[1] || '', marca: data[2]?.[4] || '', color: data[2]?.[7] || '', 
+                clase: data[3]?.[1] || '', modelo: data[3]?.[4] || '', repo: data[3]?.[7] || '',
+                linea: data[4]?.[1] || '', motor: data[4]?.[4] || '', chasis: data[4]?.[7] || '',
+                gps_co: data[5]?.[1] || '', user: data[5]?.[4] || '', pass: data[5]?.[7] || '',
+                trayler: data[6]?.[1] || '', carro: data[6]?.[4] || '', m_trailer: data[6]?.[7] || ''
+            },
+            c: { 
+                nom: data[9]?.[1] || '', cc: data[9]?.[4] || '', lic: data[9]?.[7] || '',
+                cat: data[10]?.[1] || '', venc: data[10]?.[4] || '', dir: data[10]?.[7] || '',
+                tel: data[11]?.[1] || '', ciu: data[11]?.[4] || '', cel: data[12]?.[1] || '',
+                arl: data[12]?.[4] || '', eps: data[12]?.[7] || '', mail: data[13]?.[1] || ''
+            },
+            t: { nom: data[16]?.[1] || '', nit: data[16]?.[4] || '', ciu: data[16]?.[7] || '' },
+            p: { nom: data[19]?.[1] || '', nit: data[19]?.[4] || '', ciu: data[19]?.[7] || '' },
+            r: { e1: data[24]?.[1] || '', e2: data[24]?.[4] || '', per: data[24]?.[7] || '' }
         };
         fs.unlinkSync(req.file.path);
         res.json(info);
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// 2. GUARDAR EN BD
+// 2. GUARDAR / ACTUALIZAR
 app.post('/guardar', (req, res) => {
     let db = leerDB();
     const nuevo = req.body;
-    if (!nuevo.v.placa) return res.status(400).json({ error: "Falta la placa" });
+    if (!nuevo.v.placa) return res.status(400).json({ error: "Placa obligatoria" });
+
     const index = db.findIndex(i => i.v.placa.toUpperCase() === nuevo.v.placa.toUpperCase());
-    if (index !== -1) db[index] = nuevo; else db.push(nuevo);
+    if (index !== -1) db[index] = nuevo; 
+    else db.push(nuevo);
+
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-    res.json({ mensaje: "✅ Registro guardado correctamente" });
+    res.json({ mensaje: "✅ Registro guardado en disco persistente" });
 });
 
-// 3. CONSULTAR POR PLACA O CÉDULA
+// 3. CONSULTAR
 app.get('/consultar/:termino', (req, res) => {
     const db = leerDB();
-    const termino = req.params.termino.toUpperCase();
-    const resultado = db.find(i => i.v.placa.toUpperCase() === termino || i.c.cc.toString() === termino);
-    if (resultado) res.json(resultado);
+    const t = req.params.termino.toUpperCase();
+    const registro = db.find(i => i.v.placa.toUpperCase() === t || i.c.cc.toString() === t);
+    
+    if (registro) res.json(registro);
     else res.status(404).json({ error: "No encontrado" });
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 YEGO Logistics activo`));
+app.listen(PORT, () => console.log(`🚀 YEGO con Disco Persistente activo`));
