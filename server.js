@@ -8,6 +8,7 @@ const cors = require('cors');
 const app = express();
 const upload = multer({ dest: 'uploads/' });
 const DB_PATH = '/data/vehiculos.json';
+const ADMIN_PASS = "admin123"; // 🔑 Define aquí tu contraseña de administrador
 
 if (!fs.existsSync('/data')) { try { fs.mkdirSync('/data', { recursive: true }); } catch (e) {} }
 if (!fs.existsSync(DB_PATH)) { try { fs.writeFileSync(DB_PATH, JSON.stringify([], null, 2)); } catch (e) {} }
@@ -66,12 +67,17 @@ app.get('/consultar/:t', (req, res) => {
     if (r) res.json(r); else res.status(404).json({ error: "No encontrado" });
 });
 
+// 🛡️ RUTA PROTEGIDA PARA ELIMINACIÓN
 app.delete('/eliminar/:placa', (req, res) => {
+    const password = req.headers['admin-password'];
+    if (password !== ADMIN_PASS) {
+        return res.status(403).json({ error: "Acceso Denegado: No tienes permisos para eliminar registros." });
+    }
     let db = leerDB();
     const nuevaDB = db.filter(i => i.v.placa.toUpperCase() !== req.params.placa.toUpperCase());
     fs.writeFileSync(DB_PATH, JSON.stringify(nuevaDB, null, 2));
-    res.json({ mensaje: "Eliminado" });
+    res.json({ mensaje: "Registro eliminado correctamente." });
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 YEGO Server Activo`));
+app.listen(PORT, () => console.log(`🚀 YEGO Server Activo (NODE_VERSION 20)`));
