@@ -23,6 +23,25 @@
         .alert-danger { border-left-color: #dc3545; background: #fdf2f2; }
         .alert-warning { border-left-color: #ffc107; background: #fffbeb; }
         .alert-success { border-left-color: #28a745; background: #f4faf6; }
+
+        /* --- NUEVO: ESTILOS PARA IMPRESIÓN PDF --- */
+        @media print {
+            .navbar, .btn, .sticky-top, .section-header:nth-of-type(5), 
+            .card-body.p-0, #listaTabla, .input-group-text, input[type="file"],
+            #q, .btn-primary, .btn-yego, .row.g-2.mb-3, td:last-child, th:last-child {
+                display: none !important;
+            }
+            body { background: white !important; }
+            .container-fluid { width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .col-lg-9 { width: 100% !important; }
+            .section-header {
+                -webkit-print-color-adjust: exact;
+                background-color: #002d5a !important;
+                color: white !important;
+                border-left: 8px solid #27ae60 !important;
+            }
+            .form-control { border: none !important; border-bottom: 1px solid #eee !important; }
+        }
     </style>
 </head>
 <body onload="listarTodo()">
@@ -31,6 +50,7 @@
     <div class="container d-flex justify-content-between">
         <span>YEGO LOGÍSTICA - SEGURIDAD</span>
         <div>
+            <button class="btn btn-info btn-sm fw-bold me-2" onclick="window.print()">🖨️ IMPRIMIR / PDF</button>
             <button class="btn btn-warning btn-sm fw-bold me-2" onclick="generarPlantilla()">📥 DESCARGAR FICHA</button>
             <button class="btn btn-outline-light btn-sm me-2" onclick="limpiarForm()">🆕 NUEVO</button>
             <button class="btn btn-success btn-sm fw-bold" onclick="document.getElementById('f').click()">📤 IMPORTAR EXCEL</button>
@@ -191,23 +211,12 @@
         `).join('');
     }
 
-    // 🛡️ FUNCIÓN ELIMINAR CON RESTRICCIÓN DE USUARIO
     async function eliminar(p) {
         const pass = prompt(`Para eliminar la placa ${p}, ingresa la clave de administrador:`);
         if(!pass) return;
-
-        const res = await fetch(`/eliminar/${p}`, { 
-            method: 'DELETE',
-            headers: { 'admin-password': pass } 
-        });
-
-        if(res.ok) {
-            alert("Registro eliminado con éxito.");
-            listarTodo();
-        } else {
-            const err = await res.json();
-            alert(err.error || "Error al eliminar");
-        }
+        const res = await fetch(`/eliminar/${p}`, { method: 'DELETE', headers: { 'admin-password': pass } });
+        if(res.ok) { alert("Registro eliminado con éxito."); listarTodo(); } 
+        else { const err = await res.json(); alert(err.error || "Error al eliminar"); }
     }
 
     async function consultar() {
