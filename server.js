@@ -7,36 +7,35 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Forzamos que el servidor use la carpeta actual
-const dirActual = process.cwd();
+// Configuramos la ruta hacia la carpeta 'public'
+const publicPath = path.join(__dirname, 'public');
+
+// Servir archivos estáticos desde 'public'
+app.use(express.static(publicPath));
 
 app.get('/', (req, res) => {
-    // Lista de posibles ubicaciones del index.html para evitar el ENOENT
-    const rutas = [
-        path.join(dirActual, 'index.html'),
-        path.join(__dirname, 'index.html'),
-        '/opt/render/project/src/index.html'
-    ];
-
-    let encontrado = false;
-    for (const ruta of rutas) {
-        if (fs.existsSync(ruta)) {
-            res.sendFile(ruta);
-            encontrado = true;
-            break;
-        }
-    }
-
-    if (!encontrado) {
-        res.status(404).send("Error crítico: El archivo index.html no existe en la raíz del repositorio de GitHub.");
+    const indexPath = path.join(publicPath, 'index.html');
+    
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else {
+        res.status(404).send(`
+            <h2>Error de Configuración</h2>
+            <p>El servidor no encuentra index.html en: <b>${indexPath}</b></p>
+            <p>Contenido de la carpeta public: ${fs.readdirSync(publicPath).join(', ')}</p>
+        `);
     }
 });
 
-// Rutas API para los datos de POZ987
+// APIs para la gestión de la flota
 let baseDatos = [];
+
 app.post('/guardar', (req, res) => {
-    baseDatos.push(req.body);
-    res.json({ mensaje: "Guardado" });
+    const nuevo = req.body;
+    const index = baseDatos.findIndex(v => v.v.placa === nuevo.v.placa);
+    if(index !== -1) baseDatos[index] = nuevo;
+    else baseDatos.push(nuevo);
+    res.json({ mensaje: "Sincronizado con Render", placa: nuevo.v.placa });
 });
 
 app.get('/listar', (req, res) => res.json(baseDatos));
@@ -44,5 +43,5 @@ app.get('/listar', (req, res) => res.json(baseDatos));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor activo en puerto ${PORT}`);
-    console.log(`Buscando archivos en: ${dirActual}`);
+    console.log(`Buscando en: ${publicPath}`);
 });
