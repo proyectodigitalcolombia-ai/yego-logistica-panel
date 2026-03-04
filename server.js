@@ -1,68 +1,44 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
 const cors = require('cors');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// CONFIGURACIÓN DE RUTAS PARA RENDER
-// El archivo index.html está dentro de 'public'
-const publicPath = path.join(__dirname, 'public');
-app.use(express.static(publicPath));
+// Servir archivos de la carpeta public
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Base de datos volátil (en memoria de Render)
-let baseDatosFlota = [];
+// BASE DE DATOS EN MEMORIA
+let baseDatos = [];
 
-// RUTA PRINCIPAL
-app.get('/', (req, res) => {
-    const file = path.join(publicPath, 'index.html');
-    if (fs.existsSync(file)) {
-        res.sendFile(file);
-    } else {
-        res.status(404).send("Error: No se encuentra public/index.html en el repositorio.");
-    }
+// Ruta para ver la lista completa
+app.get('/listar', (req, res) => {
+    console.log("Enviando lista de vehículos. Total:", baseDatos.length);
+    res.json(baseDatos);
 });
 
-// ENDPOINT: Guardar o Actualizar Vehículo
+// Ruta para guardar
 app.post('/guardar', (req, res) => {
-    const vehiculo = req.body;
-    // Evitar duplicados por placa
-    const index = baseDatosFlota.findIndex(v => v.v.placa === vehiculo.v.placa);
+    const data = req.body;
+    const index = baseDatos.findIndex(v => v.v.placa === data.v.placa);
     
     if (index !== -1) {
-        baseDatosFlota[index] = vehiculo;
+        baseDatos[index] = data; // Actualiza si ya existe
     } else {
-        baseDatosFlota.push(vehiculo);
+        baseDatos.push(data); // Agrega nuevo
     }
-    
-    console.log(`Unidad sincronizada: ${vehiculo.v.placa}`);
-    res.json({ mensaje: "Sincronización Exitosa con Render", total: baseDatosFlota.length });
+    console.log("Placa guardada con éxito:", data.v.placa);
+    res.json({ mensaje: "Guardado en Render", total: baseDatos.length });
 });
 
-// ENDPOINT: Listar todos los registros (Base de Datos)
-app.get('/listar', (req, res) => {
-    res.json(baseDatosFlota);
-});
-
-// ENDPOINT: Consultar una placa específica
+// Ruta para consultar una sola placa
 app.get('/consultar/:placa', (req, res) => {
     const placa = req.params.placa.toUpperCase();
-    const resultado = baseDatosFlota.find(v => v.v.placa === placa);
-    if (resultado) {
-        res.json(resultado);
-    } else {
-        res.status(404).json({ error: "No encontrado" });
-    }
+    const unidad = baseDatos.find(u => u.v.placa === placa);
+    if (unidad) res.json(unidad);
+    else res.status(404).send("No encontrado");
 });
 
-// INICIO DEL SERVIDOR
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`========== YEGO LOGISTICA SERVER ==========`);
-    console.log(`Puerto: ${PORT}`);
-    console.log(`Ruta Public: ${publicPath}`);
-    console.log(`NODE_VERSION configurada: 20`);
-    console.log(`===========================================`);
-});
+app.listen(PORT, () => console.log(`Servidor en puerto ${PORT}`));
