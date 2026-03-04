@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>SISTEMA YEGO LOGÍSTICA - GESTIÓN DE SEGURIDAD</title>
+    <title>SISTEMA YEGO LOGÍSTICA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -31,9 +31,11 @@
 
 <nav class="navbar bg-dark text-white p-2 no-pdf">
     <div class="container d-flex justify-content-between">
-        <span class="fw-bold">YEGO LOGÍSTICA - SEGURIDAD OPERATIVA</span>
+        <span>YEGO LOGÍSTICA - SEGURIDAD</span>
         <div>
-            <button class="btn btn-outline-light btn-sm me-2" onclick="limpiarForm()">🆕 NUEVO REGISTRO</button>
+            <button id="btnPDF" class="btn btn-danger btn-sm fw-bold me-2" onclick="generarPDF()">📥 DESCARGAR PDF</button>
+            <button class="btn btn-warning btn-sm fw-bold me-2" onclick="generarPlantilla()">📥 EXCEL</button>
+            <button class="btn btn-outline-light btn-sm me-2" onclick="limpiarForm()">🆕 NUEVO</button>
             <button class="btn btn-success btn-sm fw-bold" onclick="document.getElementById('f').click()">📤 IMPORTAR EXCEL</button>
         </div>
         <input type="file" id="f" style="display:none" onchange="importar()">
@@ -45,14 +47,14 @@
         <div class="col-lg-9" id="area-pdf">
             <div class="row g-2 mb-3 bg-white p-3 shadow-sm border rounded no-pdf">
                 <div class="col-md-7"><input type="text" id="q" class="form-control" placeholder="Buscar Placa o Cédula..."></div>
-                <div class="col-md-2"><button class="btn btn-primary w-100 fw-bold" onclick="consultar()">BUSCAR</button></div>
-                <div class="col-md-3"><button class="btn btn-yego w-100 fw-bold" onclick="guardar()">GUARDAR / ACTUALIZAR</button></div>
+                <div class="col-md-2"><button class="btn btn-primary w-100" onclick="consultar()">BUSCAR</button></div>
+                <div class="col-md-3"><button class="btn btn-yego w-100" onclick="guardar()">GUARDAR REGISTRO</button></div>
             </div>
 
             <form id="formYego">
-                <div class="section-header">I. INFORMACIÓN DEL VEHÍCULO Y GPS</div>
+                <div class="section-header">I. VEHÍCULO Y GPS</div>
                 <div class="card-body row g-2">
-                    <div class="col-md-2"><label>PLACA</label><input type="text" id="v_placa" class="form-control fw-bold text-uppercase"></div>
+                    <div class="col-md-2"><label>PLACA</label><input type="text" id="v_placa" class="form-control"></div>
                     <div class="col-md-2"><label>MARCA</label><input type="text" id="v_marca" class="form-control"></div>
                     <div class="col-md-2"><label>COLOR</label><input type="text" id="v_color" class="form-control"></div>
                     <div class="col-md-2"><label>CLASE</label><input type="text" id="v_clase" class="form-control"></div>
@@ -71,7 +73,7 @@
                     <div class="col-md-4"><label>VENC. TECNO</label><input type="date" id="v_tecno" class="form-control" onchange="alerta(this.id)"></div>
                 </div>
 
-                <div class="section-header">II. DATOS DEL CONDUCTOR Y SEGURIDAD SOCIAL</div>
+                <div class="section-header">II. CONDUCTOR Y SEGURIDAD SOCIAL</div>
                 <div class="card-body row g-2">
                     <div class="col-md-4"><label>NOMBRE COMPLETO</label><input type="text" id="c_nom" class="form-control"></div>
                     <div class="col-md-4">
@@ -94,7 +96,7 @@
                     <div class="col-md-4"><label>FONDO PENSIÓN</label><input type="text" id="c_pension" class="form-control"></div>
                 </div>
 
-                <div class="section-header">III. INFORMACIÓN DE TENEDOR Y PROPIETARIO</div>
+                <div class="section-header">III. TENEDOR Y PROPIETARIO</div>
                 <div class="card-body row g-3">
                     <div class="col-md-6">
                         <div class="box-sub">
@@ -130,9 +132,9 @@
 
                 <div class="section-header">IV. REFERENCIAS</div>
                 <div class="card-body row g-2">
-                    <div class="col-md-4"><label>EMPRESA 1</label><input type="text" id="r_e1" class="form-control mb-1" placeholder="Nombre"><input type="text" id="r_t1" class="form-control" placeholder="Tel"></div>
-                    <div class="col-md-4"><label>EMPRESA 2</label><input type="text" id="r_e2" class="form-control mb-1" placeholder="Nombre"><input type="text" id="r_t2" class="form-control" placeholder="Tel"></div>
-                    <div class="col-md-4"><label>PERSONAL</label><input type="text" id="r_per" class="form-control mb-1" placeholder="Nombre"><input type="text" id="r_tp" class="form-control" placeholder="Tel"></div>
+                    <div class="col-md-4"><label>EMPRESA 1</label><input type="text" id="r_e1" class="form-control mb-1"><input type="text" id="r_t1" class="form-control"></div>
+                    <div class="col-md-4"><label>EMPRESA 2</label><input type="text" id="r_e2" class="form-control mb-1"><input type="text" id="r_t2" class="form-control"></div>
+                    <div class="col-md-4"><label>PERSONAL</label><input type="text" id="r_per" class="form-control mb-1"><input type="text" id="r_tp" class="form-control"></div>
                 </div>
             </form>
         </div>
@@ -144,22 +146,17 @@
                     <small id="placa-activa">Placa: -</small>
                 </div>
                 <div id="panel-vencimientos" class="p-3 border rounded bg-white shadow-sm" style="min-height: 200px;">
-                    <p class="text-muted text-center mt-4 small">Consulte una placa para ver sus alertas...</p>
+                    <p class="text-muted text-center mt-4">Consulta una placa...</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="section-header mt-4 no-pdf">V. LISTADO DE REGISTROS Y DESCARGAS</div>
+    <div class="section-header mt-4 no-pdf">V. LISTADO DE REGISTROS</div>
     <div class="card-body p-0 border shadow-sm mt-2 no-pdf">
         <table class="table table-hover mb-0">
             <thead class="table-dark">
-                <tr>
-                    <th class="ps-3">PLACA</th>
-                    <th>CONDUCTOR</th>
-                    <th>SOAT / TECNO</th>
-                    <th class="text-center">ACCIONES Y DESCARGAS</th>
-                </tr>
+                <tr><th>PLACA</th><th>CONDUCTOR</th><th>SOAT</th><th>TECNO</th><th>ACCIONES</th></tr>
             </thead>
             <tbody id="listaTabla"></tbody>
         </table>
@@ -170,7 +167,6 @@
     const val = (id) => document.getElementById(id).value;
     const set = (id, v) => { if(document.getElementById(id)) document.getElementById(id).value = v || ''; };
 
-    // Función para listar con botones de descarga individual desde DB
     async function listarTodo() {
         try {
             const res = await fetch('/listar');
@@ -178,63 +174,24 @@
             const tabla = document.getElementById('listaTabla');
             tabla.innerHTML = db.map(i => `
                 <tr>
-                    <td class="fw-bold ps-3 align-middle">${i.v.placa}</td>
-                    <td class="align-middle">${i.c.nom}</td>
-                    <td class="align-middle small">${i.v.soat || '-'} / ${i.v.tecno || '-'}</td>
-                    <td class="text-center">
-                        <button class="btn btn-primary btn-sm fw-bold" onclick="cargar('${i.v.placa}')">VER</button>
-                        <button class="btn btn-danger btn-sm fw-bold" onclick="descargarDesdeDB('${i.v.placa}', 'pdf')">📥 PDF</button>
-                        <button class="btn btn-warning btn-sm fw-bold" onclick="descargarDesdeDB('${i.v.placa}', 'xlsx')">📥 EXCEL</button>
-                        <button class="btn btn-secondary btn-sm" onclick="eliminar('${i.v.placa}')">🗑️</button>
+                    <td class="fw-bold ps-3">${i.v.placa}</td>
+                    <td>${i.c.nom}</td>
+                    <td>${i.v.soat || '-'}</td>
+                    <td>${i.v.tecno || '-'}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="cargar('${i.v.placa}')">VER</button>
+                        <button class="btn btn-danger btn-sm" onclick="eliminar('${i.v.placa}')">🗑️</button>
                     </td>
                 </tr>
             `).join('');
-        } catch(e) { console.error("Error al listar registros", e); }
-    }
-
-    // DESCARGA DIRECTA DESDE LA BASE DE DATOS
-    async function descargarDesdeDB(placa, tipo) {
-        try {
-            const res = await fetch(`/consultar/${placa}`);
-            if(!res.ok) return alert("Error al conectar con la base de datos.");
-            const data = await res.json();
-            
-            // Llenamos el formulario con la data fresca de Render
-            llenar(data);
-            
-            if(tipo === 'pdf') {
-                const elemento = document.getElementById('area-pdf');
-                const opciones = {
-                    margin: 10,
-                    filename: `Ficha_YEGO_${placa}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true, logging: false },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-                html2pdf().from(elemento).set(opciones).save();
-            } else {
-                let pArr = [
-                    ["SISTEMA YEGO LOGÍSTICA - FICHA TÉCNICA"],
-                    ["DATOS DEL VEHÍCULO"],
-                    ["PLACA", data.v.placa, "MARCA", data.v.marca, "MODELO", data.v.modelo],
-                    ["SOAT", data.v.soat, "TECNO", data.v.tecno],
-                    [""],
-                    ["DATOS DEL CONDUCTOR"],
-                    ["NOMBRE", data.c.nom, "ID", data.c.cc, "CEL", data.c.cel]
-                ];
-                const ws = XLSX.utils.aoa_to_sheet(pArr);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Ficha");
-                XLSX.writeFile(wb, `Ficha_YEGO_${placa}.xlsx`);
-            }
-        } catch(e) { alert("Error procesando la descarga."); }
+        } catch(e) {}
     }
 
     async function eliminar(p) {
-        const pass = prompt(`Para eliminar la placa ${p}, ingresa la clave:`);
+        const pass = prompt(`Para eliminar la placa ${p}, ingresa la clave de administrador:`);
         if(!pass) return;
         const res = await fetch(`/eliminar/${p}`, { method: 'DELETE', headers: { 'admin-password': pass } });
-        if(res.ok) { alert("Eliminado."); listarTodo(); } else { alert("Error de clave."); }
+        if(res.ok) { alert("Eliminado."); listarTodo(); limpiarForm(); } else { alert("Error al eliminar."); }
     }
 
     async function consultar() {
@@ -243,20 +200,21 @@
             const data = await res.json();
             llenar(data);
             actualizarDashboard(data);
-        } else alert("Registro no encontrado.");
+        } else alert("No encontrado");
     }
 
     function actualizarDashboard(d) {
         document.getElementById('placa-activa').innerText = `Placa: ${d.v.placa}`;
         const panel = document.getElementById('panel-vencimientos');
-        panel.innerHTML = '<h6 class="fw-bold mb-3 border-bottom pb-1">Estado de Documentos</h6>';
+        panel.innerHTML = '<h6 class="fw-bold mb-3 border-bottom pb-1">Estado de Vencimientos</h6>';
         const fechas = [{n:'SOAT',f:d.v.soat},{n:'TECNO',f:d.v.tecno},{n:'LICENCIA',f:d.c.venc_lic},{n:'PLANILLA',f:d.c.venc_planilla}];
         fechas.forEach(f => {
             if(!f.f) return;
             const diff = Math.ceil((new Date(f.f) - new Date()) / 86400000);
-            let c = (diff < 0) ? 'alert-danger' : (diff <= 10) ? 'alert-warning' : 'alert-success';
-            let i = (diff < 0) ? '❌' : (diff <= 10) ? '⚠️' : '✅';
-            panel.innerHTML += `<div class="alert-item ${c}"><strong>${f.n}:</strong> ${i}<br><small>${f.f} (${diff} d)</small></div>`;
+            let c = 'alert-success', i = '✅', m = `Faltan ${diff} días`;
+            if(diff < 0) { c = 'alert-danger'; i = '❌'; m = 'VENCIDO'; }
+            else if(diff <= 10) { c = 'alert-warning'; i = '⚠️'; if(diff <= 6) m = `¡URGENTE! ${diff} días`; }
+            panel.innerHTML += `<div class="alert-item ${c}"><strong>${f.n}:</strong> ${i} <br> <small>${m} (${f.f})</small></div>`;
         });
     }
 
@@ -276,7 +234,11 @@
     }
 
     function llenar(d) {
-        if(d.v) Object.keys(d.v).forEach(k => set(k === 'user' ? 'v_gps_user' : k === 'pass' ? 'v_gps_pass' : 'v_'+k, d.v[k]));
+        if(d.v) Object.keys(d.v).forEach(k => {
+            if(k === 'user') set('v_gps_user', d.v[k]);
+            else if(k === 'pass') set('v_gps_pass', d.v[k]);
+            else set('v_'+k, d.v[k]);
+        });
         if(d.c) Object.keys(d.c).forEach(k => set('c_'+k, d.c[k]));
         if(d.t) Object.keys(d.t).forEach(k => set('t_'+k, d.t[k]));
         if(d.p) Object.keys(d.p).forEach(k => set('p_'+k, d.p[k]));
@@ -305,7 +267,54 @@
         const res = await fetch('/importar', { method: 'POST', body: formData });
         const data = await res.json();
         llenar(data);
-        alert("Importación finalizada.");
+        alert("Ficha cargada.");
+    }
+
+    // --- FUNCIÓN PDF CORREGIDA Y REFORZADA ---
+    async function generarPDF() {
+        const btn = document.getElementById('btnPDF');
+        const elemento = document.getElementById('area-pdf');
+        const placa = document.getElementById('v_placa').value || "FICHA";
+        
+        btn.innerText = "⏳ GENERANDO...";
+        btn.disabled = true;
+
+        const opciones = {
+            margin:       10,
+            filename:     `Ficha_YEGO_${placa}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { 
+                scale: 2, 
+                useCORS: true,
+                logging: false,
+                letterRendering: true
+            },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        try {
+            // Usamos el método asíncrono para asegurar que el navegador dispare la descarga
+            await html2pdf().from(elemento).set(opciones).save();
+        } catch (error) {
+            console.error("Error al generar PDF:", error);
+            alert("No se pudo descargar el PDF. Intente de nuevo.");
+        } finally {
+            btn.innerText = "📥 DESCARGAR PDF";
+            btn.disabled = false;
+        }
+    }
+
+    function generarPlantilla() {
+        let pArr = Array.from({ length: 40 }, () => Array(15).fill(""));
+        pArr[0][0] = "SISTEMA YEGO LOGÍSTICA - REGISTRO TÉCNICO";
+        pArr[2] = ["PLACA", val('v_placa'), "MARCA", val('v_marca'), "MODELO", val('v_modelo')];
+        pArr[3] = ["COLOR", val('v_color'), "CLASE", val('v_clase'), "LÍNEA", val('v_linea')];
+        pArr[5] = ["CONDUCTOR", val('c_nom'), "ID", val('c_cc'), "CELULAR", val('c_cel')];
+        pArr[6] = ["VENC. SOAT", val('v_soat'), "VENC. TECNO", val('v_tecno'), "VENC. LIC", val('c_venc_lic')];
+        const ws = XLSX.utils.aoa_to_sheet(pArr);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Datos");
+        XLSX.writeFile(wb, `Ficha_${val('v_placa') || 'General'}.xlsx`);
     }
 </script>
 </body>
